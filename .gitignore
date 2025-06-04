@@ -3,6 +3,10 @@
 # dependencies
 node_modules/
 
+# Native build
+andriod/
+ios/
+
 # Expo
 .expo/
 dist/
@@ -37,3 +41,5 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+.env
