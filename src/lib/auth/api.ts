@@ -29,23 +29,6 @@ export const apiRequest = async <T>(
   }
 };
 
-export const refreshTokenApi = async (
-  refreshToken: string
-): Promise<AuthData | null> => {
-  const { data } = await apiRequest<AuthData>('/auth/refresh-token', {
-    method: 'POST',
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  });
-  return data;
-};
-
-export const loginApi = async (email: string, password: string) => {
-  return apiRequest<AuthData>('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-};
-
 export const registerApi = async (email: string, password: string) => {
   return apiRequest('/auth/register', {
     method: 'POST',
@@ -60,6 +43,23 @@ export const resendActivationApi = async (email: string) => {
   });
 };
 
+export const loginApi = async (email: string, password: string) => {
+  return apiRequest<AuthData>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+};
+
+export const refreshTokenApi = async (
+  refreshToken: string
+): Promise<AuthData | null> => {
+  const { data } = await apiRequest<AuthData>('/auth/refresh-token', {
+    method: 'POST',
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+  return data;
+};
+
 export const logoutApi = async (accessToken: string) => {
   return apiRequest('/auth/logout', {
     method: 'POST',
@@ -67,5 +67,16 @@ export const logoutApi = async (accessToken: string) => {
       Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ scope: 'local' }),
+  });
+};
+
+export const changePasswordApi = async (
+  type: string,
+  tokenHash: string,
+  password: string
+) => {
+  return apiRequest('/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ type, tokenHash, password }),
   });
 };

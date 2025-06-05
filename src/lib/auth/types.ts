@@ -108,6 +108,11 @@ export type AuthContextType = {
   setAuthData: (data: AuthData) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   resendActivation: (email: string) => Promise<boolean>;
+  changePassword: (
+    type: string,
+    tokenHash: string,
+    password: string
+  ) => Promise<void>;
   logIn: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
 };

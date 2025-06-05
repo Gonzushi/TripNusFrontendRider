@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
 import {
+  changePasswordApi,
   loginApi,
   logoutApi,
   refreshTokenApi,
@@ -29,6 +30,7 @@ export const AuthContext = createContext<AuthContextType>({
   setAuthData: async () => {},
   register: async () => {},
   resendActivation: async () => false,
+  changePassword: async () => {},
   logIn: async () => {},
   logOut: async () => {},
 });
@@ -118,6 +120,40 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return false;
   };
 
+  const changePassword = async (
+    type: string,
+    tokenHash: string,
+    password: string
+  ) => {
+    const { error } = await changePasswordApi(type, tokenHash, password);
+
+    if (!error) {
+      Alert.alert('Success', 'Password has been changed successfully', [
+        {
+          text: 'OK',
+          onPress: () => {
+            if (router.canDismiss()) {
+              router.dismissAll();
+            }
+            router.replace('/welcome');
+          },
+        },
+      ]);
+    } else {
+      Alert.alert('Error', error || 'Failed to change password', [
+        {
+          text: 'OK',
+          onPress: () => {
+            if (router.canDismiss()) {
+              router.dismissAll();
+            }
+            router.replace('/welcome');
+          },
+        },
+      ]);
+    }
+  };
+
   const logOut = async () => {
     try {
       if (authState.data?.session.access_token) {
@@ -182,6 +218,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         setAuthData,
         register,
         resendActivation,
+        changePassword,
         logIn,
         logOut,
       }}
