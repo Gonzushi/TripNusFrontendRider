@@ -1,9 +1,7 @@
 import { AuthProvider } from '@/lib/auth';
 import { initializeFirebase } from '@/lib/firebase';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../../global.css';
 
 // Initialize Firebase
@@ -22,26 +20,8 @@ export default function RootLayout() {
   // }, []);
 
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen
-            name="(protected)"
-            options={{
-              headerShown: false,
-              animation: 'none',
-            }}
-          />
-          <Stack.Screen
-            name="(authentication)"
-            options={{
-              headerShown: false,
-              animation: 'none',
-            }}
-          />
-        </Stack>
-      </AuthProvider>
-    </SafeAreaProvider>
+    <AuthProvider>
+      <Stack screenOptions={{ headerShown: false, animation: 'none' }} />
+    </AuthProvider>
   );
 }

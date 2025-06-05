@@ -11,6 +11,7 @@ export default function Activity() {
   return (
     <SafeView
       isShowingTabBar={true}
+      isShowingPaddingTop={true}
       statusBarStyle="light"
       statusBackgroundColor="bg-blue-600"
     >

@@ -64,11 +64,10 @@ export default function Index() {
   const handleInvite = async () => {
     try {
       const result = await Share.share({
+        url: 'https://play.google.com/store/apps/details?id=com.tripnus',
+        title: 'Share TripNus',
         message:
           "Join me on TripNus! The local ride-sharing app that's making transportation better in Indonesia. Download now!",
-        title: 'Share TripNus',
-        // Add your app store URL when available
-        // url: 'https://play.google.com/store/apps/details?id=com.tripnus'
       });
 
       if (result.action === Share.sharedAction) {
