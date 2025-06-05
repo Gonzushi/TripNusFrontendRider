@@ -1,7 +1,6 @@
 import { Redirect } from 'expo-router';
 import { useContext } from 'react';
 import { AuthContext } from './auth-context';
-import { View } from 'react-native';
 
 export default function AuthCheck({ children }: { children: React.ReactNode }) {
   const authState = useContext(AuthContext);
