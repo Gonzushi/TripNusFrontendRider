@@ -3,7 +3,7 @@ import {
   downloadAndSaveProfilePicture,
   getProfilePictureUri,
 } from '@/lib/profile-picture';
-import SafeView from '@/utils/safeView';
+import { SafeView } from '@/lib/safe-view';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -258,7 +258,7 @@ export default function Profile() {
   }
 
   return (
-    <SafeView statusStyle="bg-blue-600" statusBarStyle="light">
+    <SafeView statusBackgroundColor="bg-blue-600" statusBarStyle="light">
       <View className="flex-1 bg-blue-600">
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3">

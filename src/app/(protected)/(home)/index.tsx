@@ -1,8 +1,7 @@
-import NotificationDebug from '@/components/NotificationDebug';
 import { AuthContext } from '@/lib/auth';
 import { getProfilePictureUri } from '@/lib/profile-picture';
+import { SafeView } from '@/lib/safe-view';
 import type { LocationDetail } from '@/types/location';
-import SafeView from '@/utils/safeView';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -94,7 +93,7 @@ export default function Index() {
   };
 
   return (
-    <SafeView tabShown={true}>
+    <SafeView isShowingTabBar={true}>
       <ScrollView className="flex-1 bg-white">
         {/* Header Section */}
         <View className="px-4 pt-6 pb-4">
@@ -231,7 +230,7 @@ export default function Index() {
         {/* Bottom Spacing */}
         <View className="h-8" />
       </ScrollView>
-      {dev && <NotificationDebug />}
+      {/* {dev && <NotificationDebug />} */}
     </SafeView>
   );
 }

@@ -49,7 +49,8 @@ const SCHEME = 'tripnus-rider'; // app scheme
  */
 
 const withEnvSuffix = (name) => {
-  return APP_ENV === 'production' ? name : `${name}.${APP_ENV}`;
+  return APP_ENV === 'production' ? name : `${name}`;
+  // return APP_ENV === 'production' ? name : `${name}.${APP_ENV}`;
 };
 
 /**
@@ -117,7 +118,7 @@ const _buildTimeEnv = {
   EAS_PROJECT_ID,
   // ADD YOUR ENV VARS HERE TOO
   API_URL: process.env.API_URL,
-  GOOGLE_API_KEY: process.env.GOOGLE_API_KEY
+  GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
 };
 
 /**

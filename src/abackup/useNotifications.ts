@@ -1,10 +1,10 @@
+import * as Notifications from 'expo-notifications';
+import { useEffect, useRef, useState } from 'react';
 import {
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
   registerForPushNotificationsAsync,
-} from "@/utils/notifications";
-import * as Notifications from "expo-notifications";
-import { useEffect, useRef, useState } from "react";
+} from './notifications';
 
 export function useNotifications() {
   const [expoPushToken, setExpoPushToken] = useState<string | undefined>();
@@ -25,27 +25,27 @@ export function useNotifications() {
         if (token) {
           setExpoPushToken(token);
           setError(undefined);
-          console.log("Push token set:", token);
+          console.log('Push token set:', token);
         } else {
-          setError("Failed to get push token");
-          console.log("No push token received");
+          setError('Failed to get push token');
+          console.log('No push token received');
         }
       })
       .catch((err) => {
         setError(err.message);
-        console.error("Error getting push token:", err);
+        console.error('Error getting push token:', err);
       });
 
     notificationListener.current = addNotificationReceivedListener(
       (notification) => {
         setNotification(notification);
-        console.log("Received notification:", notification);
+        console.log('Received notification:', notification);
       }
     );
 
     responseListener.current = addNotificationResponseReceivedListener(
       (response) => {
-        console.log("Notification response:", response);
+        console.log('Notification response:', response);
         // Handle notification taps here
       }
     );

@@ -47,7 +47,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#ffffff',
     },
     package: Env.PACKAGE,
-    edgeToEdgeEnabled: true,
+    edgeToEdgeEnabled: false,
     googleServicesFile: './google-services.json',
     config: {
       googleMaps: {

@@ -1,9 +1,9 @@
-import { ApiResponse } from "@/types/api";
-import { AuthContext } from "@/lib/auth";
-import SafeView from "@/utils/safeView";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useContext, useState } from "react";
+import { AuthContext } from '@/lib/auth';
+import { SafeView } from '@/lib/safe-view';
+import { ApiResponse } from '@/types/api';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useContext, useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -11,7 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
 
 interface FormData {
   firstName: string;
@@ -25,26 +25,26 @@ export default function PersonalInformation() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    firstName: authData?.firstName || "",
-    lastName: authData?.lastName || "",
-    phoneNumber: authData?.user.phone || "",
+    firstName: authData?.firstName || '',
+    lastName: authData?.lastName || '',
+    phoneNumber: authData?.user.phone || '',
   });
 
   const handleUpdate = async () => {
     if (!formData.firstName.trim()) {
-      Alert.alert("Error", "First name is required");
+      Alert.alert('Error', 'First name is required');
       return;
     }
 
     if (!formData.phoneNumber.trim()) {
-      Alert.alert("Error", "Phone number is required");
+      Alert.alert('Error', 'Phone number is required');
       return;
     }
 
     // Validate phone number format
     const phoneRegex = /^62[1-9][0-9]{8,11}$/;
     if (!phoneRegex.test(formData.phoneNumber.trim())) {
-      Alert.alert("Error", "Please enter a valid Indonesian phone number");
+      Alert.alert('Error', 'Please enter a valid Indonesian phone number');
       return;
     }
 
@@ -52,13 +52,13 @@ export default function PersonalInformation() {
     try {
       // Update profile (name)
       const profileResponse = await fetch(
-        "https://rest.trip-nus.com/user/profile",
+        'https://rest.trip-nus.com/user/profile',
         {
-          method: "PATCH",
+          method: 'PATCH',
           headers: {
-            accept: "application/json",
+            accept: 'application/json',
             Authorization: `Bearer ${authData?.session.access_token}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             first_name: formData.firstName.trim(),
@@ -70,21 +70,21 @@ export default function PersonalInformation() {
       const profileData: ApiResponse = await profileResponse.json();
 
       if (profileData.status !== 200) {
-        throw new Error(profileData.message || "Failed to update profile");
+        throw new Error(profileData.message || 'Failed to update profile');
       }
 
       // Update phone number
       const phoneResponse = await fetch(
-        "https://rest.trip-nus.com/auth/update-phone",
+        'https://rest.trip-nus.com/auth/update-phone',
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            accept: "application/json",
+            accept: 'application/json',
             Authorization: `Bearer ${authData?.session.access_token}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            phone: "+" + formData.phoneNumber.trim(),
+            phone: '+' + formData.phoneNumber.trim(),
           }),
         }
       );
@@ -92,7 +92,7 @@ export default function PersonalInformation() {
       const phoneData: ApiResponse = await phoneResponse.json();
 
       if (phoneData.status !== 200) {
-        throw new Error(phoneData.message || "Failed to update phone number");
+        throw new Error(phoneData.message || 'Failed to update phone number');
       }
 
       // Update local state
@@ -117,10 +117,10 @@ export default function PersonalInformation() {
         await setAuthData(updatedAuthData);
       }
 
-      Alert.alert("Success", "Profile updated successfully");
+      Alert.alert('Success', 'Profile updated successfully');
       setIsEditing(false);
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to update profile");
+      Alert.alert('Error', error.message || 'Failed to update profile');
     } finally {
       setIsLoading(false);
     }
@@ -128,46 +128,46 @@ export default function PersonalInformation() {
 
   const handleCancel = () => {
     setFormData({
-      firstName: authData?.firstName || "",
-      lastName: authData?.lastName || "",
-      phoneNumber: authData?.user.phone || "",
+      firstName: authData?.firstName || '',
+      lastName: authData?.lastName || '',
+      phoneNumber: authData?.user.phone || '',
     });
     setIsEditing(false);
   };
 
   const renderField = (label: string, value: string, field: keyof FormData) => {
-    const isPhoneNumber = field === "phoneNumber";
-    const isOptional = field === "lastName";
+    const isPhoneNumber = field === 'phoneNumber';
+    const isOptional = field === 'lastName';
 
     // Helper function to format phone number for display
     const formatPhoneNumber = (phone: string) => {
-      return phone.startsWith("+62")
+      return phone.startsWith('+62')
         ? phone.slice(3) // Remove +62
-        : phone.startsWith("62")
-        ? phone.slice(2) // Remove 62
-        : phone;
+        : phone.startsWith('62')
+          ? phone.slice(2) // Remove 62
+          : phone;
     };
 
     // Helper function to format phone number for storage
     const formatPhoneForStorage = (phone: string) => {
-      const cleaned = phone.replace(/[^0-9]/g, "");
-      return cleaned.startsWith("62") ? cleaned : "62" + cleaned;
+      const cleaned = phone.replace(/[^0-9]/g, '');
+      return cleaned.startsWith('62') ? cleaned : '62' + cleaned;
     };
 
     return (
       <View className="mb-4">
         <Text className="text-sm text-gray-700 mb-1.5">
-          {label} {isOptional ? "(Optional)" : "*"}
+          {label} {isOptional ? '(Optional)' : '*'}
         </Text>
         <View className="flex-row items-center bg-gray-50 rounded-xl border border-gray-200">
           <View className="pl-4 pr-2">
             <Ionicons
               name={
                 isPhoneNumber
-                  ? "call"
-                  : field === "lastName"
-                  ? "person-outline"
-                  : "person"
+                  ? 'call'
+                  : field === 'lastName'
+                    ? 'person-outline'
+                    : 'person'
               }
               size={20}
               color="#6B7280"
@@ -184,7 +184,7 @@ export default function PersonalInformation() {
                   placeholder="812 3456 7890"
                   value={formatPhoneNumber(value)}
                   onChangeText={(text) => {
-                    const numbersOnly = text.replace(/[^0-9]/g, "");
+                    const numbersOnly = text.replace(/[^0-9]/g, '');
                     setFormData((prev) => ({
                       ...prev,
                       phoneNumber: formatPhoneForStorage(numbersOnly),
@@ -217,7 +217,7 @@ export default function PersonalInformation() {
             />
           ) : (
             <Text className="flex-1 py-3 px-2 text-gray-900">
-              {value || "Not set"}
+              {value || 'Not set'}
             </Text>
           )}
         </View>
@@ -242,13 +242,13 @@ export default function PersonalInformation() {
                 onPress={() => {
                   if (isEditing) {
                     Alert.alert(
-                      "Discard Changes",
-                      "Are you sure you want to discard your changes?",
+                      'Discard Changes',
+                      'Are you sure you want to discard your changes?',
                       [
-                        { text: "Cancel", style: "cancel" },
+                        { text: 'Cancel', style: 'cancel' },
                         {
-                          text: "Discard",
-                          style: "destructive",
+                          text: 'Discard',
+                          style: 'destructive',
                           onPress: () => {
                             handleCancel();
                             router.back();
@@ -278,43 +278,43 @@ export default function PersonalInformation() {
                 <Ionicons name="person" size={32} color="#2563EB" />
               </View>
               <Text className="text-2xl font-bold text-gray-900 mb-2">
-                {isEditing ? "Update Your Profile" : "Profile Information"}
+                {isEditing ? 'Update Your Profile' : 'Profile Information'}
               </Text>
               <Text className="text-base text-gray-600 text-center">
                 {isEditing
-                  ? "Make changes to your personal information"
-                  : "View your personal information"}
+                  ? 'Make changes to your personal information'
+                  : 'View your personal information'}
               </Text>
             </View>
 
             {/* Form */}
             <View className="space-y-4 mx-2">
-              {renderField("First Name", formData.firstName, "firstName")}
-              {renderField("Last Name", formData.lastName, "lastName")}
-              {renderField("Phone Number", formData.phoneNumber, "phoneNumber")}
+              {renderField('First Name', formData.firstName, 'firstName')}
+              {renderField('Last Name', formData.lastName, 'lastName')}
+              {renderField('Phone Number', formData.phoneNumber, 'phoneNumber')}
             </View>
 
             {/* Buttons */}
             <View className="mt-8 space-y-4 mx-2">
               <TouchableOpacity
                 className={`${
-                  isLoading ? "bg-blue-300" : "bg-blue-600"
+                  isLoading ? 'bg-blue-300' : 'bg-blue-600'
                 } py-4 rounded-xl items-center flex-row justify-center mb-4`}
                 onPress={isEditing ? handleUpdate : () => setIsEditing(true)}
                 disabled={isLoading}
               >
                 <Ionicons
-                  name={isEditing ? "checkmark" : "pencil"}
+                  name={isEditing ? 'checkmark' : 'pencil'}
                   size={20}
                   color="white"
                   style={{ marginRight: 8 }}
                 />
                 <Text className="text-white font-semibold text-base">
                   {isLoading
-                    ? "Updating..."
+                    ? 'Updating...'
                     : isEditing
-                    ? "Update Profile"
-                    : "Edit Profile"}
+                      ? 'Update Profile'
+                      : 'Edit Profile'}
                 </Text>
               </TouchableOpacity>
 

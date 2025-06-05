@@ -1,5 +1,5 @@
 // Core imports
-import SafeView from '@/utils/safeView';
+import { SafeView } from '@/lib/safe-view';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';

@@ -1,5 +1,5 @@
-import { useNotifications } from "@/hooks/useNotifications";
-import { Text, View } from "react-native";
+import { useNotifications } from '@/abackup/useNotifications';
+import { Text, View } from 'react-native';
 
 export default function NotificationDebug() {
   const { expoPushToken, notification, error } = useNotifications();
@@ -15,7 +15,7 @@ export default function NotificationDebug() {
           Expo Push Token
         </Text>
         <Text className="text-white/80 font-mono text-xs break-all">
-          {expoPushToken || "No token yet"}
+          {expoPushToken || 'No token yet'}
         </Text>
         {error && (
           <Text className="text-red-400 font-mono text-xs mt-2">

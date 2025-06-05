@@ -1,15 +1,19 @@
-import SafeView from "@/utils/safeView";
-import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeView } from '@/lib/safe-view';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Activity() {
-  const [activeTab, setActiveTab] = useState<"all" | "completed" | "cancelled">(
-    "all"
+  const [activeTab, setActiveTab] = useState<'all' | 'completed' | 'cancelled'>(
+    'all'
   );
 
   return (
-    <SafeView tabShown={true} statusBarStyle="light" statusStyle="bg-blue-600">
+    <SafeView
+      isShowingTabBar={true}
+      statusBarStyle="light"
+      statusBackgroundColor="bg-blue-600"
+    >
       <View className="flex-1 bg-white">
         {/* Enhanced Header */}
         <View className="bg-blue-600 px-4 pt-6 pb-12">
@@ -27,13 +31,13 @@ export default function Activity() {
         <View className="flex-row px-4 py-5 bg-white border-b border-gray-100 -mt-6 rounded-t-3xl">
           <TouchableOpacity
             className={`px-4 py-2 rounded-full ${
-              activeTab === "all" ? "bg-blue-600" : "bg-gray-100"
+              activeTab === 'all' ? 'bg-blue-600' : 'bg-gray-100'
             }`}
-            onPress={() => setActiveTab("all")}
+            onPress={() => setActiveTab('all')}
           >
             <Text
               className={`${
-                activeTab === "all" ? "text-white" : "text-gray-600"
+                activeTab === 'all' ? 'text-white' : 'text-gray-600'
               } font-medium`}
             >
               All
@@ -41,13 +45,13 @@ export default function Activity() {
           </TouchableOpacity>
           <TouchableOpacity
             className={`px-4 py-2 rounded-full ml-2 ${
-              activeTab === "completed" ? "bg-blue-600" : "bg-gray-100"
+              activeTab === 'completed' ? 'bg-blue-600' : 'bg-gray-100'
             }`}
-            onPress={() => setActiveTab("completed")}
+            onPress={() => setActiveTab('completed')}
           >
             <Text
               className={`${
-                activeTab === "completed" ? "text-white" : "text-gray-600"
+                activeTab === 'completed' ? 'text-white' : 'text-gray-600'
               } font-medium`}
             >
               Completed
@@ -55,13 +59,13 @@ export default function Activity() {
           </TouchableOpacity>
           <TouchableOpacity
             className={`px-4 py-2 rounded-full ml-2 ${
-              activeTab === "cancelled" ? "bg-blue-600" : "bg-gray-100"
+              activeTab === 'cancelled' ? 'bg-blue-600' : 'bg-gray-100'
             }`}
-            onPress={() => setActiveTab("cancelled")}
+            onPress={() => setActiveTab('cancelled')}
           >
             <Text
               className={`${
-                activeTab === "cancelled" ? "text-white" : "text-gray-600"
+                activeTab === 'cancelled' ? 'text-white' : 'text-gray-600'
               } font-medium`}
             >
               Cancelled

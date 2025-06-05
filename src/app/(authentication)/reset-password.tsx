@@ -30,13 +30,6 @@ export default function ResetPassword() {
       const emailMatch = cleanDataStr.match(/email:(.*?)\s/);
       const email = emailMatch?.[1] || '';
 
-      console.log('Parsed URL Parameters:', {
-        type,
-        tokenHash,
-        email,
-        dataStr,
-      });
-
       return { type, tokenHash, email };
     } catch (error) {
       console.error('Error parsing URL parameters:', error);

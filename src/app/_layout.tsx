@@ -1,33 +1,25 @@
-import { useNotifications } from '@/hooks/useNotifications';
 import { AuthProvider } from '@/lib/auth';
-import { initializeFirebase } from '@/utils/firebase';
+import { initializeFirebase } from '@/lib/firebase';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../../global.css';
 
-// Configure the linking before the app renders
-export const unstable_settings = {
-  initialRouteName: 'welcome',
-};
+// Initialize Firebase
+initializeFirebase();
 
 export default function RootLayout() {
-  useEffect(() => {
-    // Initialize Firebase before notifications
-    const initFirebase = async () => {
-      try {
-        await initializeFirebase();
-      } catch (error) {
-        console.error('Failed to initialize Firebase:', error);
-      }
-    };
+  // Use ref to track if notifications have been initialized
+  // const notificationsInitialized = useRef(false);
 
-    initFirebase();
-  }, []);
+  // useEffect(() => {
+  //   if (notificationsInitialized.current) return;
 
-  // Initialize notifications
-  useNotifications();
+  //   // Initialize notifications only once
+  //   useNotifications();
+  //   notificationsInitialized.current = true;
+  // }, []);
 
   return (
     <SafeAreaProvider>

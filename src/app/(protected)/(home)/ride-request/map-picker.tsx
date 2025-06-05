@@ -1,6 +1,6 @@
+import { SafeView } from '@/lib/safe-view';
 import { useLocationStore } from '@/store/useLocationStore';
 import { LocationDetail } from '@/types/location';
-import SafeView from '@/utils/safeView';
 import Env from '@env';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -280,18 +280,18 @@ export default function MapPicker() {
               !isMapReady || isLoading || isMapMoving || !locationDetail
                 ? 'bg-gray-300'
                 : type === 'pickup'
-                ? 'bg-blue-600 active:bg-blue-700'
-                : 'bg-red-600 active:bg-red-700'
+                  ? 'bg-blue-600 active:bg-blue-700'
+                  : 'bg-red-600 active:bg-red-700'
             }`}
           >
             <Text className="text-white font-semibold text-center text-lg">
               {!isMapReady
                 ? 'Loading Map...'
                 : isLoading || isMapMoving
-                ? 'Getting Location...'
-                : type === 'pickup'
-                ? 'Confirm Pickup Location'
-                : 'Confirm Drop-off Location'}
+                  ? 'Getting Location...'
+                  : type === 'pickup'
+                    ? 'Confirm Pickup Location'
+                    : 'Confirm Drop-off Location'}
             </Text>
           </TouchableOpacity>
         </View>
