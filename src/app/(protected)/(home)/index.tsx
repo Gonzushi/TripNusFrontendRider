@@ -1,11 +1,11 @@
-import NotificationDebug from "@/components/NotificationDebug";
-import type { LocationDetail } from "@/types/location";
-import { AuthContext } from "@/utils/authContext";
-import { getProfilePictureUri } from "@/utils/profilePicture";
-import SafeView from "@/utils/safeView";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useCallback, useContext, useEffect, useState } from "react";
+import NotificationDebug from '@/components/NotificationDebug';
+import { AuthContext } from '@/lib/auth';
+import type { LocationDetail } from '@/types/location';
+import { getProfilePictureUri } from '@/utils/profilePicture';
+import SafeView from '@/utils/safeView';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -13,7 +13,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
 
 const dev = true;
 
@@ -28,8 +28,8 @@ export default function Index() {
   // Store current location details for reuse
   const [currentLocationDetails, setCurrentLocationDetails] =
     useState<LocationDetail>({
-      title: "Current Location",
-      address: "Getting your location...",
+      title: 'Current Location',
+      address: 'Getting your location...',
       coordinates: undefined,
     });
 
@@ -50,7 +50,7 @@ export default function Index() {
     setIsNavigating(true);
 
     router.push({
-      pathname: "/ride-request",
+      pathname: '/ride-request',
       params: {
         currentLocationDetails: JSON.stringify(currentLocationDetails),
       },
@@ -67,7 +67,7 @@ export default function Index() {
       const result = await Share.share({
         message:
           "Join me on TripNus! The local ride-sharing app that's making transportation better in Indonesia. Download now!",
-        title: "Share TripNus",
+        title: 'Share TripNus',
         // Add your app store URL when available
         // url: 'https://play.google.com/store/apps/details?id=com.tripnus'
       });
@@ -75,22 +75,22 @@ export default function Index() {
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
           // shared with activity type of result.activityType
-          console.log("Shared with activity type:", result.activityType);
+          console.log('Shared with activity type:', result.activityType);
         } else {
           // shared
-          console.log("Shared successfully");
+          console.log('Shared successfully');
         }
       } else if (result.action === Share.dismissedAction) {
         // dismissed
-        console.log("Share dismissed");
+        console.log('Share dismissed');
       }
     } catch (error) {
-      console.error("Error sharing:", error);
+      console.error('Error sharing:', error);
     }
   };
 
   const handleProfilePress = () => {
-    router.push("/profile");
+    router.push('/profile');
   };
 
   return (
@@ -103,7 +103,7 @@ export default function Index() {
               <View className="flex-row items-baseline">
                 <Text className="text-3xl text-gray-600">Hi, </Text>
                 <Text className="text-3xl font-bold text-blue-600">
-                  {authData?.firstName || "Hendry"}
+                  {authData?.firstName || 'Hendry'}
                 </Text>
               </View>
               <Text className="text-lg text-gray-600 mt-2 leading-6">

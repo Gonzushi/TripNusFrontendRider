@@ -1,5 +1,7 @@
-import { ApiResponse } from '@/types/api';
-import { AuthData, AuthState } from '@/types/auth';
+import {
+  clearProfilePicture,
+  downloadAndSaveProfilePicture,
+} from '@/utils/profilePicture';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SplashScreen, useRouter } from 'expo-router';
 import React, {
@@ -10,60 +12,25 @@ import React, {
 } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
 import {
-  clearProfilePicture,
-  downloadAndSaveProfilePicture,
-} from './profilePicture';
-import Env from '@env';
+  loginApi,
+  logoutApi,
+  refreshTokenApi,
+  registerApi,
+  resendActivationApi,
+} from './api';
+import { AUTH_STORAGE_KEY } from './constants';
+import { AuthContextType, AuthData, AuthStateInternal } from './types';
 
-// Constants
-const AUTH_STORAGE_KEY = 'auth-key';
-const API_BASE_URL = Env.API_URL
-
-// Types
-type AuthStateInternal = {
-  isLoggedIn: boolean;
-  data: AuthData | null;
-};
-
-// API Helpers
-const apiRequest = async <T,>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<{ data: T | null; error: string | null }> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    });
-
-    const apiOutput: ApiResponse = await response.json();
-    return {
-      data:
-        apiOutput.status === 200 || apiOutput.status === 201
-          ? (apiOutput.data as T)
-          : null,
-      error:
-        apiOutput.status >= 400 ? apiOutput.message || 'Unknown error' : null,
-    };
-  } catch (error) {
-    return { data: null, error: 'Network error occurred' };
-  }
-};
-
-// Default context value
-export const AuthContext = createContext<AuthState>({
+// Create context with default values
+export const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
   isReady: false,
   authData: null,
-  logIn: async () => {},
+  setAuthData: async () => {},
   register: async () => {},
   resendActivation: async () => false,
-  logOut: () => {},
-  setAuthData: async () => {},
+  logIn: async () => {},
+  logOut: async () => {},
 });
 
 export function AuthProvider({ children }: PropsWithChildren) {
@@ -74,32 +41,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
   });
   const router = useRouter();
 
-  // Profile Picture Management
-  const handleProfilePicture = async (
-    userId: string,
-    pictureUrl: string | null
-  ) => {
-    if (pictureUrl) {
-      await downloadAndSaveProfilePicture(userId, pictureUrl);
-    } else if (userId) {
-      await clearProfilePicture(userId);
-    }
-  };
-
   // Auth State Management
   const updateAuthState = async (newState: AuthStateInternal) => {
     try {
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newState));
       setAuthState(newState);
-
-      if (newState.isLoggedIn && newState.data) {
-        await handleProfilePicture(
-          newState.data.user.id,
-          newState.data.riderProfilePictureUrl
-        );
-      } else if (authState.data?.user.id) {
-        await handleProfilePicture(authState.data.user.id, null);
-      }
     } catch (error) {
       console.error('Error saving auth state:', error);
     }
@@ -110,23 +56,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
   };
 
   // Token Management
-  const refreshToken = async (
-    refreshToken: string
-  ): Promise<AuthData | null> => {
-    const { data } = await apiRequest<AuthData>('/auth/refresh-token', {
-      method: 'POST',
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
-    return data;
-  };
-
   const checkAndRefreshToken = async (
     data: AuthData
   ): Promise<AuthData | null> => {
     const now = Math.floor(Date.now() / 1000);
     if (data.session.expires_at > now) return data;
 
-    const newData = await refreshToken(data.session.refresh_token);
+    const newData = await refreshTokenApi(data.session.refresh_token);
     if (newData) {
       await updateAuthState({ isLoggedIn: true, data: newData });
     }
@@ -135,13 +71,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   // Auth Actions
   const logIn = async (email: string, password: string) => {
-    const { data, error } = await apiRequest<AuthData>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    const { data, error } = await loginApi(email, password);
 
     if (data) {
       await updateAuthState({ isLoggedIn: true, data });
+      if (data.riderProfilePictureUrl) {
+        await downloadAndSaveProfilePicture(
+          data.user.id,
+          data.riderProfilePictureUrl
+        );
+      }
       if (router.canDismiss()) {
         router.dismissAll();
       }
@@ -154,10 +93,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   };
 
   const register = async (email: string, password: string) => {
-    const { error } = await apiRequest('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    const { error } = await registerApi(email, password);
 
     if (!error) {
       Alert.alert(
@@ -174,10 +110,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   };
 
   const resendActivation = async (email: string): Promise<boolean> => {
-    const { error } = await apiRequest('/auth/resend-activation', {
-      method: 'POST',
-      body: JSON.stringify({ email }),
-    });
+    const { error } = await resendActivationApi(email);
 
     if (!error) return true;
 
@@ -188,18 +121,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const logOut = async () => {
     try {
       if (authState.data?.session.access_token) {
-        await apiRequest('/auth/logout', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${authState.data.session.access_token}`,
-          },
-          body: JSON.stringify({ scope: 'local' }),
-        });
+        await logoutApi(authState.data.session.access_token);
       }
     } catch (error) {
       console.error('Error during logout:', error);
     } finally {
       await updateAuthState({ isLoggedIn: false, data: null });
+      await clearProfilePicture(authState.data?.user.id!);
+      if (router.canDismiss()) {
+        router.dismissAll();
+      }
       router.replace('/welcome');
     }
   };
@@ -248,11 +179,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
         isLoggedIn: authState.isLoggedIn,
         isReady,
         authData: authState.data,
-        logIn,
+        setAuthData,
         register,
         resendActivation,
+        logIn,
         logOut,
-        setAuthData,
       }}
     >
       {children}

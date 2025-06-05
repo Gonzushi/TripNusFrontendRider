@@ -1,9 +1,9 @@
-import { AuthContext } from "@/utils/authContext";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useContext, useEffect, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthContext } from '@/lib/auth';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useContext, useEffect, useState } from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface PasswordRequirement {
   label: string;
@@ -13,35 +13,35 @@ interface PasswordRequirement {
 
 export default function Register() {
   const { register } = useContext(AuthContext);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const [requirements, setRequirements] = useState<PasswordRequirement[]>([
     {
-      label: "At least 6 characters long",
+      label: 'At least 6 characters long',
       regex: /^.{6,}$/,
       met: false,
     },
     {
-      label: "Contains lowercase letter (a-z)",
+      label: 'Contains lowercase letter (a-z)',
       regex: /[a-z]/,
       met: false,
     },
     {
-      label: "Contains uppercase letter (A-Z)",
+      label: 'Contains uppercase letter (A-Z)',
       regex: /[A-Z]/,
       met: false,
     },
     {
-      label: "Contains number (0-9)",
+      label: 'Contains number (0-9)',
       regex: /[0-9]/,
       met: false,
     },
     {
-      label: "Contains special character (!@#$%^&*()_+-=[]{};\\':\"|<>?,./`~)",
+      label: 'Contains special character (!@#$%^&*()_+-=[]{};\\\':"|<>?,./`~)',
       regex: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]/,
       met: false,
     },
@@ -154,13 +154,13 @@ export default function Register() {
               {requirements.map((req, index) => (
                 <View key={index} className="flex-row items-center mb-1.5">
                   <Ionicons
-                    name={req.met ? "checkmark-circle" : "close-circle"}
+                    name={req.met ? 'checkmark-circle' : 'close-circle'}
                     size={16}
-                    color={req.met ? "#10B981" : "#EF4444"}
+                    color={req.met ? '#10B981' : '#EF4444'}
                   />
                   <Text
                     className={`ml-2 text-xs ${
-                      req.met ? "text-green-600" : "text-gray-600"
+                      req.met ? 'text-green-600' : 'text-gray-600'
                     }`}
                   >
                     {req.label}
@@ -174,7 +174,7 @@ export default function Register() {
           <View className="mt-8 space-y-4 mx-2">
             <TouchableOpacity
               className={`${
-                !allRequirementsMet || isLoading ? "bg-blue-300" : "bg-blue-600"
+                !allRequirementsMet || isLoading ? 'bg-blue-300' : 'bg-blue-600'
               } py-4 rounded-xl items-center flex-row justify-center mb-4`}
               onPress={handleRegister}
               disabled={!allRequirementsMet || isLoading}
@@ -186,7 +186,7 @@ export default function Register() {
                 style={{ marginRight: 8 }}
               />
               <Text className="text-white font-semibold text-base">
-                {isLoading ? "Creating Account..." : "Create Account"}
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </Text>
             </TouchableOpacity>
 
@@ -198,7 +198,7 @@ export default function Register() {
 
             <TouchableOpacity
               className="py-4 rounded-xl items-center"
-              onPress={() => router.replace("/login")}
+              onPress={() => router.replace('/login')}
             >
               <Text className="text-blue-600 font-semibold text-base">
                 Already have an account?

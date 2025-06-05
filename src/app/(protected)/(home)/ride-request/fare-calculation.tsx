@@ -1,9 +1,9 @@
-import { FareResponse, Location, RouteDetails } from "@/types/fare";
-import { AuthContext } from "@/utils/authContext";
+import { AuthContext } from '@/lib/auth';
+import { FareResponse, Location, RouteDetails } from '@/types/fare';
 import Env from '@env';
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -11,10 +11,9 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+} from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Constants
 const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
@@ -23,14 +22,14 @@ const dev = false;
 // Vehicle Configuration
 const VEHICLES = [
   {
-    id: "motorcycle",
-    name: "TripNus Bike",
-    icon: "motorbike",
+    id: 'motorcycle',
+    name: 'TripNus Bike',
+    icon: 'motorbike',
   },
   {
-    id: "car",
-    name: "TripNus Car",
-    icon: "car",
+    id: 'car',
+    name: 'TripNus Car',
+    icon: 'car',
   },
 ] as const;
 
@@ -39,11 +38,11 @@ type Vehicle = (typeof VEHICLES)[number];
 // Debug Tools
 const debugTools = {
   log: (message: string, data?: any) => {
-    if (dev) console.log(`[DEBUG] ${message}`, data || "");
+    if (dev) console.log(`[DEBUG] ${message}`, data || '');
   },
   mapState: (ref: any, polyline: any) => {
     if (dev) {
-      console.log("[MAP STATE]", {
+      console.log('[MAP STATE]', {
         hasRef: !!ref?.current,
         polylineLength: polyline?.length || 0,
         polylineData: polyline?.slice(0, 2) || [],
@@ -57,18 +56,18 @@ const LocationMarker = ({
   type,
   coordinate,
 }: {
-  type: "pickup" | "dropoff";
+  type: 'pickup' | 'dropoff';
   coordinate: { latitude: number; longitude: number };
 }) => (
   <Marker
     coordinate={coordinate}
-    title={`${type === "pickup" ? "Pickup" : "Drop-off"} Location`}
+    title={`${type === 'pickup' ? 'Pickup' : 'Drop-off'} Location`}
   >
     <View className="items-center">
       <MaterialCommunityIcons
         name="map-marker"
         size={40}
-        color={type === "pickup" ? "#3B82F6" : "#EF4444"}
+        color={type === 'pickup' ? '#3B82F6' : '#EF4444'}
       />
     </View>
   </Marker>
@@ -125,7 +124,7 @@ const AddressCard = ({
 
 // Add a utility function for number formatting
 const formatPrice = (price: number): string => {
-  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
 const VehicleOption = ({
@@ -145,19 +144,19 @@ const VehicleOption = ({
     <TouchableOpacity
       onPress={onSelect}
       className={`px-3 py-2.5 mb-2 rounded-xl border ${
-        isSelected ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"
+        isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white'
       }`}
     >
       <View className="flex-row items-center">
         <View
           className={`p-1.5 rounded-lg ${
-            isSelected ? "bg-blue-100" : "bg-gray-100"
+            isSelected ? 'bg-blue-100' : 'bg-gray-100'
           }`}
         >
           <MaterialCommunityIcons
             name={vehicle.icon as any}
             size={20}
-            color={isSelected ? "#3B82F6" : "#4B5563"}
+            color={isSelected ? '#3B82F6' : '#4B5563'}
           />
         </View>
         <View className="flex-row flex-1 items-center justify-between ml-3">
@@ -165,7 +164,7 @@ const VehicleOption = ({
             <Text className="font-medium text-gray-900">{vehicle.name}</Text>
           </View>
           <Text className="font-medium text-gray-900">
-            Rp {fare ? formatPrice(fare.total_fare) : "-"}
+            Rp {fare ? formatPrice(fare.total_fare) : '-'}
           </Text>
         </View>
       </View>
@@ -185,30 +184,30 @@ const DebugOverlay = ({
   return (
     <View
       style={{
-        position: "absolute",
+        position: 'absolute',
         top: 120,
         left: 10,
         right: 10,
-        backgroundColor: "rgba(0,0,0,0.7)",
+        backgroundColor: 'rgba(0,0,0,0.7)',
         padding: 10,
         borderRadius: 8,
         zIndex: 1000,
       }}
     >
-      <Text style={{ color: "white", fontSize: 12 }}>
-        🗺 Map Ref: {mapRef.current ? "✅" : "❌"}
-        {"\n"}
+      <Text style={{ color: 'white', fontSize: 12 }}>
+        🗺 Map Ref: {mapRef.current ? '✅' : '❌'}
+        {'\n'}
         📍 Polyline Points: {routeDetails.polyline.length}
-        {"\n"}
-        🎯 First Point:{" "}
+        {'\n'}
+        🎯 First Point:{' '}
         {routeDetails.polyline[0]
           ? `${routeDetails.polyline[0].latitude.toFixed(
               4
             )}, ${routeDetails.polyline[0].longitude.toFixed(4)}`
-          : "None"}
-        {"\n"}
+          : 'None'}
+        {'\n'}
         📏 Distance: {routeDetails.distance.toFixed(2)} km
-        {"\n"}⏱ Duration: {routeDetails.duration} mins
+        {'\n'}⏱ Duration: {routeDetails.duration} mins
       </Text>
     </View>
   );
@@ -341,12 +340,12 @@ export default function FareCalculation() {
   // API Functions
   const fetchFareDetails = async (distance: number, duration: number) => {
     try {
-      const response = await fetch("https://rest.trip-nus.com/fare/calculate", {
-        method: "POST",
+      const response = await fetch('https://rest.trip-nus.com/fare/calculate', {
+        method: 'POST',
         headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + authState.authData?.session.access_token,
-          "Content-Type": "application/json",
+          accept: 'application/json',
+          Authorization: 'Bearer ' + authState.authData?.session.access_token,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           distanceM: distance,
@@ -361,7 +360,7 @@ export default function FareCalculation() {
       }
       return null;
     } catch (error) {
-      console.log("Error fetching fare:", error);
+      console.log('Error fetching fare:', error);
       return null;
     }
   };
@@ -369,17 +368,17 @@ export default function FareCalculation() {
   const fetchRouteDetails = async () => {
     try {
       setIsLoading(true);
-      debugTools.log("Fetching route details...");
+      debugTools.log('Fetching route details...');
 
       const response = await fetch(
         `https://routes.googleapis.com/directions/v2:computeRoutes`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
-            "X-Goog-Api-Key": GOOGLE_API_KEY,
-            "X-Goog-FieldMask":
-              "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline",
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': GOOGLE_API_KEY,
+            'X-Goog-FieldMask':
+              'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
           },
           body: JSON.stringify({
             origin: {
@@ -398,11 +397,11 @@ export default function FareCalculation() {
                 },
               },
             },
-            travelMode: "DRIVE",
-            routingPreference: "TRAFFIC_AWARE",
+            travelMode: 'DRIVE',
+            routingPreference: 'TRAFFIC_AWARE',
             computeAlternativeRoutes: false,
-            languageCode: "id-ID",
-            units: "METRIC",
+            languageCode: 'id-ID',
+            units: 'METRIC',
             routeModifiers: {
               avoidFerries: true,
             },
@@ -411,7 +410,7 @@ export default function FareCalculation() {
       );
 
       const data = await response.json();
-      debugTools.log("Route API Response:", data);
+      debugTools.log('Route API Response:', data);
 
       // Check if the response is empty or has no routes
       if (!data || !data.routes || data.routes.length === 0) {
@@ -420,14 +419,14 @@ export default function FareCalculation() {
           duration: 0,
           polyline: [],
           fares: null,
-          error: "NO_ROUTE",
+          error: 'NO_ROUTE',
         });
         return null;
       }
 
       const route = data.routes[0];
       const distanceM = route.distanceMeters;
-      const durationSec = Math.ceil(parseInt(route.duration.replace("s", "")));
+      const durationSec = Math.ceil(parseInt(route.duration.replace('s', '')));
       const decodedPolyline = decodePolyline(route.polyline.encodedPolyline);
 
       // Fetch fare details
@@ -450,14 +449,14 @@ export default function FareCalculation() {
 
       return routeData;
     } catch (error) {
-      debugTools.log("Error in fetchRouteDetails:", error);
-      console.error("Error fetching route:", error);
+      debugTools.log('Error in fetchRouteDetails:', error);
+      console.error('Error fetching route:', error);
       setRouteDetails({
         distance: 0,
         duration: 0,
         polyline: [],
         fares: null,
-        error: "NETWORK_ERROR",
+        error: 'NETWORK_ERROR',
       });
       return null;
     } finally {
@@ -474,12 +473,12 @@ export default function FareCalculation() {
         routeDetails.fares[selectedVehicle.id as keyof FareResponse];
       if (!fareDetails) return;
 
-      const response = await fetch("https://rest.trip-nus.com/ride", {
-        method: "POST",
+      const response = await fetch('https://rest.trip-nus.com/ride', {
+        method: 'POST',
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
           Authorization: `Bearer ${authState.authData?.session.access_token}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           distance_m: routeDetails.distance,
@@ -509,23 +508,23 @@ export default function FareCalculation() {
       if (response.ok) {
         // Navigate to ride tracking or confirmation screen
         router.replace({
-          pathname: "/(protected)/(home)/ride-request",
+          pathname: '/(protected)/(home)/ride-request',
           params: {
             rideId: data.data.id,
-            status: "finding-driver",
+            status: 'finding-driver',
           },
         });
       } else {
         Alert.alert(
-          "Error",
-          data.message || "Failed to create ride request. Please try again."
+          'Error',
+          data.message || 'Failed to create ride request. Please try again.'
         );
       }
     } catch (error) {
-      console.error("Error creating ride:", error);
+      console.error('Error creating ride:', error);
       Alert.alert(
-        "Error",
-        "An unexpected error occurred. Please try again later."
+        'Error',
+        'An unexpected error occurred. Please try again later.'
       );
     }
   };
@@ -537,7 +536,7 @@ export default function FareCalculation() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {routeDetails.error === "NO_ROUTE" ? (
+      {routeDetails.error === 'NO_ROUTE' ? (
         <View className="absolute inset-0 z-50 bg-white">
           <NoRouteError onBack={() => router.back()} />
         </View>
@@ -569,7 +568,7 @@ export default function FareCalculation() {
                       coordinates={routeDetails.polyline}
                       strokeWidth={4}
                       strokeColor="#3B82F6"
-                      strokeColors={["#3B82F6"]}
+                      strokeColors={['#3B82F6']}
                       lineDashPattern={[1]}
                     />
                   )}
@@ -652,14 +651,14 @@ export default function FareCalculation() {
                 <View>
                   <Text className="text-xs text-gray-500">Total Fare</Text>
                   <Text className="text-xl font-bold text-gray-900">
-                    Rp{" "}
+                    Rp{' '}
                     {isPolylineDrawn
                       ? formatPrice(
                           routeDetails.fares?.[
                             selectedVehicle.id as keyof FareResponse
                           ]?.total_fare || 0
                         )
-                      : "-"}
+                      : '-'}
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -667,8 +666,8 @@ export default function FareCalculation() {
                   disabled={!isPolylineDrawn}
                   className={`px-6 py-3 rounded-xl ${
                     isPolylineDrawn
-                      ? "bg-blue-600 active:bg-blue-700"
-                      : "bg-gray-300"
+                      ? 'bg-blue-600 active:bg-blue-700'
+                      : 'bg-gray-300'
                   }`}
                 >
                   <Text className="text-white font-semibold">Confirm Ride</Text>

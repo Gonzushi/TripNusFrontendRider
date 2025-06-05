@@ -1,9 +1,9 @@
-import { AuthContext } from "@/utils/authContext";
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useContext, useEffect, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthContext } from '@/lib/auth';
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useContext, useEffect, useState } from 'react';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ResendActivation() {
   const { email } = useLocalSearchParams();
@@ -30,11 +30,11 @@ export default function ResendActivation() {
   const handleResend = async () => {
     if (attempts >= maxAttempts) {
       Alert.alert(
-        "Maximum Attempts Reached",
-        "Please try again later or contact support.",
+        'Maximum Attempts Reached',
+        'Please try again later or contact support.',
         [
           {
-            text: "Back to Login",
+            text: 'Back to Login',
             onPress: () => router.back(),
           },
         ]
@@ -97,8 +97,8 @@ export default function ResendActivation() {
             <TouchableOpacity
               className={`${
                 countdown > 0 || attempts >= maxAttempts || isLoading
-                  ? "bg-gray-300"
-                  : "bg-blue-600"
+                  ? 'bg-gray-300'
+                  : 'bg-blue-600'
               } py-4 rounded-xl items-center flex-row justify-center mb-4`}
               onPress={handleResend}
               disabled={countdown > 0 || attempts >= maxAttempts || isLoading}
@@ -111,12 +111,12 @@ export default function ResendActivation() {
               />
               <Text className="text-white font-semibold text-base">
                 {isLoading
-                  ? "Sending..."
+                  ? 'Sending...'
                   : countdown > 0
-                  ? `Resend in ${countdown}s`
-                  : attempts >= maxAttempts
-                  ? "Maximum attempts reached"
-                  : "Resend Activation Email"}
+                    ? `Resend in ${countdown}s`
+                    : attempts >= maxAttempts
+                      ? 'Maximum attempts reached'
+                      : 'Resend Activation Email'}
               </Text>
             </TouchableOpacity>
 

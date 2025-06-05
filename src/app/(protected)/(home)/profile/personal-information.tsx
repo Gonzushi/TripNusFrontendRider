@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/types/api";
-import { AuthContext } from "@/utils/authContext";
+import { AuthContext } from "@/lib/auth";
 import SafeView from "@/utils/safeView";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";

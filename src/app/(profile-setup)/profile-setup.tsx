@@ -1,10 +1,10 @@
-import { ApiResponse } from "@/types/api";
-import { AuthContext } from "@/utils/authContext";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useContext, useEffect, useState } from "react";
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthContext } from '@/lib/auth';
+import { ApiResponse } from '@/types/api';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useContext, useEffect, useState } from 'react';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Component interfaces
 interface ProfileFormData {
@@ -16,9 +16,9 @@ interface ProfileFormData {
 export default function ProfileSetup() {
   // State
   const [formData, setFormData] = useState<ProfileFormData>({
-    firstName: "",
-    lastName: "",
-    phoneNumber: "+62",
+    firstName: '',
+    lastName: '',
+    phoneNumber: '+62',
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,37 +30,37 @@ export default function ProfileSetup() {
   // Effects
   useEffect(() => {
     if (authData?.firstName) {
-      router.replace("/profile-success");
+      router.replace('/profile-success');
     }
   }, [authData]);
 
   // API Calls
   const updateUserProfile = async (): Promise<void> => {
     if (!formData.firstName.trim()) {
-      throw new Error("First name is required");
+      throw new Error('First name is required');
     }
 
     if (!formData.phoneNumber.trim()) {
-      throw new Error("Phone number is required");
+      throw new Error('Phone number is required');
     }
 
     // Validate phone number format
     const phoneRegex = /^\+62[1-9][0-9]{8,11}$/;
     if (!phoneRegex.test(formData.phoneNumber.trim())) {
       throw new Error(
-        "Please enter a valid Indonesian phone number starting with +62"
+        'Please enter a valid Indonesian phone number starting with +62'
       );
     }
 
     // Update profile
     const profileResponse = await fetch(
-      "https://rest.trip-nus.com/user/profile",
+      'https://rest.trip-nus.com/user/profile',
       {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
           Authorization: `Bearer ${authData?.session.access_token}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           first_name: formData.firstName.trim(),
@@ -72,18 +72,18 @@ export default function ProfileSetup() {
     const profileData: ApiResponse = await profileResponse.json();
 
     if (profileData.status !== 200) {
-      throw new Error(profileData.message || "Failed to update user profile");
+      throw new Error(profileData.message || 'Failed to update user profile');
     }
 
     // Update phone number
     const phoneResponse = await fetch(
-      "https://rest.trip-nus.com/auth/update-phone",
+      'https://rest.trip-nus.com/auth/update-phone',
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
           Authorization: `Bearer ${authData?.session.access_token}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           phone: formData.phoneNumber.trim(),
@@ -94,7 +94,7 @@ export default function ProfileSetup() {
     const phoneData: ApiResponse = await phoneResponse.json();
 
     if (phoneData.status !== 200) {
-      throw new Error(phoneData.message || "Failed to update phone number");
+      throw new Error(phoneData.message || 'Failed to update phone number');
     }
 
     // Update auth data with both profile and phone updates
@@ -122,22 +122,22 @@ export default function ProfileSetup() {
   // Event Handlers
   const handleError = async (error: Error) => {
     if (
-      error.message === "First name is required" ||
-      error.message === "Phone number is required" ||
-      error.message.includes("valid Indonesian phone number")
+      error.message === 'First name is required' ||
+      error.message === 'Phone number is required' ||
+      error.message.includes('valid Indonesian phone number')
     ) {
-      Alert.alert("Error", error.message);
+      Alert.alert('Error', error.message);
       return;
     }
     await logOut();
-    router.replace("/welcome");
+    router.replace('/welcome');
   };
 
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
       await updateUserProfile();
-      router.replace("/profile-success");
+      router.replace('/profile-success');
     } catch (error) {
       await handleError(error as Error);
     } finally {
@@ -242,13 +242,13 @@ export default function ProfileSetup() {
                   <TextInput
                     className="flex-1 py-3 px-2"
                     placeholder="812XXXXXXXX"
-                    value={formData.phoneNumber.replace("+62", "")}
+                    value={formData.phoneNumber.replace('+62', '')}
                     onChangeText={(text) => {
                       // Only allow numbers
-                      const numbersOnly = text.replace(/[^0-9]/g, "");
+                      const numbersOnly = text.replace(/[^0-9]/g, '');
                       setFormData((prev) => ({
                         ...prev,
-                        phoneNumber: "+62" + numbersOnly,
+                        phoneNumber: '+62' + numbersOnly,
                       }));
                     }}
                     keyboardType="phone-pad"
@@ -267,7 +267,7 @@ export default function ProfileSetup() {
           <View className="mt-8 space-y-4 mx-2">
             <TouchableOpacity
               className={`${
-                isLoading ? "bg-blue-300" : "bg-blue-600"
+                isLoading ? 'bg-blue-300' : 'bg-blue-600'
               } py-4 rounded-xl items-center flex-row justify-center mb-4`}
               onPress={handleSubmit}
               disabled={isLoading}
@@ -279,7 +279,7 @@ export default function ProfileSetup() {
                 style={{ marginRight: 8 }}
               />
               <Text className="text-white font-semibold text-base">
-                {isLoading ? "Setting up..." : "Continue"}
+                {isLoading ? 'Setting up...' : 'Continue'}
               </Text>
             </TouchableOpacity>
           </View>

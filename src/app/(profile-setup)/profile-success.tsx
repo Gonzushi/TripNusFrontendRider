@@ -1,10 +1,10 @@
-import { ApiResponse } from "@/types/api";
-import { AuthContext } from "@/utils/authContext";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useContext, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthContext } from '@/lib/auth';
+import { ApiResponse } from '@/types/api';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useContext, useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileSuccess() {
   // State
@@ -18,10 +18,10 @@ export default function ProfileSuccess() {
   // API Calls
   const createRiderProfile = async (): Promise<void> => {
     if (!authData?.riderId) {
-      const response = await fetch("https://rest.trip-nus.com/rider/profile", {
-        method: "POST",
+      const response = await fetch('https://rest.trip-nus.com/rider/profile', {
+        method: 'POST',
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
           Authorization: `Bearer ${authData?.session.access_token}`,
         },
       });
@@ -29,7 +29,7 @@ export default function ProfileSuccess() {
       const data: ApiResponse = await response.json();
 
       if (data.status !== 200 && data.status !== 201) {
-        throw new Error(data.message || "Failed to create rider profile");
+        throw new Error(data.message || 'Failed to create rider profile');
       }
 
       await setAuthData({
@@ -41,9 +41,9 @@ export default function ProfileSuccess() {
 
   // Event Handlers
   const handleError = async (error: Error) => {
-    console.error("Profile setup error:", error);
+    console.error('Profile setup error:', error);
     await logOut();
-    router.replace("/welcome");
+    router.replace('/welcome');
   };
 
   const handleContinue = async () => {
@@ -53,7 +53,7 @@ export default function ProfileSuccess() {
       if (router.canDismiss()) {
         router.dismissAll();
       }
-      router.replace("/");
+      router.replace('/');
     } catch (error) {
       await handleError(error as Error);
     } finally {
@@ -106,7 +106,7 @@ export default function ProfileSuccess() {
           <View className="mt-8 space-y-4 mx-2">
             <TouchableOpacity
               className={`${
-                isLoading ? "bg-blue-300" : "bg-blue-600"
+                isLoading ? 'bg-blue-300' : 'bg-blue-600'
               } py-4 rounded-xl items-center flex-row justify-center mb-4`}
               onPress={handleContinue}
               disabled={isLoading}
@@ -118,7 +118,7 @@ export default function ProfileSuccess() {
                 style={{ marginRight: 8 }}
               />
               <Text className="text-white font-semibold text-base">
-                {isLoading ? "Setting up..." : "Continue to Home"}
+                {isLoading ? 'Setting up...' : 'Continue to Home'}
               </Text>
             </TouchableOpacity>
           </View>

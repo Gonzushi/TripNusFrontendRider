@@ -1,8 +1,8 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
-import { useRouter } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Welcome() {
   const router = useRouter();
@@ -33,7 +33,7 @@ export default function Welcome() {
           <View className="items-center">
             <Image
               source={{
-                uri: "https://placehold.co/400x400/4F46E5/ffffff?text=City+Traffic",
+                uri: 'https://placehold.co/400x400/4F46E5/ffffff?text=City+Traffic',
               }}
               className="w-full aspect-square"
               contentFit="contain"
@@ -58,7 +58,7 @@ export default function Welcome() {
           <View className="space-y-6">
             <TouchableOpacity
               className="bg-blue-600 py-4 rounded-xl items-center mb-6"
-              onPress={() => router.push("/register")}
+              onPress={() => router.push('/register')}
             >
               <Text className="text-white font-semibold text-base">
                 Get Started
@@ -67,7 +67,7 @@ export default function Welcome() {
 
             <TouchableOpacity
               className="py-4 rounded-xl items-center border border-blue-600 mb-16"
-              onPress={() => router.push("/login")}
+              onPress={() => router.push('/login')}
             >
               <Text className="text-blue-600 font-semibold text-base">
                 I already have an account

@@ -598,8 +598,8 @@ export default function RideRequest() {
                       pickupInputMode === 'editing'
                         ? 'border-blue-600'
                         : pickupInputMode === 'highlighted'
-                        ? 'border-blue-600'
-                        : 'border-gray-200/50'
+                          ? 'border-blue-600'
+                          : 'border-gray-200/50'
                     }`}
                   />
                 </View>
@@ -641,8 +641,8 @@ export default function RideRequest() {
                       destinationInputMode === 'editing'
                         ? 'border-red-600'
                         : destinationInputMode === 'highlighted'
-                        ? 'border-red-600'
-                        : 'border-gray-200/50'
+                          ? 'border-red-600'
+                          : 'border-gray-200/50'
                     }`}
                   />
                 </View>

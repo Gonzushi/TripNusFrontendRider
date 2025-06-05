@@ -1,4 +1,4 @@
-import { AuthContext } from "@/utils/authContext";
+import { AuthContext } from "@/lib/auth";
 import {
   downloadAndSaveProfilePicture,
   getProfilePictureUri,

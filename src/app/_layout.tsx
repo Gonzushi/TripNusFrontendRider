@@ -1,5 +1,5 @@
 import { useNotifications } from '@/hooks/useNotifications';
-import { AuthProvider } from '@/utils/authContext';
+import { AuthProvider } from '@/lib/auth';
 import { initializeFirebase } from '@/utils/firebase';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';

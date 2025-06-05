@@ -1,14 +1,14 @@
-import { AuthContext } from "@/utils/authContext";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useContext, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthContext } from '@/lib/auth';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useContext, useState } from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Login() {
   const { logIn } = useContext(AuthContext);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -102,7 +102,7 @@ export default function Login() {
 
             {/* Forgot Password */}
             <TouchableOpacity
-              onPress={() => router.push("/forgot-password")}
+              onPress={() => router.push('/forgot-password')}
               className="items-end mb-4"
             >
               <Text className="text-blue-600 text-sm font-medium">
@@ -115,7 +115,7 @@ export default function Login() {
           <View className="mt-8 space-y-4 mx-2">
             <TouchableOpacity
               className={`${
-                isLoading ? "bg-blue-300" : "bg-blue-600"
+                isLoading ? 'bg-blue-300' : 'bg-blue-600'
               } py-4 rounded-xl items-center flex-row justify-center mb-4`}
               onPress={handleLogin}
               disabled={isLoading}
@@ -127,7 +127,7 @@ export default function Login() {
                 style={{ marginRight: 8 }}
               />
               <Text className="text-white font-semibold text-base">
-                {isLoading ? "Logging in..." : "Log In"}
+                {isLoading ? 'Logging in...' : 'Log In'}
               </Text>
             </TouchableOpacity>
 
@@ -139,7 +139,7 @@ export default function Login() {
 
             <TouchableOpacity
               className="py-4 rounded-xl items-center"
-              onPress={() => router.replace("/register")}
+              onPress={() => router.replace('/register')}
             >
               <Text className="text-blue-600 font-semibold text-base">
                 Create a new account

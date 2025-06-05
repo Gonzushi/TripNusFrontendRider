@@ -1,6 +1,6 @@
-import { AuthContext } from "@/utils/authContext";
-import { Redirect, Stack, usePathname } from "expo-router";
-import { useContext } from "react";
+import { AuthContext } from '@/lib/auth';
+import { Redirect, Stack, usePathname } from 'expo-router';
+import { useContext } from 'react';
 
 export default function RidesLayout() {
   const pathname = usePathname();
@@ -26,34 +26,34 @@ export default function RidesLayout() {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: "white",
+          backgroundColor: 'white',
         },
         headerTitleStyle: {
-          color: "#1F2937",
-          fontWeight: "bold",
+          color: '#1F2937',
+          fontWeight: 'bold',
         },
-        headerTitleAlign: "center",
-        animation: pathname.startsWith("/(home)") ? "default" : "none",
+        headerTitleAlign: 'center',
+        animation: pathname.startsWith('/(home)') ? 'default' : 'none',
       }}
     >
       <Stack.Screen
         name="index"
         options={{
-          title: "Home",
+          title: 'Home',
           headerShown: false,
         }}
       />
       <Stack.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: 'Profile',
           headerShown: false,
         }}
       />
       <Stack.Screen
         name="ride-request"
         options={{
-          title: "Ride Request",
+          title: 'Ride Request',
           headerShown: false,
         }}
       />
