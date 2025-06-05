@@ -1,7 +1,7 @@
 import {
   clearProfilePicture,
   downloadAndSaveProfilePicture,
-} from '@/utils/profilePicture';
+} from '@/lib/profile-picture';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SplashScreen, useRouter } from 'expo-router';
 import React, {
@@ -164,9 +164,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     } finally {
       await updateAuthState({ isLoggedIn: false, data: null });
       await clearProfilePicture(authState.data?.user.id!);
-      if (router.canDismiss()) {
-        router.dismissAll();
-      }
       router.replace('/welcome');
     }
   };

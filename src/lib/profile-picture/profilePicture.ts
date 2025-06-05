@@ -1,10 +1,10 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as FileSystem from "expo-file-system";
-import * as ImageManipulator from "expo-image-manipulator";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
 
-const PROFILE_PICTURE_STORAGE_KEY = "profile-picture-";
+const PROFILE_PICTURE_STORAGE_KEY = 'profile-picture-';
 const SUPABASE_STORAGE_URL =
-  "https://mvmxgiflitlviqimsips.supabase.co/storage/v1/object/public";
+  'https://mvmxgiflitlviqimsips.supabase.co/storage/v1/object/public';
 const dev = false;
 
 // Debug utility
@@ -41,7 +41,7 @@ export const compressImage = async (uri: string): Promise<string> => {
     );
     return result.uri;
   } catch (error) {
-    debugLog("Error compressing image:", error);
+    debugLog('Error compressing image:', error);
     throw error;
   }
 };
@@ -58,7 +58,7 @@ const getFileInfo = async (
     const fileInfo = await FileSystem.getInfoAsync(uri);
     return { uri, exists: fileInfo.exists };
   } catch (error) {
-    debugLog("Error checking file info:", error);
+    debugLog('Error checking file info:', error);
     return null;
   }
 };
@@ -85,7 +85,7 @@ export const clearProfilePicture = async (userId: string): Promise<void> => {
 
     await AsyncStorage.removeItem(storageKey);
   } catch (error) {
-    debugLog("Error clearing profile picture:", error);
+    debugLog('Error clearing profile picture:', error);
   }
 };
 
@@ -118,16 +118,23 @@ export const downloadAndSaveProfilePicture = async (
       to: finalUri,
     });
 
+    console.log('tempFileUri', tempFileUri);
+    console.log('downloadUrl', downloadUrl);
+    console.log('storageKey', storageKey);
+    console.log('downloadedUri', downloadedUri);
+    console.log('compressedUri', compressedUri);
+    console.log('finalUri', finalUri);
+
     try {
       await FileSystem.deleteAsync(tempFileUri, { idempotent: true });
     } catch (error) {
-      debugLog("Error cleaning up temp file:", error);
+      debugLog('Error cleaning up temp file:', error);
     }
 
     await AsyncStorage.setItem(storageKey, finalUri);
     return finalUri;
   } catch (error) {
-    debugLog("Error downloading profile picture:", error);
+    debugLog('Error downloading profile picture:', error);
     return null;
   }
 };
@@ -153,7 +160,7 @@ export const getProfilePictureUri = async (
 
     return null;
   } catch (error) {
-    debugLog("Error getting profile picture URI:", error);
+    debugLog('Error getting profile picture URI:', error);
     return null;
   }
 };
@@ -168,10 +175,10 @@ export const prepareImageForUpload = async (
     const compressedUri = await compressImage(uri);
     return {
       uri: compressedUri,
-      type: "image/jpeg",
+      type: 'image/jpeg',
     };
   } catch (error) {
-    debugLog("Error preparing image for upload:", error);
+    debugLog('Error preparing image for upload:', error);
     throw error;
   }
 };

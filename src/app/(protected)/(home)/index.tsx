@@ -1,7 +1,7 @@
 import NotificationDebug from '@/components/NotificationDebug';
 import { AuthContext } from '@/lib/auth';
+import { getProfilePictureUri } from '@/lib/profile-picture';
 import type { LocationDetail } from '@/types/location';
-import { getProfilePictureUri } from '@/utils/profilePicture';
 import SafeView from '@/utils/safeView';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';

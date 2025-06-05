@@ -1,13 +1,13 @@
-import { AuthContext } from "@/lib/auth";
+import { AuthContext } from '@/lib/auth';
 import {
   downloadAndSaveProfilePicture,
   getProfilePictureUri,
-} from "@/utils/profilePicture";
-import SafeView from "@/utils/safeView";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import { useContext, useEffect, useState } from "react";
+} from '@/lib/profile-picture';
+import SafeView from '@/utils/safeView';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -16,7 +16,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
 
 // Profile Picture Component
 const ProfilePicture = ({
@@ -37,7 +37,7 @@ const ProfilePicture = ({
           key={imageKey}
           source={{
             uri: `${uri}?timestamp=${Date.now()}`,
-            cache: "reload",
+            cache: 'reload',
           }}
           className="w-full h-full"
           resizeMode="cover"
@@ -69,7 +69,7 @@ const MenuItem = ({
   subtitle,
   onPress,
   loading,
-  textColor = "text-gray-900",
+  textColor = 'text-gray-900',
 }: {
   icon: any;
   iconColor: string;
@@ -130,9 +130,9 @@ export default function Profile() {
     setIsSigningOut(true);
     try {
       await authState.logOut();
-      router.replace("/welcome");
+      router.replace('/welcome');
     } catch (error) {
-      Alert.alert("Error", "Failed to sign out. Please try again.");
+      Alert.alert('Error', 'Failed to sign out. Please try again.');
     } finally {
       setIsSigningOut(false);
     }
@@ -140,23 +140,23 @@ export default function Profile() {
 
   const handleProfilePictureUpdate = async () => {
     if (!authState?.authData?.session?.access_token) {
-      Alert.alert("Error", "Not authenticated");
+      Alert.alert('Error', 'Not authenticated');
       return;
     }
 
     try {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
+      if (status !== 'granted') {
         Alert.alert(
-          "Permission Denied",
-          "Sorry, we need camera roll permissions to update your profile picture."
+          'Permission Denied',
+          'Sorry, we need camera roll permissions to update your profile picture.'
         );
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
+        mediaTypes: 'images',
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -167,21 +167,21 @@ export default function Profile() {
       setUploading(true);
       const localUri = result.assets[0].uri;
       const formData = new FormData();
-      formData.append("file", {
+      formData.append('file', {
         uri: localUri,
-        name: localUri.split("/").pop(),
+        name: localUri.split('/').pop(),
         type: result.assets[0].mimeType,
       } as any);
 
       try {
         const response = await fetch(
-          "https://rest.trip-nus.com/rider/picture",
+          'https://rest.trip-nus.com/rider/picture',
           {
-            method: "POST",
+            method: 'POST',
             headers: {
-              accept: "application/json",
+              accept: 'application/json',
               Authorization: `Bearer ${authState.authData.session.access_token}`,
-              "Content-Type": "multipart/form-data",
+              'Content-Type': 'multipart/form-data',
             },
             body: formData,
           }
@@ -207,20 +207,20 @@ export default function Profile() {
               );
 
               Alert.alert(
-                "Profile Picture Updated",
-                "Please sign in again to see your new profile picture.",
+                'Profile Picture Updated',
+                'Please sign in again to see your new profile picture.',
                 [
                   {
-                    text: "OK",
+                    text: 'OK',
                     onPress: async () => {
                       try {
                         await authState.logOut();
-                        router.replace("/welcome");
+                        router.replace('/welcome');
                       } catch (error) {
-                        console.error("Error during logout:", error);
+                        console.error('Error during logout:', error);
                         Alert.alert(
-                          "Error",
-                          "Failed to sign out. Please try manually signing out."
+                          'Error',
+                          'Failed to sign out. Please try manually signing out.'
                         );
                       }
                     },
@@ -229,20 +229,20 @@ export default function Profile() {
               );
             }
           } catch (error) {
-            console.error("Error updating profile picture:", error);
-            Alert.alert("Error", "Failed to save profile picture");
+            console.error('Error updating profile picture:', error);
+            Alert.alert('Error', 'Failed to save profile picture');
           }
         } else {
           Alert.alert(
-            "Error",
-            data.message || "Failed to update profile picture"
+            'Error',
+            data.message || 'Failed to update profile picture'
           );
         }
       } catch (error) {
-        Alert.alert("Error", "Failed to upload image. Please try again.");
+        Alert.alert('Error', 'Failed to upload image. Please try again.');
       }
     } catch (error) {
-      Alert.alert("Error", "An unexpected error occurred");
+      Alert.alert('Error', 'An unexpected error occurred');
     } finally {
       setUploading(false);
     }
@@ -313,7 +313,7 @@ export default function Profile() {
                 bgColor="bg-blue-100"
                 title="Personal Information"
                 subtitle="Update your details"
-                onPress={() => router.push("/profile/personal-information")}
+                onPress={() => router.push('/profile/personal-information')}
               />
               <MenuItem
                 icon="help-circle-outline"
@@ -327,9 +327,9 @@ export default function Profile() {
                 icon="logout"
                 iconColor="#EF4444"
                 bgColor="bg-red-100"
-                title={isSigningOut ? "Signing Out..." : "Sign Out"}
+                title={isSigningOut ? 'Signing Out...' : 'Sign Out'}
                 subtitle={
-                  isSigningOut ? "Please wait..." : "Logout from account"
+                  isSigningOut ? 'Please wait...' : 'Logout from account'
                 }
                 onPress={handleLogout}
                 loading={isSigningOut}
