@@ -1,15 +1,15 @@
 // Core imports
-import SafeView from "@/utils/safeView";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Location from "expo-location";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import SafeView from '@/utils/safeView';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, {
   Fragment,
   useCallback,
   useEffect,
   useRef,
   useState,
-} from "react";
+} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -19,21 +19,22 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-} from "react-native";
+} from 'react-native';
 
 // Local imports
-import LoadingDots from "@/components/LoadingDots";
-import LocationInput from "@/components/LocationInput";
-import RouteMapPreview from "@/components/RouteMapPreview";
-import { useLocationStore } from "@/store/useLocationStore";
+import LoadingDots from '@/components/LoadingDots';
+import LocationInput from '@/components/LocationInput';
+import RouteMapPreview from '@/components/RouteMapPreview';
+import { useLocationStore } from '@/store/useLocationStore';
 import type {
   LocationDetail,
   LocationSuggestion as LocationSuggestionType,
-} from "@/types/location";
-import { isLocationInIndonesia } from "@/utils/locationUtils";
+} from '@/types/location';
+import { isLocationInIndonesia } from '@/utils/locationUtils';
+import Env from '@env';
 
 // Constants
-const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_API_KEY!;
+const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
 const LOCATION_SEARCH_RADIUS_M = 50000.0;
 const SEARCH_DEBOUNCE_MS = 500;
 const DEBUG_MODE = false;
@@ -50,7 +51,7 @@ const debugLog = (message: string, data?: any) => {
 };
 
 // Types
-type InputMode = "highlighted" | "editing" | false;
+type InputMode = 'highlighted' | 'editing' | false;
 
 export default function RideRequest() {
   const router = useRouter();
@@ -67,21 +68,21 @@ export default function RideRequest() {
 
   // Location states
   const [pickupLocation, setPickupLocation] = useState<LocationDetail>({
-    title: "Current Location",
-    address: "Getting your location...",
+    title: 'Current Location',
+    address: 'Getting your location...',
   });
 
   const [previousPickupLocation, setPreviousPickupLocation] =
     useState<LocationDetail>(pickupLocation);
   const [destinationLocation, setDestinationLocation] =
     useState<LocationDetail>({
-      title: "",
-      address: "",
+      title: '',
+      address: '',
     });
   const [previousDestinationLocation, setPreviousDestinationLocation] =
     useState<LocationDetail>({
-      title: "",
-      address: "",
+      title: '',
+      address: '',
     });
   const [currentLocation, setCurrentLocation] = useState<{
     longitude: number;
@@ -109,8 +110,8 @@ export default function RideRequest() {
       const url = `https://places.googleapis.com/v1/places/${placeId}`;
       const response = await fetch(url, {
         headers: {
-          "X-Goog-Api-Key": GOOGLE_API_KEY,
-          "X-Goog-FieldMask": "id,displayName,formattedAddress,location",
+          'X-Goog-Api-Key': GOOGLE_API_KEY,
+          'X-Goog-FieldMask': 'id,displayName,formattedAddress,location',
         },
       });
 
@@ -135,7 +136,7 @@ export default function RideRequest() {
       }
       return null;
     } catch (error) {
-      console.error("Error fetching location details:", error);
+      console.error('Error fetching location details:', error);
       return null;
     }
   };
@@ -145,8 +146,8 @@ export default function RideRequest() {
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          debugLog("Permission to access location was denied");
+        if (status !== 'granted') {
+          debugLog('Permission to access location was denied');
           return;
         }
 
@@ -171,7 +172,7 @@ export default function RideRequest() {
           if (data.results && data.results.length > 0) {
             const result = data.results[0];
             const locationDetail = {
-              title: "Current Location",
+              title: 'Current Location',
               address: result.formatted_address,
               place_id: result.place_id,
               coordinates: coords,
@@ -183,7 +184,7 @@ export default function RideRequest() {
           } else {
             // Fallback if no results found
             const locationDetail = {
-              title: "Current Location",
+              title: 'Current Location',
               address: `${coords.latitude.toFixed(
                 6
               )}, ${coords.longitude.toFixed(6)}`,
@@ -195,10 +196,10 @@ export default function RideRequest() {
             setPreviousPickupLocation(locationDetail);
           }
         } catch (error) {
-          debugLog("Error fetching reverse geocoding:", error);
+          debugLog('Error fetching reverse geocoding:', error);
           // Fallback on error
           const locationDetail = {
-            title: "Current Location",
+            title: 'Current Location',
             address: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(
               6
             )}`,
@@ -210,7 +211,7 @@ export default function RideRequest() {
           setPreviousPickupLocation(locationDetail);
         }
       } catch (error) {
-        debugLog("Error getting location:", error);
+        debugLog('Error getting location:', error);
       } finally {
         setIsLoadingLocation(false);
       }
@@ -219,10 +220,10 @@ export default function RideRequest() {
 
   // Handle clicking outside the input boxes
   const handleOutsidePress = () => {
-    if (pickupInputMode === "editing") {
+    if (pickupInputMode === 'editing') {
       setPickupLocation(previousPickupLocation);
     }
-    if (destinationInputMode === "editing") {
+    if (destinationInputMode === 'editing') {
       setDestinationLocation(previousDestinationLocation);
     }
     setPickupInputMode(false);
@@ -233,11 +234,11 @@ export default function RideRequest() {
   // Debounced search function
   const searchLocations = useCallback(
     async (searchText: string) => {
-      debugLog("Searching for:", searchText);
-      debugLog("Current location:", currentLocation);
+      debugLog('Searching for:', searchText);
+      debugLog('Current location:', currentLocation);
 
       if (!searchText || searchText.length < 3 || !currentLocation) {
-        debugLog("Search cancelled", {
+        debugLog('Search cancelled', {
           noText: !searchText,
           tooShort: searchText?.length < 3,
           noLocation: !currentLocation,
@@ -249,14 +250,14 @@ export default function RideRequest() {
         setIsLoading(true);
         const url = `https://places.googleapis.com/v1/places:searchText`;
 
-        debugLog("Fetching suggestions from:", url);
+        debugLog('Fetching suggestions from:', url);
         const response = await fetch(url, {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
-            "X-Goog-Api-Key": GOOGLE_API_KEY,
-            "X-Goog-FieldMask":
-              "places.displayName,places.formattedAddress,places.id,places.location",
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': GOOGLE_API_KEY,
+            'X-Goog-FieldMask':
+              'places.displayName,places.formattedAddress,places.id,places.location',
           },
           body: JSON.stringify({
             textQuery: searchText,
@@ -269,18 +270,18 @@ export default function RideRequest() {
                 radius: LOCATION_SEARCH_RADIUS_M,
               },
             },
-            languageCode: "en",
-            regionCode: "ID",
+            languageCode: 'en',
+            regionCode: 'ID',
           }),
         });
 
         if (!response.ok) {
-          debugLog("Places API error response:", await response.json());
+          debugLog('Places API error response:', await response.json());
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        debugLog("Places API response:", data);
+        debugLog('Places API response:', data);
 
         if (data.places) {
           // Transform Places API suggestions to our format
@@ -288,7 +289,7 @@ export default function RideRequest() {
             (place: any) => ({
               title: place.displayName.text,
               address: place.formattedAddress,
-              type: "api",
+              type: 'api',
               place_id: place.id,
               coordinates: place.location
                 ? {
@@ -299,14 +300,14 @@ export default function RideRequest() {
             })
           );
 
-          debugLog("Transformed suggestions:", apiSuggestions);
+          debugLog('Transformed suggestions:', apiSuggestions);
           setSuggestions(apiSuggestions);
         } else {
-          debugLog("No places in response");
+          debugLog('No places in response');
           setSuggestions([]);
         }
       } catch (error) {
-        debugLog("Error fetching locations:", error);
+        debugLog('Error fetching locations:', error);
         setSuggestions([]);
       } finally {
         setIsLoading(false);
@@ -319,12 +320,12 @@ export default function RideRequest() {
   const handlePickupPress = () => {
     if (!pickupInputMode) {
       setDestinationLocation(previousDestinationLocation);
-      setPickupInputMode("highlighted");
+      setPickupInputMode('highlighted');
       setDestinationInputMode(false);
       setPreviousPickupLocation(pickupLocation);
-    } else if (pickupInputMode === "highlighted") {
-      setPickupInputMode("editing");
-      setPickupLocation((prev) => ({ ...prev, title: "" }));
+    } else if (pickupInputMode === 'highlighted') {
+      setPickupInputMode('editing');
+      setPickupLocation((prev) => ({ ...prev, title: '' }));
       setSuggestions([]);
     }
   };
@@ -332,38 +333,38 @@ export default function RideRequest() {
   const handleDestinationPress = () => {
     if (!destinationInputMode) {
       setPickupLocation(previousPickupLocation);
-      setDestinationInputMode("highlighted");
+      setDestinationInputMode('highlighted');
       setPickupInputMode(false);
       setPreviousDestinationLocation(destinationLocation);
-    } else if (destinationInputMode === "highlighted") {
-      setDestinationInputMode("editing");
-      setDestinationLocation((prev) => ({ ...prev, title: "" }));
+    } else if (destinationInputMode === 'highlighted') {
+      setDestinationInputMode('editing');
+      setDestinationLocation((prev) => ({ ...prev, title: '' }));
       setSuggestions([]);
     }
   };
 
   // Debounce setup with 500ms
   useEffect(() => {
-    debugLog("Input changed", {
+    debugLog('Input changed', {
       pickupTitle: pickupLocation.title,
       destinationTitle: destinationLocation.title,
       pickupMode: pickupInputMode,
       destinationMode: destinationInputMode,
     });
 
-    if (pickupInputMode !== "editing" && destinationInputMode !== "editing") {
-      debugLog("Not in editing mode, skipping search");
+    if (pickupInputMode !== 'editing' && destinationInputMode !== 'editing') {
+      debugLog('Not in editing mode, skipping search');
       return;
     }
 
     setIsTyping(true);
     const timer = setTimeout(() => {
-      if (pickupInputMode === "editing") {
-        debugLog("Searching for pickup location:", pickupLocation.title);
+      if (pickupInputMode === 'editing') {
+        debugLog('Searching for pickup location:', pickupLocation.title);
         searchLocations(pickupLocation.title);
-      } else if (destinationInputMode === "editing") {
+      } else if (destinationInputMode === 'editing') {
         debugLog(
-          "Searching for destination location:",
+          'Searching for destination location:',
           destinationLocation.title
         );
         searchLocations(destinationLocation.title);
@@ -387,11 +388,11 @@ export default function RideRequest() {
   const handleUseCurrentLocation = useCallback(async () => {
     // If we have stored current location details, use them immediately
     if (currentLocationDetailsRef.current) {
-      if (pickupInputMode === "editing") {
+      if (pickupInputMode === 'editing') {
         setPickupLocation(currentLocationDetailsRef.current);
         setPreviousPickupLocation(currentLocationDetailsRef.current);
         setPickupInputMode(false);
-      } else if (destinationInputMode === "editing") {
+      } else if (destinationInputMode === 'editing') {
         setDestinationLocation(currentLocationDetailsRef.current);
         setPreviousDestinationLocation(currentLocationDetailsRef.current);
         setDestinationInputMode(false);
@@ -403,8 +404,8 @@ export default function RideRequest() {
     try {
       setIsLoadingLocation(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.error("Permission to access location was denied");
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
         return;
       }
 
@@ -417,7 +418,7 @@ export default function RideRequest() {
 
       // Create a basic location detail
       const locationDetail = {
-        title: "Current Location",
+        title: 'Current Location',
         address: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(
           6
         )}`,
@@ -427,17 +428,17 @@ export default function RideRequest() {
       // Store for future use
       currentLocationDetailsRef.current = locationDetail;
 
-      if (pickupInputMode === "editing") {
+      if (pickupInputMode === 'editing') {
         setPickupLocation(locationDetail);
         setPreviousPickupLocation(locationDetail);
         setPickupInputMode(false);
-      } else if (destinationInputMode === "editing") {
+      } else if (destinationInputMode === 'editing') {
         setDestinationLocation(locationDetail);
         setPreviousDestinationLocation(locationDetail);
         setDestinationInputMode(false);
       }
     } catch (error) {
-      console.error("Error getting location:", error);
+      console.error('Error getting location:', error);
     } finally {
       setIsLoadingLocation(false);
     }
@@ -469,16 +470,16 @@ export default function RideRequest() {
   };
 
   // Handle map button press
-  const handleMapPress = (locationType: "pickup" | "destination") => {
+  const handleMapPress = (locationType: 'pickup' | 'destination') => {
     const initialCoords =
-      locationType === "pickup"
+      locationType === 'pickup'
         ? pickupLocation.coordinates || currentLocation
         : destinationLocation.coordinates || currentLocation;
 
     if (!initialCoords) return;
 
     router.push({
-      pathname: "/ride-request/map-picker",
+      pathname: '/ride-request/map-picker',
       params: {
         type: locationType,
         initialLatitude: initialCoords.latitude,
@@ -492,11 +493,11 @@ export default function RideRequest() {
     if (selectedMapLocation) {
       const { location, type } = selectedMapLocation;
 
-      if (type === "pickup") {
+      if (type === 'pickup') {
         setPickupLocation(location);
         setPreviousPickupLocation(location);
         setPickupInputMode(false);
-      } else if (type === "destination") {
+      } else if (type === 'destination') {
         setDestinationLocation(location);
         setPreviousDestinationLocation(location);
         setDestinationInputMode(false);
@@ -520,15 +521,15 @@ export default function RideRequest() {
 
       if (!isPickupInIndonesia || !isDestinationInIndonesia) {
         Alert.alert(
-          "Location Error",
-          "Both pickup and destination locations must be within Indonesia.",
-          [{ text: "OK" }]
+          'Location Error',
+          'Both pickup and destination locations must be within Indonesia.',
+          [{ text: 'OK' }]
         );
         return;
       }
 
       router.push({
-        pathname: "/ride-request/fare-calculation",
+        pathname: '/ride-request/fare-calculation',
         params: {
           pickupLat: pickupLocation.coordinates.latitude,
           pickupLng: pickupLocation.coordinates.longitude,
@@ -556,8 +557,8 @@ export default function RideRequest() {
     <View
       className={`bg-white ${
         !pickupInputMode && !destinationInputMode
-          ? "border-b border-gray-200"
-          : ""
+          ? 'border-b border-gray-200'
+          : ''
       }`}
     >
       <View className="p-3">
@@ -579,32 +580,32 @@ export default function RideRequest() {
                     label=""
                     value={
                       isLoadingLocation
-                        ? "Getting your location..."
+                        ? 'Getting your location...'
                         : pickupLocation.title
                     }
                     placeholder="Enter pickup point"
-                    isEditing={pickupInputMode === "editing"}
-                    isHighlighted={pickupInputMode === "highlighted"}
+                    isEditing={pickupInputMode === 'editing'}
+                    isHighlighted={pickupInputMode === 'highlighted'}
                     onPress={handlePickupPress}
                     onChangeText={(text) =>
                       setPickupLocation((prev) => ({ ...prev, title: text }))
                     }
                     onClear={() =>
-                      setPickupLocation((prev) => ({ ...prev, title: "" }))
+                      setPickupLocation((prev) => ({ ...prev, title: '' }))
                     }
                     isLoading={isLoadingLocation}
                     customInputStyle={`bg-white rounded-xl py-3 px-4 border-2 ${
-                      pickupInputMode === "editing"
-                        ? "border-blue-600"
-                        : pickupInputMode === "highlighted"
-                        ? "border-blue-600"
-                        : "border-gray-200/50"
+                      pickupInputMode === 'editing'
+                        ? 'border-blue-600'
+                        : pickupInputMode === 'highlighted'
+                        ? 'border-blue-600'
+                        : 'border-gray-200/50'
                     }`}
                   />
                 </View>
-                {pickupInputMode === "highlighted" && (
+                {pickupInputMode === 'highlighted' && (
                   <TouchableOpacity
-                    onPress={() => handleMapPress("pickup")}
+                    onPress={() => handleMapPress('pickup')}
                     className="ml-2 bg-blue-100 p-2 rounded-xl active:bg-blue-100 border border-blue-600 self-center"
                   >
                     <MaterialCommunityIcons
@@ -624,8 +625,8 @@ export default function RideRequest() {
                     label=""
                     value={destinationLocation.title}
                     placeholder="Enter drop-off point"
-                    isEditing={destinationInputMode === "editing"}
-                    isHighlighted={destinationInputMode === "highlighted"}
+                    isEditing={destinationInputMode === 'editing'}
+                    isHighlighted={destinationInputMode === 'highlighted'}
                     onPress={handleDestinationPress}
                     onChangeText={(text) =>
                       setDestinationLocation((prev) => ({
@@ -634,20 +635,20 @@ export default function RideRequest() {
                       }))
                     }
                     onClear={() =>
-                      setDestinationLocation((prev) => ({ ...prev, title: "" }))
+                      setDestinationLocation((prev) => ({ ...prev, title: '' }))
                     }
                     customInputStyle={`bg-white rounded-xl py-3 px-4 border-2 ${
-                      destinationInputMode === "editing"
-                        ? "border-red-600"
-                        : destinationInputMode === "highlighted"
-                        ? "border-red-600"
-                        : "border-gray-200/50"
+                      destinationInputMode === 'editing'
+                        ? 'border-red-600'
+                        : destinationInputMode === 'highlighted'
+                        ? 'border-red-600'
+                        : 'border-gray-200/50'
                     }`}
                   />
                 </View>
-                {destinationInputMode === "highlighted" && (
+                {destinationInputMode === 'highlighted' && (
                   <TouchableOpacity
-                    onPress={() => handleMapPress("destination")}
+                    onPress={() => handleMapPress('destination')}
                     className="ml-2 bg-red-100 p-2 rounded-xl active:bg-red-600 border border-red-600 self-center"
                   >
                     <MaterialCommunityIcons
@@ -682,8 +683,8 @@ export default function RideRequest() {
         <Text className="text-gray-900 font-medium">Use current location</Text>
         <Text className="text-gray-500 text-sm">
           {isLoadingLocation
-            ? "Getting your location..."
-            : "Quick select your current position"}
+            ? 'Getting your location...'
+            : 'Quick select your current position'}
         </Text>
       </View>
       {isLoadingLocation && <ActivityIndicator size="small" color="#3B82F6" />}
@@ -694,7 +695,7 @@ export default function RideRequest() {
     <View className="bg-white mt-2">
       <View className="px-4 py-3 border-b border-gray-100">
         <Text className="text-sm font-medium text-gray-900">
-          {isTyping || isLoading ? "Searching..." : "Suggestions"}
+          {isTyping || isLoading ? 'Searching...' : 'Suggestions'}
         </Text>
       </View>
 
@@ -777,12 +778,12 @@ export default function RideRequest() {
           Current Location
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • coordinates:{" "}
+          • coordinates:{' '}
           {currentLocation
             ? `${currentLocation.latitude.toFixed(
                 6
               )}, ${currentLocation.longitude.toFixed(6)}`
-            : "null"}
+            : 'null'}
         </Text>
       </View>
 
@@ -791,21 +792,21 @@ export default function RideRequest() {
           Pickup Location
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • title: {pickupLocation.title || "null"}
+          • title: {pickupLocation.title || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • address: {pickupLocation.address || "null"}
+          • address: {pickupLocation.address || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • place_id: {pickupLocation.place_id || "null"}
+          • place_id: {pickupLocation.place_id || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • coordinates:{" "}
+          • coordinates:{' '}
           {pickupLocation.coordinates
             ? `${pickupLocation.coordinates.latitude.toFixed(
                 6
               )}, ${pickupLocation.coordinates.longitude.toFixed(6)}`
-            : "null"}
+            : 'null'}
         </Text>
       </View>
 
@@ -814,21 +815,21 @@ export default function RideRequest() {
           Previous Pickup Location
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • title: {previousPickupLocation.title || "null"}
+          • title: {previousPickupLocation.title || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • address: {previousPickupLocation.address || "null"}
+          • address: {previousPickupLocation.address || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • place_id: {previousPickupLocation.place_id || "null"}
+          • place_id: {previousPickupLocation.place_id || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • coordinates:{" "}
+          • coordinates:{' '}
           {previousPickupLocation.coordinates
             ? `${previousPickupLocation.coordinates.latitude.toFixed(
                 6
               )}, ${previousPickupLocation.coordinates.longitude.toFixed(6)}`
-            : "null"}
+            : 'null'}
         </Text>
       </View>
 
@@ -837,21 +838,21 @@ export default function RideRequest() {
           Destination Location
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • title: {destinationLocation.title || "null"}
+          • title: {destinationLocation.title || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • address: {destinationLocation.address || "null"}
+          • address: {destinationLocation.address || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • place_id: {destinationLocation.place_id || "null"}
+          • place_id: {destinationLocation.place_id || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • coordinates:{" "}
+          • coordinates:{' '}
           {destinationLocation.coordinates
             ? `${destinationLocation.coordinates.latitude.toFixed(
                 6
               )}, ${destinationLocation.coordinates.longitude.toFixed(6)}`
-            : "null"}
+            : 'null'}
         </Text>
       </View>
 
@@ -860,23 +861,23 @@ export default function RideRequest() {
           Previous Destination Location
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • title: {previousDestinationLocation.title || "null"}
+          • title: {previousDestinationLocation.title || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • address: {previousDestinationLocation.address || "null"}
+          • address: {previousDestinationLocation.address || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • place_id: {previousDestinationLocation.place_id || "null"}
+          • place_id: {previousDestinationLocation.place_id || 'null'}
         </Text>
         <Text className="text-white/80 font-mono text-xs">
-          • coordinates:{" "}
+          • coordinates:{' '}
           {previousDestinationLocation.coordinates
             ? `${previousDestinationLocation.coordinates.latitude.toFixed(
                 6
               )}, ${previousDestinationLocation.coordinates.longitude.toFixed(
                 6
               )}`
-            : "null"}
+            : 'null'}
         </Text>
       </View>
 
@@ -902,23 +903,23 @@ export default function RideRequest() {
               • type: {selectedMapLocation.type}
             </Text>
             <Text className="text-white/80 font-mono text-xs">
-              • title: {selectedMapLocation.location.title || "null"}
+              • title: {selectedMapLocation.location.title || 'null'}
             </Text>
             <Text className="text-white/80 font-mono text-xs">
-              • address: {selectedMapLocation.location.address || "null"}
+              • address: {selectedMapLocation.location.address || 'null'}
             </Text>
             <Text className="text-white/80 font-mono text-xs">
-              • place_id: {selectedMapLocation.location.place_id || "null"}
+              • place_id: {selectedMapLocation.location.place_id || 'null'}
             </Text>
             <Text className="text-white/80 font-mono text-xs">
-              • coordinates:{" "}
+              • coordinates:{' '}
               {selectedMapLocation.location.coordinates
                 ? `${selectedMapLocation.location.coordinates.latitude.toFixed(
                     6
                   )}, ${selectedMapLocation.location.coordinates.longitude.toFixed(
                     6
                   )}`
-                : "null"}
+                : 'null'}
             </Text>
           </Fragment>
         ) : (
@@ -965,8 +966,8 @@ export default function RideRequest() {
                   destinationLocation={destinationLocation}
                 />
               </View>
-            ) : pickupInputMode === "editing" ||
-              destinationInputMode === "editing" ? (
+            ) : pickupInputMode === 'editing' ||
+              destinationInputMode === 'editing' ? (
               <ScrollView
                 className="flex-1"
                 showsVerticalScrollIndicator={false}
@@ -1003,8 +1004,8 @@ export default function RideRequest() {
                 }
                 className={`py-4 rounded-xl flex-row items-center justify-center mb-4 mt-2 ${
                   pickupLocation.coordinates && destinationLocation.coordinates
-                    ? "bg-blue-600 active:bg-blue-700"
-                    : "bg-gray-300"
+                    ? 'bg-blue-600 active:bg-blue-700'
+                    : 'bg-gray-300'
                 }`}
               >
                 <Ionicons

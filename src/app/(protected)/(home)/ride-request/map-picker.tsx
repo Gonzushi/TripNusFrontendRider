@@ -1,14 +1,15 @@
-import { useLocationStore } from "@/store/useLocationStore";
-import { LocationDetail } from "@/types/location";
-import SafeView from "@/utils/safeView";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import { useLocationStore } from '@/store/useLocationStore';
+import { LocationDetail } from '@/types/location';
+import SafeView from '@/utils/safeView';
+import Env from '@env';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 
 // Get Google Maps API key from environment variables
-const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_API_KEY;
+const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
 
 // Debug mode flag
 const dev = false;
@@ -39,7 +40,7 @@ export default function MapPicker() {
       if (data.results && data.results.length > 0) {
         const result = data.results[0];
         setLocationDetail({
-          title: result.formatted_address.split(",")[0],
+          title: result.formatted_address.split(',')[0],
           address: result.formatted_address,
           coordinates: {
             latitude: selectedLocation.latitude,
@@ -48,7 +49,7 @@ export default function MapPicker() {
         });
       }
     } catch (error) {
-      console.error("Error fetching location details:", error);
+      console.error('Error fetching location details:', error);
     } finally {
       setIsLoading(false);
     }
@@ -128,18 +129,18 @@ export default function MapPicker() {
               Location Details:
             </Text>
             <Text className="text-white font-mono text-xs">
-              • title: {locationDetail?.title || "null"}
+              • title: {locationDetail?.title || 'null'}
             </Text>
             <Text className="text-white font-mono text-xs">
-              • address: {locationDetail?.address || "null"}
+              • address: {locationDetail?.address || 'null'}
             </Text>
             <Text className="text-white font-mono text-xs">
-              • coordinates:{" "}
+              • coordinates:{' '}
               {locationDetail?.coordinates
                 ? `\n  lat: ${locationDetail.coordinates.latitude.toFixed(
                     6
                   )}\n  lng: ${locationDetail.coordinates.longitude.toFixed(6)}`
-                : "null"}
+                : 'null'}
             </Text>
 
             <Text className="text-white font-mono text-xs mt-2 mb-1">
@@ -165,9 +166,9 @@ export default function MapPicker() {
             <Ionicons name="arrow-back" size={24} color="#111827" />
           </TouchableOpacity>
           <Text className="text-gray-900 font-semibold text-lg">
-            {type === "pickup"
-              ? "Set Pickup Location"
-              : "Set Drop-off Location"}
+            {type === 'pickup'
+              ? 'Set Pickup Location'
+              : 'Set Drop-off Location'}
           </Text>
           <View className="w-10" />
         </View>
@@ -212,7 +213,7 @@ export default function MapPicker() {
             <MaterialCommunityIcons
               name="map-marker"
               size={40}
-              color={type === "pickup" ? "#3B82F6" : "#EF4444"}
+              color={type === 'pickup' ? '#3B82F6' : '#EF4444'}
             />
           </View>
 
@@ -221,7 +222,7 @@ export default function MapPicker() {
             onPress={handleMyLocation}
             className="absolute right-4 top-4 bg-white rounded-full w-12 h-12 items-center justify-center shadow-xl"
             style={{
-              shadowColor: "#000",
+              shadowColor: '#000',
               shadowOffset: {
                 width: 0,
                 height: 2,
@@ -258,14 +259,14 @@ export default function MapPicker() {
                   <MaterialCommunityIcons
                     name="map-marker"
                     size={24}
-                    color={type === "pickup" ? "#3B82F6" : "#EF4444"}
+                    color={type === 'pickup' ? '#3B82F6' : '#EF4444'}
                   />
                   <Text className="text-gray-900 font-semibold text-xl flex-1">
-                    {" " + locationDetail?.title || "Unknown Location"}
+                    {' ' + locationDetail?.title || 'Unknown Location'}
                   </Text>
                 </View>
                 <Text className="text-gray-600 text-base mb-2 pl-8">
-                  {locationDetail?.address || "Address not found"}
+                  {locationDetail?.address || 'Address not found'}
                 </Text>
               </>
             )}
@@ -277,20 +278,20 @@ export default function MapPicker() {
             }
             className={`py-5 px-6 rounded-2xl mt-2 mb-8 shadow-sm ${
               !isMapReady || isLoading || isMapMoving || !locationDetail
-                ? "bg-gray-300"
-                : type === "pickup"
-                ? "bg-blue-600 active:bg-blue-700"
-                : "bg-red-600 active:bg-red-700"
+                ? 'bg-gray-300'
+                : type === 'pickup'
+                ? 'bg-blue-600 active:bg-blue-700'
+                : 'bg-red-600 active:bg-red-700'
             }`}
           >
             <Text className="text-white font-semibold text-center text-lg">
               {!isMapReady
-                ? "Loading Map..."
+                ? 'Loading Map...'
                 : isLoading || isMapMoving
-                ? "Getting Location..."
-                : type === "pickup"
-                ? "Confirm Pickup Location"
-                : "Confirm Drop-off Location"}
+                ? 'Getting Location...'
+                : type === 'pickup'
+                ? 'Confirm Pickup Location'
+                : 'Confirm Drop-off Location'}
             </Text>
           </TouchableOpacity>
         </View>

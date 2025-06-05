@@ -1,5 +1,6 @@
 import { FareResponse, Location, RouteDetails } from "@/types/fare";
 import { AuthContext } from "@/utils/authContext";
+import Env from '@env';
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useContext, useEffect, useRef, useState } from "react";
@@ -14,8 +15,9 @@ import {
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+
 // Constants
-const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_API_KEY!;
+const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
 const dev = false;
 
 // Vehicle Configuration
@@ -375,7 +377,7 @@ export default function FareCalculation() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
+            "X-Goog-Api-Key": GOOGLE_API_KEY,
             "X-Goog-FieldMask":
               "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline",
           },
