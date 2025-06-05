@@ -1,22 +1,22 @@
-import { ApiResponse } from "@/types/api";
-import { AuthData, AuthState } from "@/types/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { SplashScreen, useRouter } from "expo-router";
+import { ApiResponse } from '@/types/api';
+import { AuthData, AuthState } from '@/types/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SplashScreen, useRouter } from 'expo-router';
 import React, {
   createContext,
   PropsWithChildren,
   useEffect,
   useState,
-} from "react";
-import { ActivityIndicator, Alert, View } from "react-native";
+} from 'react';
+import { ActivityIndicator, Alert, View } from 'react-native';
 import {
   clearProfilePicture,
   downloadAndSaveProfilePicture,
-} from "./profilePicture";
+} from './profilePicture';
 
 // Constants
-const AUTH_STORAGE_KEY = "auth-key";
-const API_BASE_URL = "https://rest.trip-nus.com";
+const AUTH_STORAGE_KEY = 'auth-key';
+const API_BASE_URL = 'https://rest.trip-nus.com';
 
 // Types
 type AuthStateInternal = {
@@ -32,8 +32,8 @@ const apiRequest = async <T,>(
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
         ...options.headers,
       },
       ...options,
@@ -46,10 +46,10 @@ const apiRequest = async <T,>(
           ? (apiOutput.data as T)
           : null,
       error:
-        apiOutput.status >= 400 ? apiOutput.message || "Unknown error" : null,
+        apiOutput.status >= 400 ? apiOutput.message || 'Unknown error' : null,
     };
   } catch (error) {
-    return { data: null, error: "Network error occurred" };
+    return { data: null, error: 'Network error occurred' };
   }
 };
 
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         await handleProfilePicture(authState.data.user.id, null);
       }
     } catch (error) {
-      console.error("Error saving auth state:", error);
+      console.error('Error saving auth state:', error);
     }
   };
 
@@ -112,8 +112,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const refreshToken = async (
     refreshToken: string
   ): Promise<AuthData | null> => {
-    const { data } = await apiRequest<AuthData>("/auth/refresh-token", {
-      method: "POST",
+    const { data } = await apiRequest<AuthData>('/auth/refresh-token', {
+      method: 'POST',
       body: JSON.stringify({ refresh_token: refreshToken }),
     });
     return data;
@@ -134,8 +134,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   // Auth Actions
   const logIn = async (email: string, password: string) => {
-    const { data, error } = await apiRequest<AuthData>("/auth/login", {
-      method: "POST",
+    const { data, error } = await apiRequest<AuthData>('/auth/login', {
+      method: 'POST',
       body: JSON.stringify({ email, password }),
     });
 
@@ -144,62 +144,62 @@ export function AuthProvider({ children }: PropsWithChildren) {
       if (router.canDismiss()) {
         router.dismissAll();
       }
-      router.replace("/");
-    } else if (error === "Email not confirmed") {
-      router.push({ pathname: "/resend", params: { email } });
+      router.replace('/');
+    } else if (error === 'Email not confirmed') {
+      router.push({ pathname: '/resend', params: { email } });
     } else {
-      Alert.alert("Login Failed", error || "Invalid email or password.");
+      Alert.alert('Login Failed', error || 'Invalid email or password.');
     }
   };
 
   const register = async (email: string, password: string) => {
-    const { error } = await apiRequest("/auth/register", {
-      method: "POST",
+    const { error } = await apiRequest('/auth/register', {
+      method: 'POST',
       body: JSON.stringify({ email, password }),
     });
 
     if (!error) {
       Alert.alert(
-        "Registration Successful",
-        "Please check your email to activate your account.",
-        [{ text: "OK", onPress: () => router.replace("/login") }]
+        'Registration Successful',
+        'Please check your email to activate your account.',
+        [{ text: 'OK', onPress: () => router.replace('/login') }]
       );
     } else {
       Alert.alert(
-        "Registration Failed",
-        error || "An error occurred during registration."
+        'Registration Failed',
+        error || 'An error occurred during registration.'
       );
     }
   };
 
   const resendActivation = async (email: string): Promise<boolean> => {
-    const { error } = await apiRequest("/auth/resend-activation", {
-      method: "POST",
+    const { error } = await apiRequest('/auth/resend-activation', {
+      method: 'POST',
       body: JSON.stringify({ email }),
     });
 
     if (!error) return true;
 
-    Alert.alert("Error", error || "Failed to send activation email");
+    Alert.alert('Error', error || 'Failed to send activation email');
     return false;
   };
 
   const logOut = async () => {
     try {
       if (authState.data?.session.access_token) {
-        await apiRequest("/auth/logout", {
-          method: "POST",
+        await apiRequest('/auth/logout', {
+          method: 'POST',
           headers: {
             Authorization: `Bearer ${authState.data.session.access_token}`,
           },
-          body: JSON.stringify({ scope: "local" }),
+          body: JSON.stringify({ scope: 'local' }),
         });
       }
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error('Error during logout:', error);
     } finally {
       await updateAuthState({ isLoggedIn: false, data: null });
-      router.replace("/welcome");
+      router.replace('/welcome');
     }
   };
 
@@ -212,6 +212,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
           const storedState = JSON.parse(value);
           if (storedState.isLoggedIn && storedState.data) {
             const validData = await checkAndRefreshToken(storedState.data);
+            console.log(validData);
             await updateAuthState({
               isLoggedIn: !!validData,
               data: validData,
@@ -219,11 +220,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
           }
         }
       } catch (error) {
-        console.error("Error initializing auth:", error);
+        console.error('Error initializing auth:', error);
       }
       setIsReady(true);
     };
 
+    console.log('Initializing auth');
     initializeAuth();
   }, []);
 
