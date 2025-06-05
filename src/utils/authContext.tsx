@@ -13,10 +13,11 @@ import {
   clearProfilePicture,
   downloadAndSaveProfilePicture,
 } from './profilePicture';
+import Env from '@env';
 
 // Constants
 const AUTH_STORAGE_KEY = 'auth-key';
-const API_BASE_URL = 'https://rest.trip-nus.com';
+const API_BASE_URL = Env.API_URL
 
 // Types
 type AuthStateInternal = {

@@ -81,6 +81,7 @@ const client = z.object({
   // ADD YOUR CLIENT ENV VARS HERE
   API_URL: z.string(),
   GOOGLE_API_KEY: z.string(),
+  SUPABASE_STORAGE_URL: z.string(),
 });
 
 const buildTime = z.object({
@@ -104,7 +105,8 @@ const _clientEnv = {
 
   // ADD YOUR ENV VARS HERE TOO
   API_URL: process.env.API_URL,
-  GOOGLE_API_KEY: process.env.GOOGLE_API_KEY
+  GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
+  SUPABASE_STORAGE_URL: process.env.SUPABASE_STORAGE_URL,
 };
 
 /**
