@@ -213,7 +213,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
           const storedState = JSON.parse(value);
           if (storedState.isLoggedIn && storedState.data) {
             const validData = await checkAndRefreshToken(storedState.data);
-            console.log(validData);
             await updateAuthState({
               isLoggedIn: !!validData,
               data: validData,
@@ -226,7 +225,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setIsReady(true);
     };
 
-    console.log('Initializing auth');
     initializeAuth();
   }, []);
 

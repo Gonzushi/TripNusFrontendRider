@@ -40,4 +40,8 @@ yarn-error.*
 
 app-example
 
+# environment variables
+.env.development
+.env.production
+.env.staging
 .env
