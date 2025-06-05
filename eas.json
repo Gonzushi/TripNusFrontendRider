@@ -4,26 +4,66 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "production": {
+      "channel": "production",
+      "distribution": "store",
+      "pnpm": "9.12.3",
+      "ios": {
+        "image": "latest"
+      },
+      "android": {
+        "buildType": "app-bundle",
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_NO_DOTENV": "1",
+        "APP_ENV": "production",
+        "FLIPPER_DISABLE": "1"
+      }
+    },
+    "staging": {
+      "channel": "staging",
+      "distribution": "internal",
+      "pnpm": "9.12.3",
+      "ios": {
+        "image": "latest"
+      },
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "env": {
+        "APP_ENV": "staging",
+        "EXPO_NO_DOTENV": "1",
+        "FLIPPER_DISABLE": "1"
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_GOOGLE_API_KEY": "AIzaSyD2MxqysyNtpEj0-yHnYhOI_Tgkx4x8Ci0"
-      }
-    },
-    "preview": {
-      "distribution": "internal",
+      "ios": {
+        "image": "latest"
+      },
       "android": {
-        "buildType": "apk"
+        "image": "latest"
       },
       "env": {
-        "EXPO_PUBLIC_GOOGLE_API_KEY": "AIzaSyD2MxqysyNtpEj0-yHnYhOI_Tgkx4x8Ci0"
+        "APP_ENV": "development",
+        "EXPO_NO_DOTENV": "1"
       }
     },
-    "production": {
-      "autoIncrement": true,
+    "simulator": {
+      "pnpm": "9.12.3",
+      "ios": {
+        "simulator": true,
+        "image": "latest"
+      },
+      "android": {
+        "image": "latest"
+      },
       "env": {
-        "EXPO_PUBLIC_GOOGLE_API_KEY": "AIzaSyD2MxqysyNtpEj0-yHnYhOI_Tgkx4x8Ci0"
+        "APP_ENV": "development",
+        "EXPO_NO_DOTENV": "1"
       }
     }
   },

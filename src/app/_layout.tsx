@@ -1,15 +1,15 @@
-import { useNotifications } from "@/hooks/useNotifications";
-import { AuthProvider } from "@/utils/authContext";
-import { initializeFirebase } from "@/utils/firebase";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import "../../global.css";
+import { useNotifications } from '@/hooks/useNotifications';
+import { AuthProvider } from '@/utils/authContext';
+import { initializeFirebase } from '@/utils/firebase';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import '../../global.css';
 
 // Configure the linking before the app renders
 export const unstable_settings = {
-  initialRouteName: "welcome",
+  initialRouteName: 'welcome',
 };
 
 export default function RootLayout() {
@@ -19,7 +19,7 @@ export default function RootLayout() {
       try {
         await initializeFirebase();
       } catch (error) {
-        console.error("Failed to initialize Firebase:", error);
+        console.error('Failed to initialize Firebase:', error);
       }
     };
 
@@ -38,14 +38,14 @@ export default function RootLayout() {
             name="(protected)"
             options={{
               headerShown: false,
-              animation: "none",
+              animation: 'none',
             }}
           />
           <Stack.Screen
             name="(authentication)"
             options={{
               headerShown: false,
-              animation: "none",
+              animation: 'none',
             }}
           />
         </Stack>
