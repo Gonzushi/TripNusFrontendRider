@@ -60,10 +60,10 @@ export default function RenderHeader({
                     label=""
                     value={
                       isLoadingLocation
-                        ? 'Getting your location...'
+                        ? 'Mendapatkan lokasi Anda...'
                         : pickupLocation.title
                     }
-                    placeholder="Enter pickup point"
+                    placeholder="Masukkan titik penjemputan"
                     isEditing={pickupInputMode === 'editing'}
                     isHighlighted={pickupInputMode === 'highlighted'}
                     onPress={handlePickupPress}
@@ -104,7 +104,7 @@ export default function RenderHeader({
                   <LocationInput
                     label=""
                     value={destinationLocation.title}
-                    placeholder="Enter drop-off point"
+                    placeholder="Masukkan titik tujuan"
                     isEditing={destinationInputMode === 'editing'}
                     isHighlighted={destinationInputMode === 'highlighted'}
                     onPress={handleDestinationPress}

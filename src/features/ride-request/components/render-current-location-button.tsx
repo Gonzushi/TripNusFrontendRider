@@ -24,11 +24,13 @@ export default function RenderCurrentLocationButton({
         />
       </View>
       <View className="ml-3 flex-1">
-        <Text className="font-medium text-gray-900">Use current location</Text>
+        <Text className="font-medium text-gray-900">
+          Gunakan lokasi saat ini
+        </Text>
         <Text className="text-sm text-gray-500">
           {isLoadingLocation
-            ? 'Getting your location...'
-            : 'Quick select your current position'}
+            ? 'Mendapatkan lokasi Anda...'
+            : 'Pilih cepat posisi Anda saat ini'}
         </Text>
       </View>
       {isLoadingLocation && <ActivityIndicator size="small" color="#3B82F6" />}

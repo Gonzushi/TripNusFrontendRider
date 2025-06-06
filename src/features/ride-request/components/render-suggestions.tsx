@@ -21,7 +21,7 @@ export default function RenderSuggestions({
     <View className="mt-2 bg-white">
       <View className="border-b border-gray-100 px-4 py-3">
         <Text className="text-sm font-medium text-gray-900">
-          {isTyping || isLoading ? 'Searching...' : 'Suggestions'}
+          {isTyping || isLoading ? 'Mencari...' : 'Saran Lokasi'}
         </Text>
       </View>
 
@@ -59,7 +59,7 @@ export default function RenderSuggestions({
         <View className="items-center px-4 py-12">
           <MaterialCommunityIcons name="map-search" size={48} color="#9CA3AF" />
           <Text className="mt-4 text-center text-gray-400">
-            Type to search for locations
+            Ketik untuk mencari lokasi
           </Text>
         </View>
       )}

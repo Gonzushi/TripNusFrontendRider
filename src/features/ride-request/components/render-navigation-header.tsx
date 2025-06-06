@@ -14,7 +14,7 @@ export default function RenderNavigationHeader({
       <TouchableOpacity onPress={() => router.back()}>
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
-      <Text className="text-lg font-semibold text-black">Request a Ride</Text>
+      <Text className="text-lg font-semibold text-black">Pesan Perjalanan</Text>
       <View style={{ width: 24 }} />
     </View>
   );

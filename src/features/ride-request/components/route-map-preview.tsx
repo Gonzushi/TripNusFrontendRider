@@ -78,7 +78,7 @@ export default function RouteMapPreview({
         {/* Pickup Location Marker */}
         <Marker
           coordinate={pickupCoords}
-          title="Pickup"
+          title="Titik Jemput"
           description={pickupLocation.address}
         >
           <MaterialCommunityIcons name="map-marker" size={40} color="#3B82F6" />
@@ -87,7 +87,7 @@ export default function RouteMapPreview({
         {/* Destination Location Marker */}
         <Marker
           coordinate={destinationCoords}
-          title="Destination"
+          title="Tujuan"
           description={destinationLocation.address}
         >
           <MaterialCommunityIcons name="map-marker" size={40} color="#EF4444" />

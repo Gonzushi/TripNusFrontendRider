@@ -20,8 +20,8 @@ export const INITIAL_STATES = {
   } as const satisfies LocationDetail,
 
   currentLocation: {
-    title: 'Current Location',
-    address: 'Getting your location...',
+    title: 'Lokasi Saat Ini',
+    address: 'Mendapatkan lokasi Anda...',
   } as const satisfies LocationDetail,
 } as const;
 
@@ -116,7 +116,6 @@ export function useRideRequest(): RideRequestState {
     // Location Store
     selectedMapLocation,
     clearSelectedMapLocation,
-
 
     // Input Modes
     pickupInputMode,

@@ -36,6 +36,13 @@ import { SafeView } from '@/lib/safe-view';
 
 const DEBUG_MODE = false;
 
+type ButtonState = {
+  text: string;
+  isActive: boolean;
+  icon: 'navigate' | 'locate' | 'cash';
+  tip: string;
+};
+
 export default function RideRequest() {
   const {
     router,
@@ -185,7 +192,7 @@ export default function RideRequest() {
   ]);
 
   // Handle using current location button - now uses stored details
-  const handleUseCurrentLocation = useCallback(async () => {
+  const handleUseCurrentLocation = useCallback(() => {
     if (pickupInputMode === 'editing') {
       setPickupLocation(INITIAL_STATES.currentLocation);
       setPreviousPickupLocation(INITIAL_STATES.currentLocation);
@@ -259,10 +266,10 @@ export default function RideRequest() {
 
   // Function to handle ride confirmation
   const handleConfirmRide = () => {
-    // If destination is filled but pickup is still "Current Location" without coordinates
+    // If destination is filled but pickup is still "Lokasi Saat Ini" without coordinates
     if (
       destinationLocation.title &&
-      pickupLocation.title === 'Current Location' &&
+      pickupLocation.title === 'Lokasi Saat Ini' &&
       !pickupLocation.coordinates
     ) {
       router.push({
@@ -288,8 +295,8 @@ export default function RideRequest() {
 
       if (!isPickupInIndonesia || !isDestinationInIndonesia) {
         Alert.alert(
-          'Location Error',
-          'Both pickup and destination locations must be within Indonesia.',
+          'Lokasi Tidak Valid',
+          'Lokasi penjemputan dan tujuan harus berada di Indonesia.',
           [{ text: 'OK' }]
         );
         return;
@@ -310,42 +317,46 @@ export default function RideRequest() {
   };
 
   // Function to determine button state
-  const getButtonState = () => {
+  const getButtonState = (): ButtonState => {
     // If no destination is set yet
     if (!destinationLocation.title) {
       return {
-        text: 'Choose Your Destination',
+        text: 'Pilih Tujuan Anda',
         isActive: false,
-        icon: 'navigate' as const,
+        icon: 'navigate',
+        tip: 'Masukkan tujuan untuk memulai!',
       };
     }
 
-    // If destination is set but pickup is still "Current Location" without coordinates
+    // If destination is set but pickup is still "Lokasi Saat Ini" without coordinates
     if (
       destinationLocation.title &&
-      pickupLocation.title === 'Current Location' &&
+      pickupLocation.title === 'Lokasi Saat Ini' &&
       !pickupLocation.coordinates
     ) {
       return {
-        text: 'Set Your Pickup Location',
+        text: 'Tentukan Lokasi Jemput',
         isActive: true,
-        icon: 'locate' as const,
+        icon: 'locate',
+        tip: 'Tentukan lokasi jemput yang tepat untuk layanan lebih baik',
       };
     }
 
     // If both locations are set with coordinates
     if (pickupLocation.coordinates && destinationLocation.coordinates) {
       return {
-        text: 'Get Fare Estimate',
+        text: 'Lihat Estimasi Biaya',
         isActive: true,
-        icon: 'cash' as const,
+        icon: 'cash',
+        tip: 'Pastikan kedua lokasi akurat untuk kalkulasi biaya yang tepat',
       };
     }
 
     return {
-      text: 'Choose Your Destination',
+      text: 'Pilih Tujuan Anda',
       isActive: false,
-      icon: 'navigate' as const,
+      icon: 'navigate',
+      tip: 'Masukkan tujuan untuk memulai!',
     };
   };
 
@@ -415,11 +426,7 @@ export default function RideRequest() {
               <View className="mb-4 mt-2 flex-row items-center">
                 <Ionicons name="bulb" size={20} color="#3B82F6" />
                 <Text className="ml-2 text-sm text-blue-600">
-                  {buttonState.text === 'Choose Your Destination'
-                    ? 'Enter your destination to get started!'
-                    : buttonState.text === 'Set Your Pickup Location'
-                      ? 'Set your exact pickup location for better service'
-                      : 'Make sure both locations are accurate for precise fare calculation'}
+                  {buttonState.tip}
                 </Text>
               </View>
 
@@ -448,7 +455,7 @@ export default function RideRequest() {
               <TouchableOpacity onPress={() => router.back()}>
                 <View className="mb-4 rounded-xl border border-gray-200 py-4">
                   <Text className="text-center font-medium text-gray-600">
-                    Cancel
+                    Batal
                   </Text>
                 </View>
               </TouchableOpacity>
