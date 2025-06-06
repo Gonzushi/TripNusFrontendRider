@@ -15,6 +15,7 @@ import {
 
 import {
   changePasswordApi,
+  forgotPasswordApi,
   loginApi,
   logoutApi,
   refreshTokenApi,
@@ -36,6 +37,7 @@ export const AuthContext = createContext<AuthContextType>({
   setAuthData: async () => {},
   register: async () => {},
   resendActivation: async () => false,
+  forgotPassword: async () => {},
   changePassword: async () => {},
   logIn: async () => {},
   logOut: async () => {},
@@ -96,7 +98,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     } else if (error === 'Email not confirmed') {
       router.push({ pathname: '/resend', params: { email } });
     } else {
-      Alert.alert('Login Failed', error || 'Invalid email or password.');
+      Alert.alert('Gagal Masuk', error || 'Email atau kata sandi tidak valid.');
     }
   };
 
@@ -105,14 +107,24 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     if (!error) {
       Alert.alert(
-        'Registration Successful',
-        'Please check your email to activate your account.',
+        'Registrasi Berhasil',
+        'Silakan periksa email Anda untuk mengaktifkan akun.',
         [{ text: 'OK', onPress: () => router.replace('/login') }]
       );
     } else {
+      // Translate specific error messages
+      let translatedError = error;
+      if (
+        error ===
+        'This email is already registered. Please log in or reset your password.'
+      ) {
+        translatedError =
+          'Email ini sudah terdaftar. Silakan masuk atau atur ulang kata sandi Anda.';
+      }
+
       Alert.alert(
-        'Registration Failed',
-        error || 'An error occurred during registration.'
+        'Registrasi Gagal',
+        translatedError || 'Terjadi kesalahan saat registrasi.'
       );
     }
   };
@@ -122,7 +134,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     if (!error) return true;
 
-    Alert.alert('Error', error || 'Failed to send activation email');
+    Alert.alert('Error', error || 'Gagal mengirim email aktivasi');
     return false;
   };
 
@@ -134,7 +146,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const { error } = await changePasswordApi(type, tokenHash, password);
 
     if (!error) {
-      Alert.alert('Success', 'Password has been changed successfully', [
+      Alert.alert('Berhasil', 'Kata sandi berhasil diubah', [
         {
           text: 'OK',
           onPress: () => {
@@ -146,7 +158,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         },
       ]);
     } else {
-      Alert.alert('Error', error || 'Failed to change password', [
+      Alert.alert('Error', error || 'Gagal mengubah kata sandi', [
         {
           text: 'OK',
           onPress: () => {
@@ -157,6 +169,33 @@ export function AuthProvider({ children }: PropsWithChildren) {
           },
         },
       ]);
+    }
+  };
+
+  const forgotPassword = async (email: string) => {
+    const { error } = await forgotPasswordApi(email);
+
+    if (!error) {
+      Alert.alert(
+        'Reset Kata Sandi',
+        'Jika akun dengan email ini ada, Anda akan menerima instruksi untuk mengatur ulang kata sandi.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              if (router.canDismiss()) {
+                router.dismissAll();
+              }
+              router.replace('/login');
+            },
+          },
+        ]
+      );
+    } else {
+      Alert.alert(
+        'Error',
+        error || 'Gagal memproses permintaan reset kata sandi'
+      );
     }
   };
 
@@ -225,6 +264,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         register,
         resendActivation,
         changePassword,
+        forgotPassword,
         logIn,
         logOut,
       }}

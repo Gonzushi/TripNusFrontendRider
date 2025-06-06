@@ -83,3 +83,10 @@ export const changePasswordApi = async (
     body: JSON.stringify({ type, tokenHash, password }),
   });
 };
+
+export const forgotPasswordApi = async (email: string) => {
+  return apiRequest('/auth/reset-password-for-email', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+};

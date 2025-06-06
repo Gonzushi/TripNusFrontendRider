@@ -1,0 +1,5 @@
+I want you to help refactor the code inside the this code to make it more structured and readable.
+Please keep all comments in English to maintain consistent documentation standards,
+but translate all text visible in the UI (messages, labels, etc.) into Bahasa Indonesia.
+
+If it’s possible to create modular components or reusable functions, please let me know first before modularizing so I can confirm.

@@ -2,14 +2,124 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthContext } from '@/lib/auth';
 
-interface PasswordRequirement {
+type PasswordRequirement = {
   label: string;
   regex: RegExp;
   met: boolean;
+};
+
+// Define password validation rules with Indonesian labels
+const PASSWORD_REQUIREMENTS: Omit<PasswordRequirement, 'met'>[] = [
+  {
+    label: 'Minimal 6 karakter',
+    regex: /^.{6,}$/,
+  },
+  {
+    label: 'Mengandung huruf kecil (a-z)',
+    regex: /[a-z]/,
+  },
+  {
+    label: 'Mengandung huruf besar (A-Z)',
+    regex: /[A-Z]/,
+  },
+  {
+    label: 'Mengandung angka (0-9)',
+    regex: /[0-9]/,
+  },
+  {
+    label: 'Mengandung karakter khusus (!@#$%^&*)',
+    regex: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]/,
+  },
+];
+
+// App logo component with TripNus branding
+function Logo() {
+  return (
+    <View className="mt-6 items-center">
+      <View className="flex-row items-center">
+        <View className="mr-2 h-12 w-12 items-center justify-center rounded-xl bg-blue-600">
+          <Ionicons name="car" size={30} color="white" />
+        </View>
+        <Text className="text-2xl font-bold text-blue-600">TripNus</Text>
+      </View>
+    </View>
+  );
+}
+
+// Registration page header with title and subtitle
+function Header() {
+  return (
+    <View className="mb-8 items-center">
+      <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+        <Ionicons name="person-add" size={32} color="#2563EB" />
+      </View>
+      <Text className="mb-2 text-2xl font-bold text-gray-900">Buat Akun</Text>
+      <Text className="text-center text-base text-gray-600">
+        Bergabung dengan TripNus dan nikmati perjalanan yang cepat, aman, dan
+        nyaman
+      </Text>
+    </View>
+  );
+}
+
+// Reusable input field component with icon
+function InputField({
+  label,
+  icon,
+  ...props
+}: {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+} & React.ComponentProps<typeof TextInput>) {
+  return (
+    <View className="mb-4">
+      <Text className="mb-1.5 text-sm text-gray-700">{label}</Text>
+      <View className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50">
+        <View className="pl-4 pr-2">
+          <Ionicons name={icon} size={20} color="#6B7280" />
+        </View>
+        <TextInput
+          className="flex-1 px-2 py-3"
+          placeholderTextColor="#9CA3AF"
+          {...props}
+        />
+      </View>
+    </View>
+  );
+}
+
+// Password requirements checklist component
+function PasswordRequirements({
+  requirements,
+}: {
+  requirements: PasswordRequirement[];
+}) {
+  return (
+    <View className="rounded-xl bg-gray-50 p-4">
+      <Text className="mb-2 text-sm font-medium text-gray-700">
+        Persyaratan Kata Sandi:
+      </Text>
+      {requirements.map((req, index) => (
+        <View key={index} className="mb-1.5 flex-row items-center">
+          <Ionicons
+            name={req.met ? 'checkmark-circle' : 'close-circle'}
+            size={16}
+            color={req.met ? '#10B981' : '#EF4444'}
+          />
+          <Text
+            className={`ml-2 text-xs ${
+              req.met ? 'text-green-600' : 'text-gray-600'
+            }`}
+          >
+            {req.label}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
 }
 
 export default function Register() {
@@ -17,38 +127,14 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const [requirements, setRequirements] = useState<PasswordRequirement[]>([
-    {
-      label: 'At least 6 characters long',
-      regex: /^.{6,}$/,
-      met: false,
-    },
-    {
-      label: 'Contains lowercase letter (a-z)',
-      regex: /[a-z]/,
-      met: false,
-    },
-    {
-      label: 'Contains uppercase letter (A-Z)',
-      regex: /[A-Z]/,
-      met: false,
-    },
-    {
-      label: 'Contains number (0-9)',
-      regex: /[0-9]/,
-      met: false,
-    },
-    {
-      label: 'Contains special character (!@#$%^&*()_+-=[]{};\\\':"|<>?,./`~)',
-      regex: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]/,
-      met: false,
-    },
-  ]);
+  // Initialize password requirements state
+  const [requirements, setRequirements] = useState<PasswordRequirement[]>(
+    PASSWORD_REQUIREMENTS.map((req) => ({ ...req, met: false }))
+  );
 
-  // Check password requirements whenever password changes
+  // Update password requirements validation on password change
   useEffect(() => {
     setRequirements((prev) =>
       prev.map((req) => ({
@@ -60,6 +146,7 @@ export default function Register() {
 
   const allRequirementsMet = requirements.every((req) => req.met);
 
+  // Handle registration form submission
   const handleRegister = async () => {
     setIsLoading(true);
     try {
@@ -70,108 +157,44 @@ export default function Register() {
   };
 
   return (
-    <View
-      className="flex-1 bg-white"
-      style={{
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-      }}
-    >
+    <View className="flex-1 bg-white">
       <View className="flex-1 justify-between">
-        {/* Top Section */}
+        {/* Brand Logo */}
         <View>
-          {/* Logo Section */}
-          <View className="mt-6 items-center">
-            <View className="flex-row items-center">
-              <View className="mr-2 h-12 w-12 items-center justify-center rounded-xl bg-blue-600">
-                <Ionicons name="car" size={30} color="white" />
-              </View>
-              <Text className="text-2xl font-bold text-blue-600">TripNus</Text>
-            </View>
-          </View>
+          <Logo />
         </View>
 
-        {/* Main Content - Centered */}
+        {/* Main Content */}
         <View className="px-6">
-          {/* Header */}
-          <View className="mb-8 items-center">
-            <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-              <Ionicons name="person-add" size={32} color="#2563EB" />
-            </View>
-            <Text className="mb-2 text-2xl font-bold text-gray-900">
-              Create Account
-            </Text>
-            <Text className="text-center text-base text-gray-600">
-              Join TripNus and enjoy fast, safe, and reliable rides.
-            </Text>
-          </View>
+          <Header />
 
-          {/* Form */}
+          {/* Registration Form */}
           <View className="mx-2 space-y-4">
-            {/* Email Input */}
-            <View className="mb-4">
-              <Text className="mb-1.5 text-sm text-gray-700">Email</Text>
-              <View className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50">
-                <View className="pl-4 pr-2">
-                  <Ionicons name="mail" size={20} color="#6B7280" />
-                </View>
-                <TextInput
-                  className="flex-1 px-2 py-3"
-                  placeholder="you@email.com"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  editable={!isLoading}
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-            </View>
+            <InputField
+              label="Email"
+              icon="mail"
+              placeholder="anda@email.com"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!isLoading}
+            />
 
-            {/* Password Input */}
-            <View className="mb-4">
-              <Text className="mb-1.5 text-sm text-gray-700">Password</Text>
-              <View className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50">
-                <View className="pl-4 pr-2">
-                  <Ionicons name="lock-closed" size={20} color="#6B7280" />
-                </View>
-                <TextInput
-                  className="flex-1 px-2 py-3"
-                  placeholder="Password"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  editable={!isLoading}
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-            </View>
+            <InputField
+              label="Kata Sandi"
+              icon="lock-closed"
+              placeholder="Kata Sandi"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              editable={!isLoading}
+            />
 
-            {/* Password Requirements */}
-            <View className="rounded-xl bg-gray-50 p-4">
-              <Text className="mb-2 text-sm font-medium text-gray-700">
-                Password Requirements:
-              </Text>
-              {requirements.map((req, index) => (
-                <View key={index} className="mb-1.5 flex-row items-center">
-                  <Ionicons
-                    name={req.met ? 'checkmark-circle' : 'close-circle'}
-                    size={16}
-                    color={req.met ? '#10B981' : '#EF4444'}
-                  />
-                  <Text
-                    className={`ml-2 text-xs ${
-                      req.met ? 'text-green-600' : 'text-gray-600'
-                    }`}
-                  >
-                    {req.label}
-                  </Text>
-                </View>
-              ))}
-            </View>
+            <PasswordRequirements requirements={requirements} />
           </View>
 
-          {/* Buttons */}
+          {/* Action Buttons */}
           <View className="mx-2 mt-8 space-y-4">
             <TouchableOpacity
               className={`${
@@ -187,32 +210,33 @@ export default function Register() {
                 style={{ marginRight: 8 }}
               />
               <Text className="text-base font-semibold text-white">
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {isLoading ? 'Membuat Akun...' : 'Buat Akun'}
               </Text>
             </TouchableOpacity>
 
+            {/* Divider */}
             <View className="my-4 flex-row items-center justify-center">
               <View className="h-[1px] flex-1 bg-gray-200" />
-              <Text className="mx-4 text-gray-500">or</Text>
+              <Text className="mx-4 text-gray-500">atau</Text>
               <View className="h-[1px] flex-1 bg-gray-200" />
             </View>
 
+            {/* Login Link */}
             <TouchableOpacity
               className="items-center rounded-xl py-4"
               onPress={() => router.replace('/login')}
             >
               <Text className="text-base font-semibold text-blue-600">
-                Already have an account?
+                Sudah punya akun?
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Bottom Section */}
+        {/* Terms and Conditions */}
         <View>
-          {/* Terms */}
           <Text className="mb-4 px-6 text-center text-sm text-gray-500">
-            By continuing, you agree to our Terms of Service
+            Dengan melanjutkan, Anda menyetujui Syarat dan Ketentuan kami
           </Text>
         </View>
       </View>

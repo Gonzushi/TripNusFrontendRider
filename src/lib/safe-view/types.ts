@@ -5,6 +5,7 @@ export type SafeViewProps = PropsWithChildren<{
   statusBackgroundColor?: string;
   isShowingTabBar?: boolean;
   isShowingPaddingTop?: boolean;
+  isShowingPaddingBottom?: boolean;
 }>;
 
 export type TabConfig = {

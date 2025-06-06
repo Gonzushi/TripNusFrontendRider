@@ -12,6 +12,7 @@ export default function SafeView({
   statusBackgroundColor = 'bg-white',
   isShowingTabBar = false,
   isShowingPaddingTop = true,
+  isShowingPaddingBottom = false,
 }: SafeViewProps) {
   const insets = useSafeAreaInsets();
 
@@ -22,11 +23,12 @@ export default function SafeView({
         className="flex-1"
         style={{
           paddingTop: isShowingPaddingTop ? insets.top : 0,
+          paddingBottom: isShowingPaddingBottom ? insets.bottom : 0,
         }}
       >
         {children}
+        {isShowingTabBar && <TabBar />}
       </View>
-      {isShowingTabBar && <TabBar />}
     </View>
   );
 }

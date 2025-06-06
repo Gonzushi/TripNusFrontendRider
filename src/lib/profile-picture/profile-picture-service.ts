@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 import path from 'path';
 
-import { SUPABASE_STORAGE_URL } from './constants';
+import { API_URL, SUPABASE_STORAGE_URL } from './constants';
 import { type PreparedImage } from './types';
 import { compressImage, getFileInfo, getStorageKey } from './utils';
 
@@ -109,5 +110,78 @@ export const prepareImageForUpload = async (
   } catch (error) {
     console.error('Error preparing image for upload:', error);
     throw error;
+  }
+};
+
+/**
+ * Updates the user's profile picture with image picker, compression, and upload
+ */
+export const updateProfilePicture = async (
+  accessToken: string,
+  userId: string
+): Promise<{ success: boolean; pictureUrl?: string; error?: string }> => {
+  try {
+    // Request permissions
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      throw new Error(
+        'Maaf, kami membutuhkan izin akses galeri untuk memperbarui foto profil Anda.'
+      );
+    }
+
+    // Pick image
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: 'images',
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1, // We'll handle compression ourselves
+    });
+
+    if (result.canceled) {
+      return { success: false };
+    }
+
+    // Prepare and compress image
+    const preparedImage = await prepareImageForUpload(result.assets[0].uri);
+
+    // Create form data
+    const formData = new FormData();
+    // @ts-expect-error React Native's FormData accepts File-like objects
+    formData.append('file', {
+      uri: preparedImage.uri,
+      type: preparedImage.type,
+      name: `profile-${userId}${path.extname(preparedImage.uri)}`,
+    });
+
+    // Upload image
+    const response = await fetch(`${API_URL}/rider/picture`, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'multipart/form-data',
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Gagal mengunggah foto profil');
+    }
+
+    return {
+      success: true,
+      pictureUrl: data.data.profile_picture_url,
+    };
+  } catch (error) {
+    console.error('Error updating profile picture:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Terjadi kesalahan tak terduga',
+    };
   }
 };
