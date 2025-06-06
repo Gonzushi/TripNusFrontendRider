@@ -1,13 +1,7 @@
 // Core imports
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, {
-  Fragment,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -31,25 +25,18 @@ import {
   LocationInput,
   RouteMapPreview,
 } from '@/features/ride-request/components';
-import {
-  DEBUG_MODE,
-  SEARCH_DEBOUNCE_MS,
-} from '@/features/ride-request/constants';
+import renderDebugInfo from '@/features/ride-request/components/debug-info';
+import { SEARCH_DEBOUNCE_MS } from '@/features/ride-request/constants';
 import type {
+  Coordinates,
   LocationDetail,
   SearchBoxInputMode,
-  SearchLocationsResult,
 } from '@/features/ride-request/types';
 import { isLocationInIndonesia } from '@/features/ride-request/utils';
 import { useLocationStore } from '@/lib/hooks/use-location-store';
 import { SafeView } from '@/lib/safe-view';
 
-// Debug utility
-const debugLog = (...args: unknown[]) => {
-  if (DEBUG_MODE) {
-    console.log(...args);
-  }
-};
+const DEBUG_MODE = false;
 
 export default function RideRequest() {
   const router = useRouter();
@@ -82,10 +69,9 @@ export default function RideRequest() {
       title: '',
       address: '',
     });
-  const [currentLocation, setCurrentLocation] = useState<{
-    longitude: number;
-    latitude: number;
-  } | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<Coordinates | null>(
+    null
+  );
 
   // Loading states
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
@@ -116,7 +102,7 @@ export default function RideRequest() {
           setPreviousPickupLocation(locationDetail);
         }
       } catch (error) {
-        debugLog('Error getting location:', error);
+        console.error('Error getting location:', error);
       } finally {
         setIsLoadingLocation(false);
       }
@@ -139,26 +125,15 @@ export default function RideRequest() {
   // Debounced search function
   const searchLocationsCallback = useCallback(
     async (searchText: string) => {
-      debugLog('Searching for:', searchText);
-      debugLog('Current location:', currentLocation);
-
-      if (!searchText || searchText.length < 3 || !currentLocation) {
-        debugLog('Search cancelled', {
-          noText: !searchText,
-          tooShort: searchText?.length < 3,
-          noLocation: !currentLocation,
-        });
+      if (!searchText || searchText.length < 4 || !currentLocation) {
         return;
       }
 
       try {
         setIsLoading(true);
-        const places = await searchLocations(
-          searchText,
-          currentLocation,
-        );
+        const places = await searchLocations(searchText, currentLocation);
 
-        const apiSuggestions = places.map((place: SearchLocationsResult) => ({
+        const apiSuggestions = places.map((place) => ({
           title: place.displayName.text,
           address: place.formattedAddress,
           type: 'api' as const,
@@ -170,11 +145,9 @@ export default function RideRequest() {
               }
             : undefined,
         }));
-
-        debugLog('Transformed suggestions:', apiSuggestions);
         setSuggestions(apiSuggestions);
       } catch (error) {
-        debugLog('Error fetching locations:', error);
+        console.log('Error fetching locations:', error);
         setSuggestions([]);
       } finally {
         setIsLoading(false);
@@ -212,25 +185,17 @@ export default function RideRequest() {
 
   // Debounce setup with 500ms
   useEffect(() => {
-    debugLog('Input changed', {
-      pickupTitle: pickupLocation.title,
-      destinationTitle: destinationLocation.title,
-      pickupMode: pickupInputMode,
-      destinationMode: destinationInputMode,
-    });
-
     if (pickupInputMode !== 'editing' && destinationInputMode !== 'editing') {
-      debugLog('Not in editing mode, skipping search');
       return;
     }
 
     setIsTyping(true);
     const timer = setTimeout(() => {
       if (pickupInputMode === 'editing') {
-        debugLog('Searching for pickup location:', pickupLocation.title);
+        console.log('Searching for pickup location:', pickupLocation.title);
         searchLocationsCallback(pickupLocation.title);
       } else if (destinationInputMode === 'editing') {
-        debugLog(
+        console.log(
           'Searching for destination location:',
           destinationLocation.title
         );
@@ -593,195 +558,6 @@ export default function RideRequest() {
     </View>
   );
 
-  const renderDebugInfo = () => (
-    <View className="mx-4 mb-8 mt-4 rounded-lg bg-black/90 p-4">
-      <Text className="mb-4 font-mono text-base font-bold text-white">
-        Debug Info
-      </Text>
-
-      <View className="mb-3 border-b border-white/20 pb-3">
-        <Text className="mb-2 font-mono text-sm font-semibold text-white">
-          Input States
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • pickupInputMode: {String(pickupInputMode)}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • destinationInputMode: {String(destinationInputMode)}
-        </Text>
-      </View>
-
-      <View className="mb-3 border-b border-white/20 pb-3">
-        <Text className="mb-2 font-mono text-sm font-semibold text-white">
-          Loading States
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • isLoadingLocation: {String(isLoadingLocation)}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • isTyping: {String(isTyping)}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • isLoading: {String(isLoading)}
-        </Text>
-      </View>
-
-      <View className="mb-3 border-b border-white/20 pb-3">
-        <Text className="mb-2 font-mono text-sm font-semibold text-white">
-          Current Location
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • coordinates:{' '}
-          {currentLocation
-            ? `${currentLocation.latitude.toFixed(
-                6
-              )}, ${currentLocation.longitude.toFixed(6)}`
-            : 'null'}
-        </Text>
-      </View>
-
-      <View className="mb-3 border-b border-white/20 pb-3">
-        <Text className="mb-2 font-mono text-sm font-semibold text-white">
-          Pickup Location
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • title: {pickupLocation.title || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • address: {pickupLocation.address || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • place_id: {pickupLocation.place_id || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • coordinates:{' '}
-          {pickupLocation.coordinates
-            ? `${pickupLocation.coordinates.latitude.toFixed(
-                6
-              )}, ${pickupLocation.coordinates.longitude.toFixed(6)}`
-            : 'null'}
-        </Text>
-      </View>
-
-      <View className="mb-3 border-b border-white/20 pb-3">
-        <Text className="mb-2 font-mono text-sm font-semibold text-white">
-          Previous Pickup Location
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • title: {previousPickupLocation.title || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • address: {previousPickupLocation.address || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • place_id: {previousPickupLocation.place_id || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • coordinates:{' '}
-          {previousPickupLocation.coordinates
-            ? `${previousPickupLocation.coordinates.latitude.toFixed(
-                6
-              )}, ${previousPickupLocation.coordinates.longitude.toFixed(6)}`
-            : 'null'}
-        </Text>
-      </View>
-
-      <View className="mb-3 border-b border-white/20 pb-3">
-        <Text className="mb-2 font-mono text-sm font-semibold text-white">
-          Destination Location
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • title: {destinationLocation.title || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • address: {destinationLocation.address || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • place_id: {destinationLocation.place_id || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • coordinates:{' '}
-          {destinationLocation.coordinates
-            ? `${destinationLocation.coordinates.latitude.toFixed(
-                6
-              )}, ${destinationLocation.coordinates.longitude.toFixed(6)}`
-            : 'null'}
-        </Text>
-      </View>
-
-      <View className="mb-3 border-b border-white/20 pb-3">
-        <Text className="mb-2 font-mono text-sm font-semibold text-white">
-          Previous Destination Location
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • title: {previousDestinationLocation.title || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • address: {previousDestinationLocation.address || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • place_id: {previousDestinationLocation.place_id || 'null'}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • coordinates:{' '}
-          {previousDestinationLocation.coordinates
-            ? `${previousDestinationLocation.coordinates.latitude.toFixed(
-                6
-              )}, ${previousDestinationLocation.coordinates.longitude.toFixed(
-                6
-              )}`
-            : 'null'}
-        </Text>
-      </View>
-
-      <View className="mb-3 border-b border-white/20 pb-3">
-        <Text className="mb-2 font-mono text-sm font-semibold text-white">
-          Search
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • sessionToken: {sessionToken}
-        </Text>
-        <Text className="font-mono text-xs text-white/80">
-          • suggestions count: {suggestions.length}
-        </Text>
-      </View>
-
-      <View>
-        <Text className="mb-2 font-mono text-sm font-semibold text-white">
-          Selected Map Location
-        </Text>
-        {selectedMapLocation ? (
-          <Fragment>
-            <Text className="font-mono text-xs text-white/80">
-              • type: {selectedMapLocation.type}
-            </Text>
-            <Text className="font-mono text-xs text-white/80">
-              • title: {selectedMapLocation.location.title || 'null'}
-            </Text>
-            <Text className="font-mono text-xs text-white/80">
-              • address: {selectedMapLocation.location.address || 'null'}
-            </Text>
-            <Text className="font-mono text-xs text-white/80">
-              • place_id: {selectedMapLocation.location.place_id || 'null'}
-            </Text>
-            <Text className="font-mono text-xs text-white/80">
-              • coordinates:{' '}
-              {selectedMapLocation.location.coordinates
-                ? `${selectedMapLocation.location.coordinates.latitude.toFixed(
-                    6
-                  )}, ${selectedMapLocation.location.coordinates.longitude.toFixed(
-                    6
-                  )}`
-                : 'null'}
-            </Text>
-          </Fragment>
-        ) : (
-          <Text className="font-mono text-xs text-white/80">• null</Text>
-        )}
-      </View>
-    </View>
-  );
-
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center px-6">
       <MaterialCommunityIcons
@@ -829,7 +605,22 @@ export default function RideRequest() {
                   {renderCurrentLocationButton()}
                   {renderSuggestions()}
                 </View>
-                {DEBUG_MODE && renderDebugInfo()}
+                {DEBUG_MODE &&
+                  renderDebugInfo({
+                    pickupInputMode,
+                    pickupLocation,
+                    previousPickupLocation,
+                    destinationInputMode,
+                    destinationLocation,
+                    previousDestinationLocation,
+                    isLoadingLocation,
+                    isTyping,
+                    isLoading,
+                    currentLocation,
+                    sessionToken,
+                    suggestions,
+                    selectedMapLocation,
+                  })}
               </ScrollView>
             ) : (
               renderEmptyState()
