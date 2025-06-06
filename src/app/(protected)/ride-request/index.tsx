@@ -14,7 +14,6 @@ import {
 import {
   fetchLocationDetail,
   getCurrentLocation,
-  reverseGeocode,
   searchLocations,
 } from '@/features/ride-request/api';
 import {
@@ -28,18 +27,20 @@ import {
 } from '@/features/ride-request/components';
 import { SEARCH_DEBOUNCE_MS } from '@/features/ride-request/constants';
 import type { LocationDetail } from '@/features/ride-request/types';
-import { useRideRequest } from '@/features/ride-request/use-ride-request';
+import {
+  INITIAL_STATES,
+  useRideRequest,
+} from '@/features/ride-request/use-ride-request';
 import { isLocationInIndonesia } from '@/features/ride-request/utils';
 import { SafeView } from '@/lib/safe-view';
 
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 export default function RideRequest() {
   const {
     router,
     selectedMapLocation,
     clearSelectedMapLocation,
-    currentLocationDetailsRef,
     pickupInputMode,
     destinationInputMode,
     pickupLocation,
@@ -73,13 +74,6 @@ export default function RideRequest() {
         if (!coords) return;
 
         setCurrentLocation(coords);
-        // const locationDetail = await reverseGeocode(coords);
-
-        // if (locationDetail) {
-        //   currentLocationDetailsRef.current = locationDetail;
-        //   setPickupLocation(locationDetail);
-        //   setPreviousPickupLocation(locationDetail);
-        // }
       } catch (error) {
         console.error('Error getting location:', error);
       } finally {
@@ -171,13 +165,8 @@ export default function RideRequest() {
     setIsTyping(true);
     const timer = setTimeout(() => {
       if (pickupInputMode === 'editing') {
-        console.log('Searching for pickup location:', pickupLocation.title);
         searchLocationsCallback(pickupLocation.title);
       } else if (destinationInputMode === 'editing') {
-        console.log(
-          'Searching for destination location:',
-          destinationLocation.title
-        );
         searchLocationsCallback(destinationLocation.title);
       }
       setIsTyping(false);
@@ -197,49 +186,12 @@ export default function RideRequest() {
 
   // Handle using current location button - now uses stored details
   const handleUseCurrentLocation = useCallback(async () => {
-    // If we have stored current location details, use them immediately
-    if (currentLocationDetailsRef.current) {
-      if (pickupInputMode === 'editing') {
-        setPickupLocation(currentLocationDetailsRef.current);
-        setPreviousPickupLocation(currentLocationDetailsRef.current);
-        setPickupInputMode(false);
-      } else if (destinationInputMode === 'editing') {
-        setDestinationLocation(currentLocationDetailsRef.current);
-        setPreviousDestinationLocation(currentLocationDetailsRef.current);
-        setDestinationInputMode(false);
-      }
-      return;
+    if (pickupInputMode === 'editing') {
+      setPickupLocation(INITIAL_STATES.currentLocation);
+      setPreviousPickupLocation(INITIAL_STATES.currentLocation);
+      setPickupInputMode(false);
     }
-
-    // Fallback to fetching current location if somehow we don't have stored details
-    try {
-      setIsLoadingLocation(true);
-      const coords = await getCurrentLocation();
-      if (!coords) return;
-
-      setCurrentLocation(coords);
-      const locationDetail = await reverseGeocode(coords);
-
-      if (locationDetail) {
-        // Store for future use
-        currentLocationDetailsRef.current = locationDetail;
-
-        if (pickupInputMode === 'editing') {
-          setPickupLocation(locationDetail);
-          setPreviousPickupLocation(locationDetail);
-          setPickupInputMode(false);
-        } else if (destinationInputMode === 'editing') {
-          setDestinationLocation(locationDetail);
-          setPreviousDestinationLocation(locationDetail);
-          setDestinationInputMode(false);
-        }
-      }
-    } catch (error) {
-      console.error('Error getting location:', error);
-    } finally {
-      setIsLoadingLocation(false);
-    }
-  }, [pickupInputMode, destinationInputMode]);
+  }, [pickupInputMode]);
 
   // Handle suggestion selection
   const handleSuggestionSelect = async (location: LocationDetail) => {
@@ -307,6 +259,24 @@ export default function RideRequest() {
 
   // Function to handle ride confirmation
   const handleConfirmRide = () => {
+    // If destination is filled but pickup is still "Current Location" without coordinates
+    if (
+      destinationLocation.title &&
+      pickupLocation.title === 'Current Location' &&
+      !pickupLocation.coordinates
+    ) {
+      router.push({
+        pathname: '/ride-request/map-picker',
+        params: {
+          type: 'pickup',
+          initialLatitude: currentLocation?.latitude || -6.2088,
+          initialLongitude: currentLocation?.longitude || 106.8456,
+        },
+      });
+      return;
+    }
+
+    // If both locations have coordinates, proceed to fare calculation
     if (pickupLocation.coordinates && destinationLocation.coordinates) {
       // Check if both locations are in Indonesia
       const isPickupInIndonesia = isLocationInIndonesia(
@@ -338,6 +308,49 @@ export default function RideRequest() {
       });
     }
   };
+
+  // Function to determine button state
+  const getButtonState = () => {
+    // If no destination is set yet
+    if (!destinationLocation.title) {
+      return {
+        text: 'Choose Your Destination',
+        isActive: false,
+        icon: 'navigate' as const,
+      };
+    }
+
+    // If destination is set but pickup is still "Current Location" without coordinates
+    if (
+      destinationLocation.title &&
+      pickupLocation.title === 'Current Location' &&
+      !pickupLocation.coordinates
+    ) {
+      return {
+        text: 'Set Your Pickup Location',
+        isActive: true,
+        icon: 'locate' as const,
+      };
+    }
+
+    // If both locations are set with coordinates
+    if (pickupLocation.coordinates && destinationLocation.coordinates) {
+      return {
+        text: 'Get Fare Estimate',
+        isActive: true,
+        icon: 'cash' as const,
+      };
+    }
+
+    return {
+      text: 'Choose Your Destination',
+      isActive: false,
+      icon: 'navigate' as const,
+    };
+  };
+
+  // Get current button state
+  const buttonState = getButtonState();
 
   // Main Render
   return (
@@ -377,10 +390,11 @@ export default function RideRequest() {
                 showsVerticalScrollIndicator={false}
               >
                 <View className="border-t border-gray-200 bg-white">
-                  {RenderCurrentLocationButton({
-                    handleUseCurrentLocation,
-                    isLoadingLocation,
-                  })}
+                  {pickupInputMode === 'editing' &&
+                    RenderCurrentLocationButton({
+                      handleUseCurrentLocation,
+                      isLoadingLocation,
+                    })}
                   {RenderSuggestions({
                     isTyping,
                     isLoading,
@@ -401,32 +415,32 @@ export default function RideRequest() {
               <View className="mb-4 mt-2 flex-row items-center">
                 <Ionicons name="bulb" size={20} color="#3B82F6" />
                 <Text className="ml-2 text-sm text-blue-600">
-                  Tip: Make sure your pickup point is accurate for faster
-                  pickup!
+                  {buttonState.text === 'Choose Your Destination'
+                    ? 'Enter your destination to get started!'
+                    : buttonState.text === 'Set Your Pickup Location'
+                      ? 'Set your exact pickup location for better service'
+                      : 'Make sure both locations are accurate for precise fare calculation'}
                 </Text>
               </View>
 
-              {/* Get Fare Estimate Button */}
+              {/* Action Button */}
               <TouchableOpacity
                 onPress={handleConfirmRide}
-                disabled={
-                  !pickupLocation.coordinates ||
-                  !destinationLocation.coordinates
-                }
+                disabled={!buttonState.isActive}
                 className={`mb-4 mt-2 flex-row items-center justify-center rounded-xl py-4 ${
-                  pickupLocation.coordinates && destinationLocation.coordinates
+                  buttonState.isActive
                     ? 'bg-blue-600 active:bg-blue-700'
                     : 'bg-gray-300'
                 }`}
               >
                 <Ionicons
-                  name="search"
+                  name={buttonState.icon}
                   size={20}
                   color="white"
                   className="mr-2"
                 />
                 <Text className="ml-2 font-semibold text-white">
-                  Get Fare Estimate
+                  {buttonState.text}
                 </Text>
               </TouchableOpacity>
 

@@ -40,7 +40,7 @@ export default function RenderDebugInfo({
   selectedMapLocation,
 }: DebugInfoProps) {
   return (
-    <View className="mx-4 mb-8 mt-4 rounded-lg bg-black/50 p-4">
+    <View className="mx-4 mb-8 mt-4 rounded-lg bg-black/40 p-4">
       <Text className="mb-4 font-mono text-base font-bold text-white">
         Debug Info
       </Text>

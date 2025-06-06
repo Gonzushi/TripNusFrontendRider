@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
   type LocationStore,
@@ -13,7 +13,7 @@ import {
 } from './types';
 
 // Constants for initial location states
-const INITIAL_STATES = {
+export const INITIAL_STATES = {
   empty: {
     title: '',
     address: '',
@@ -32,9 +32,6 @@ type RideRequestState = {
   // Location Store
   selectedMapLocation: LocationStore['selectedMapLocation'];
   clearSelectedMapLocation: LocationStore['clearSelectedMapLocation'];
-
-  // Refs
-  currentLocationDetailsRef: React.RefObject<LocationDetail | null>;
 
   // Input Modes
   pickupInputMode: SearchBoxInputMode;
@@ -78,9 +75,6 @@ export function useRideRequest(): RideRequestState {
   const router = useRouter();
   const { selectedMapLocation, clearSelectedMapLocation } = useLocationStore();
 
-  // Refs
-  const currentLocationDetailsRef = useRef<LocationDetail | null>(null);
-
   // Input mode states
   const [pickupInputMode, setPickupInputMode] =
     useState<SearchBoxInputMode>(false);
@@ -123,8 +117,6 @@ export function useRideRequest(): RideRequestState {
     selectedMapLocation,
     clearSelectedMapLocation,
 
-    // Refs
-    currentLocationDetailsRef,
 
     // Input Modes
     pickupInputMode,
