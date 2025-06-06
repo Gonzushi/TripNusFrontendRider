@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-export interface LocationInputProps {
+type LocationInputProps = {
   label: string;
   value: string;
   placeholder: string;
@@ -17,7 +17,7 @@ export interface LocationInputProps {
   isLoading?: boolean;
   customInputStyle?: string;
   customLabelStyle?: string;
-}
+};
 
 export default function LocationInput({
   label,

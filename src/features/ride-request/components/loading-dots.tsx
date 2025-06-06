@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { Animated, View } from 'react-native';
 
-interface LoadingDotsProps {
+type LoadingDotsProps = {
   color?: string;
   size?: number;
   spacing?: number;
-}
+};
 
 export default function LoadingDots({
   color = '#3B82F6',
@@ -67,7 +67,7 @@ export default function LoadingDots({
               {
                 translateY: dot.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [0, -size * 2], // Move up by 2x the dot size
+                  outputRange: [0, -size * 2],
                 }),
               },
             ],

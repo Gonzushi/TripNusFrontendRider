@@ -1,15 +1,5 @@
-type Coordinates = {
-  latitude: number;
-  longitude: number;
-};
-
-// Indonesia's rough bounding box
-const INDONESIA_BOUNDS = {
-  north: 6, // Northern limit
-  south: -11, // Southern limit
-  west: 95, // Western limit
-  east: 141, // Eastern limit
-};
+import { INDONESIA_BOUNDS } from '../constants';
+import type { Coordinates } from '../types';
 
 export function isLocationInIndonesia(coordinates: Coordinates): boolean {
   const { latitude, longitude } = coordinates;

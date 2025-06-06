@@ -1,7 +1,5 @@
 // Core imports
-import Env from '@env';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React, {
   Fragment,
@@ -22,49 +20,35 @@ import {
 } from 'react-native';
 
 // Local imports
-import LoadingDots from '@/components/loading-dots';
-import LocationInput from '@/components/location-input';
-import RouteMapPreview from '@/components/route-map-preview';
-import { SafeView } from '@/lib/safe-view';
-import { useLocationStore } from '@/store/use-location-store';
+import {
+  fetchLocationDetail,
+  getCurrentLocation,
+  reverseGeocode,
+  searchLocations,
+} from '@/features/ride-request/api';
+import {
+  LoadingDots,
+  LocationInput,
+  RouteMapPreview,
+} from '@/features/ride-request/components';
+import {
+  DEBUG_MODE,
+  SEARCH_DEBOUNCE_MS,
+} from '@/features/ride-request/constants';
 import type {
   LocationDetail,
-  LocationSuggestion as LocationSuggestionType,
-} from '@/types/location';
-import { isLocationInIndonesia } from '@/utils/location-utils';
-
-// Constants
-const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
-const LOCATION_SEARCH_RADIUS_M = 50000.0;
-const SEARCH_DEBOUNCE_MS = 500;
-const DEBUG_MODE = false;
+  SearchBoxInputMode,
+  SearchLocationsResult,
+} from '@/features/ride-request/types';
+import { isLocationInIndonesia } from '@/features/ride-request/utils';
+import { useLocationStore } from '@/lib/hooks/use-location-store';
+import { SafeView } from '@/lib/safe-view';
 
 // Debug utility
-const debugLog = (message: string, data?: unknown) => {
+const debugLog = (...args: unknown[]) => {
   if (DEBUG_MODE) {
-    if (data) {
-      console.log(`[DEBUG] ${message}:`, data);
-    } else {
-      console.log(`[DEBUG] ${message}`);
-    }
+    console.log(...args);
   }
-};
-
-// Types
-type InputMode = 'highlighted' | 'editing' | false;
-
-type GooglePlaceLocation = {
-  latitude: number;
-  longitude: number;
-};
-
-type GooglePlace = {
-  id: string;
-  displayName: {
-    text: string;
-  };
-  formattedAddress: string;
-  location?: GooglePlaceLocation;
 };
 
 export default function RideRequest() {
@@ -75,9 +59,10 @@ export default function RideRequest() {
   const currentLocationDetailsRef = useRef<LocationDetail | null>(null);
 
   // Input mode states
-  const [pickupInputMode, setPickupInputMode] = useState<InputMode>(false);
+  const [pickupInputMode, setPickupInputMode] =
+    useState<SearchBoxInputMode>(false);
   const [destinationInputMode, setDestinationInputMode] =
-    useState<InputMode>(false);
+    useState<SearchBoxInputMode>(false);
 
   // Location states
   const [pickupLocation, setPickupLocation] = useState<LocationDetail>({
@@ -113,112 +98,19 @@ export default function RideRequest() {
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15)
   );
-  const [suggestions, setSuggestions] = useState<LocationSuggestionType[]>([]);
-
-  // Get location details from Google Places
-  const fetchLocationDetails = async (
-    placeId: string
-  ): Promise<LocationDetail | null> => {
-    try {
-      const url = `https://places.googleapis.com/v1/places/${placeId}`;
-      const response = await fetch(url, {
-        headers: {
-          'X-Goog-Api-Key': GOOGLE_API_KEY,
-          'X-Goog-FieldMask': 'id,displayName,formattedAddress,location',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const place = await response.json();
-
-      if (place) {
-        return {
-          title: place.displayName.text,
-          address: place.formattedAddress,
-          place_id: place.id,
-          coordinates: place.location
-            ? {
-                latitude: place.location.latitude,
-                longitude: place.location.longitude,
-              }
-            : undefined,
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error('Error fetching location details:', error);
-      return null;
-    }
-  };
+  const [suggestions, setSuggestions] = useState<LocationDetail[]>([]);
 
   // Get current location on mount and store details
   useEffect(() => {
     (async () => {
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          debugLog('Permission to access location was denied');
-          return;
-        }
-
-        const location = await Location.getCurrentPositionAsync({});
-        const coords = {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        };
+        const coords = await getCurrentLocation();
+        if (!coords) return;
 
         setCurrentLocation(coords);
+        const locationDetail = await reverseGeocode(coords);
 
-        // Get location details using reverse geocoding
-        try {
-          const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?` +
-              `latlng=${coords.latitude},${coords.longitude}` +
-              `&key=${GOOGLE_API_KEY}`
-          );
-
-          const data = await response.json();
-
-          if (data.results && data.results.length > 0) {
-            const result = data.results[0];
-            const locationDetail = {
-              title: 'Current Location',
-              address: result.formatted_address,
-              place_id: result.place_id,
-              coordinates: coords,
-            };
-            // Store the location details for reuse
-            currentLocationDetailsRef.current = locationDetail;
-            setPickupLocation(locationDetail);
-            setPreviousPickupLocation(locationDetail);
-          } else {
-            // Fallback if no results found
-            const locationDetail = {
-              title: 'Current Location',
-              address: `${coords.latitude.toFixed(
-                6
-              )}, ${coords.longitude.toFixed(6)}`,
-              coordinates: coords,
-            };
-            // Store the location details for reuse
-            currentLocationDetailsRef.current = locationDetail;
-            setPickupLocation(locationDetail);
-            setPreviousPickupLocation(locationDetail);
-          }
-        } catch (error) {
-          debugLog('Error fetching reverse geocoding:', error);
-          // Fallback on error
-          const locationDetail = {
-            title: 'Current Location',
-            address: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(
-              6
-            )}`,
-            coordinates: coords,
-          };
-          // Store the location details for reuse
+        if (locationDetail) {
           currentLocationDetailsRef.current = locationDetail;
           setPickupLocation(locationDetail);
           setPreviousPickupLocation(locationDetail);
@@ -245,7 +137,7 @@ export default function RideRequest() {
   };
 
   // Debounced search function
-  const searchLocations = useCallback(
+  const searchLocationsCallback = useCallback(
     async (searchText: string) => {
       debugLog('Searching for:', searchText);
       debugLog('Current location:', currentLocation);
@@ -261,64 +153,26 @@ export default function RideRequest() {
 
       try {
         setIsLoading(true);
-        const url = `https://places.googleapis.com/v1/places:searchText`;
+        const places = await searchLocations(
+          searchText,
+          currentLocation,
+        );
 
-        debugLog('Fetching suggestions from:', url);
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Goog-Api-Key': GOOGLE_API_KEY,
-            'X-Goog-FieldMask':
-              'places.displayName,places.formattedAddress,places.id,places.location',
-          },
-          body: JSON.stringify({
-            textQuery: searchText,
-            locationBias: {
-              circle: {
-                center: {
-                  latitude: currentLocation.latitude,
-                  longitude: currentLocation.longitude,
-                },
-                radius: LOCATION_SEARCH_RADIUS_M,
-              },
-            },
-            languageCode: 'en',
-            regionCode: 'ID',
-          }),
-        });
+        const apiSuggestions = places.map((place: SearchLocationsResult) => ({
+          title: place.displayName.text,
+          address: place.formattedAddress,
+          type: 'api' as const,
+          place_id: place.id,
+          coordinates: place.location
+            ? {
+                latitude: place.location.latitude,
+                longitude: place.location.longitude,
+              }
+            : undefined,
+        }));
 
-        if (!response.ok) {
-          debugLog('Places API error response:', await response.json());
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        debugLog('Places API response:', data);
-
-        if (data.places) {
-          // Transform Places API suggestions to our format
-          const apiSuggestions: LocationSuggestionType[] = data.places.map(
-            (place: GooglePlace) => ({
-              title: place.displayName.text,
-              address: place.formattedAddress,
-              type: 'api',
-              place_id: place.id,
-              coordinates: place.location
-                ? {
-                    latitude: place.location.latitude,
-                    longitude: place.location.longitude,
-                  }
-                : undefined,
-            })
-          );
-
-          debugLog('Transformed suggestions:', apiSuggestions);
-          setSuggestions(apiSuggestions);
-        } else {
-          debugLog('No places in response');
-          setSuggestions([]);
-        }
+        debugLog('Transformed suggestions:', apiSuggestions);
+        setSuggestions(apiSuggestions);
       } catch (error) {
         debugLog('Error fetching locations:', error);
         setSuggestions([]);
@@ -326,7 +180,7 @@ export default function RideRequest() {
         setIsLoading(false);
       }
     },
-    [currentLocation, sessionToken]
+    [currentLocation]
   );
 
   // Input handlers
@@ -374,13 +228,13 @@ export default function RideRequest() {
     const timer = setTimeout(() => {
       if (pickupInputMode === 'editing') {
         debugLog('Searching for pickup location:', pickupLocation.title);
-        searchLocations(pickupLocation.title);
+        searchLocationsCallback(pickupLocation.title);
       } else if (destinationInputMode === 'editing') {
         debugLog(
           'Searching for destination location:',
           destinationLocation.title
         );
-        searchLocations(destinationLocation.title);
+        searchLocationsCallback(destinationLocation.title);
       }
       setIsTyping(false);
     }, SEARCH_DEBOUNCE_MS);
@@ -394,7 +248,7 @@ export default function RideRequest() {
     destinationLocation.title,
     pickupInputMode,
     destinationInputMode,
-    searchLocations,
+    searchLocationsCallback,
   ]);
 
   // Handle using current location button - now uses stored details
@@ -416,39 +270,25 @@ export default function RideRequest() {
     // Fallback to fetching current location if somehow we don't have stored details
     try {
       setIsLoadingLocation(true);
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.error('Permission to access location was denied');
-        return;
-      }
+      const coords = await getCurrentLocation();
+      if (!coords) return;
 
-      const location = await Location.getCurrentPositionAsync({});
-      const coords = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      };
       setCurrentLocation(coords);
+      const locationDetail = await reverseGeocode(coords);
 
-      // Create a basic location detail
-      const locationDetail = {
-        title: 'Current Location',
-        address: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(
-          6
-        )}`,
-        coordinates: coords,
-      };
+      if (locationDetail) {
+        // Store for future use
+        currentLocationDetailsRef.current = locationDetail;
 
-      // Store for future use
-      currentLocationDetailsRef.current = locationDetail;
-
-      if (pickupInputMode === 'editing') {
-        setPickupLocation(locationDetail);
-        setPreviousPickupLocation(locationDetail);
-        setPickupInputMode(false);
-      } else if (destinationInputMode === 'editing') {
-        setDestinationLocation(locationDetail);
-        setPreviousDestinationLocation(locationDetail);
-        setDestinationInputMode(false);
+        if (pickupInputMode === 'editing') {
+          setPickupLocation(locationDetail);
+          setPreviousPickupLocation(locationDetail);
+          setPickupInputMode(false);
+        } else if (destinationInputMode === 'editing') {
+          setDestinationLocation(locationDetail);
+          setPreviousDestinationLocation(locationDetail);
+          setDestinationInputMode(false);
+        }
       }
     } catch (error) {
       console.error('Error getting location:', error);
@@ -458,14 +298,14 @@ export default function RideRequest() {
   }, [pickupInputMode, destinationInputMode]);
 
   // Handle suggestion selection
-  const handleSuggestionSelect = async (location: LocationSuggestionType) => {
+  const handleSuggestionSelect = async (location: LocationDetail) => {
     let locationDetail: LocationDetail = {
       title: location.title,
       address: location.address,
     };
 
     if (location.place_id) {
-      const details = await fetchLocationDetails(location.place_id);
+      const details = await fetchLocationDetail(location.place_id);
       if (details) {
         locationDetail = details;
       }

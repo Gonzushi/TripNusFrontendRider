@@ -5,9 +5,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 
+import { type LocationDetail } from '@/features/ride-request/types';
+import { useLocationStore } from '@/lib/hooks/use-location-store';
 import { SafeView } from '@/lib/safe-view';
-import { useLocationStore } from '@/store/use-location-store';
-import { type LocationDetail } from '@/types/location';
 
 // Get Google Maps API key from environment variables
 const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;

@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 
-import { PersonalInformationField } from '@/components/personal-information/personal-information-field';
+import { PersonalInformationField } from '@/features/personal-information';
 import { usePersonalInformationForm } from '@/lib/hooks/use-personal-information-form';
 import { SafeView } from '@/lib/safe-view';
 

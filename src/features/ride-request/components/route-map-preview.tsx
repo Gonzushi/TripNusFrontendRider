@@ -3,12 +3,12 @@ import React, { useEffect, useRef } from 'react';
 import { Dimensions, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import type { LocationDetail } from '@/types/location';
+import type { LocationDetail } from '@/features/ride-request/types';
 
-interface RouteMapPreviewProps {
+type RouteMapPreviewProps = {
   pickupLocation: LocationDetail;
   destinationLocation: LocationDetail;
-}
+};
 
 export default function RouteMapPreview({
   pickupLocation,
@@ -69,7 +69,7 @@ export default function RouteMapPreview({
           latitudeDelta: LATITUDE_DELTA,
           longitudeDelta: LONGITUDE_DELTA,
         }}
-        showsUserLocation={false}
+        showsUserLocation={true}
         showsMyLocationButton={false}
         showsCompass={false}
         toolbarEnabled={false}

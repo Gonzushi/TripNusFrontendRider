@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { type LocationDetail } from '@/types/location';
+import { type LocationDetail } from '@/features/ride-request/types';
 
 type LocationStore = {
   selectedMapLocation: {
