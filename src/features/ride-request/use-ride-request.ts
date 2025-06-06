@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import {
   type LocationStore,
   useLocationStore,
-} from '@/lib/hooks/use-location-store';
+} from '@/features/ride-request/hooks/use-location-store';
 
 import {
   type Coordinates,

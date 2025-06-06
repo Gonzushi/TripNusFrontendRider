@@ -1,12 +1,12 @@
 import { Fragment } from 'react';
 import { Text, View } from 'react-native';
 
+import { type SelectedMapLocation } from '@/features/ride-request/hooks/use-location-store';
 import type {
   Coordinates,
   LocationDetail,
   SearchBoxInputMode,
 } from '@/features/ride-request/types';
-import { type SelectedMapLocation } from '@/lib/hooks/use-location-store';
 
 type DebugInfoProps = {
   pickupInputMode: SearchBoxInputMode;
