@@ -192,7 +192,7 @@ export default function Profile() {
       Alert.alert('Kesalahan', 'Tidak terautentikasi');
       return;
     }
-
+    
     setUploading(true);
     try {
       const result = await updateProfilePicture(

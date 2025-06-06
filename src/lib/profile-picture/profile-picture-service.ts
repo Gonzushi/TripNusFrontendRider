@@ -128,7 +128,7 @@ export const updateProfilePicture = async (
         'Maaf, kami membutuhkan izin akses galeri untuk memperbarui foto profil Anda.'
       );
     }
-
+    
     // Pick image
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: 'images',

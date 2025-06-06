@@ -1,5 +1,5 @@
-import { INDONESIA_BOUNDS } from '../constants';
-import type { Coordinates } from '../types';
+import { INDONESIA_BOUNDS } from './constants';
+import type { Coordinates } from './types';
 
 export function isLocationInIndonesia(coordinates: Coordinates): boolean {
   const { latitude, longitude } = coordinates;

@@ -11,9 +11,4 @@ export const TAB_CONFIG: TabConfig = {
     icon: 'time',
     path: '/activity',
   },
-  chat: {
-    name: 'Chat',
-    icon: 'chatbubbles',
-    path: '/chat',
-  },
 };

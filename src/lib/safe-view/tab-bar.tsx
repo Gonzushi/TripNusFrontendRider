@@ -6,7 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TAB_CONFIG } from './constants';
 
-type TabPath = (typeof TAB_CONFIG)[keyof typeof TAB_CONFIG]['path'];
+// Explicitly type the paths we support
+type TabPath = '/' | '/activity';
 
 function useTabAnimation() {
   const animatedValues = React.useRef(

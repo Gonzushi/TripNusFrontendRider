@@ -1,9 +1,7 @@
 // Core imports
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useCallback, useEffect } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Keyboard,
   ScrollView,
@@ -13,7 +11,6 @@ import {
   View,
 } from 'react-native';
 
-// Local imports
 import {
   fetchLocationDetail,
   getCurrentLocation,
@@ -21,70 +18,52 @@ import {
   searchLocations,
 } from '@/features/ride-request/api';
 import {
-  LoadingDots,
-  LocationInput,
+  RenderCurrentLocationButton,
+  RenderDebugInfo,
+  RenderEmptyState,
+  RenderHeader,
+  RenderNavigationHeader,
+  RenderSuggestions,
   RouteMapPreview,
 } from '@/features/ride-request/components';
-import renderDebugInfo from '@/features/ride-request/components/debug-info';
 import { SEARCH_DEBOUNCE_MS } from '@/features/ride-request/constants';
-import type {
-  Coordinates,
-  LocationDetail,
-  SearchBoxInputMode,
-} from '@/features/ride-request/types';
+import type { LocationDetail } from '@/features/ride-request/types';
+import { useRideRequest } from '@/features/ride-request/use-ride-request';
 import { isLocationInIndonesia } from '@/features/ride-request/utils';
-import { useLocationStore } from '@/lib/hooks/use-location-store';
 import { SafeView } from '@/lib/safe-view';
 
-const DEBUG_MODE = false;
+const DEBUG_MODE = true;
 
 export default function RideRequest() {
-  const router = useRouter();
-  const { selectedMapLocation, clearSelectedMapLocation } = useLocationStore();
-
-  // Store current location details for reuse
-  const currentLocationDetailsRef = useRef<LocationDetail | null>(null);
-
-  // Input mode states
-  const [pickupInputMode, setPickupInputMode] =
-    useState<SearchBoxInputMode>(false);
-  const [destinationInputMode, setDestinationInputMode] =
-    useState<SearchBoxInputMode>(false);
-
-  // Location states
-  const [pickupLocation, setPickupLocation] = useState<LocationDetail>({
-    title: 'Current Location',
-    address: 'Getting your location...',
-  });
-
-  const [previousPickupLocation, setPreviousPickupLocation] =
-    useState<LocationDetail>(pickupLocation);
-  const [destinationLocation, setDestinationLocation] =
-    useState<LocationDetail>({
-      title: '',
-      address: '',
-    });
-  const [previousDestinationLocation, setPreviousDestinationLocation] =
-    useState<LocationDetail>({
-      title: '',
-      address: '',
-    });
-  const [currentLocation, setCurrentLocation] = useState<Coordinates | null>(
-    null
-  );
-
-  // Loading states
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Search states
-  const [sessionToken] = useState(
-    () =>
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15)
-  );
-  const [suggestions, setSuggestions] = useState<LocationDetail[]>([]);
+  const {
+    router,
+    selectedMapLocation,
+    clearSelectedMapLocation,
+    currentLocationDetailsRef,
+    pickupInputMode,
+    destinationInputMode,
+    pickupLocation,
+    previousPickupLocation,
+    destinationLocation,
+    previousDestinationLocation,
+    currentLocation,
+    isLoadingLocation,
+    isTyping,
+    isLoading,
+    sessionToken,
+    suggestions,
+    setPickupInputMode,
+    setDestinationInputMode,
+    setPickupLocation,
+    setPreviousPickupLocation,
+    setDestinationLocation,
+    setPreviousDestinationLocation,
+    setCurrentLocation,
+    setIsLoadingLocation,
+    setIsTyping,
+    setIsLoading,
+    setSuggestions,
+  } = useRideRequest();
 
   // Get current location on mount and store details
   useEffect(() => {
@@ -94,13 +73,13 @@ export default function RideRequest() {
         if (!coords) return;
 
         setCurrentLocation(coords);
-        const locationDetail = await reverseGeocode(coords);
+        // const locationDetail = await reverseGeocode(coords);
 
-        if (locationDetail) {
-          currentLocationDetailsRef.current = locationDetail;
-          setPickupLocation(locationDetail);
-          setPreviousPickupLocation(locationDetail);
-        }
+        // if (locationDetail) {
+        //   currentLocationDetailsRef.current = locationDetail;
+        //   setPickupLocation(locationDetail);
+        //   setPreviousPickupLocation(locationDetail);
+        // }
       } catch (error) {
         console.error('Error getting location:', error);
       } finally {
@@ -360,228 +339,24 @@ export default function RideRequest() {
     }
   };
 
-  // Render Components
-  const renderNavigationHeader = () => (
-    <View className="flex-row items-center justify-between bg-white px-4 py-3">
-      <TouchableOpacity onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="black" />
-      </TouchableOpacity>
-      <Text className="text-lg font-semibold text-black">Request a Ride</Text>
-      <View style={{ width: 24 }} />
-    </View>
-  );
-
-  const renderHeader = () => (
-    <View
-      className={`bg-white ${
-        !pickupInputMode && !destinationInputMode
-          ? 'border-b border-gray-200'
-          : ''
-      }`}
-    >
-      <View className="p-3">
-        {/* Search Card */}
-        <View className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-          <View className="flex-row items-start">
-            <View className="">
-              <View className="items-center space-y-1 py-4">
-                <View className="h-3 w-3 self-center rounded-full bg-blue-600" />
-                <View className="h-14 w-0.5 bg-gray-300" />
-                <View className="h-3 w-3 self-center rounded-full bg-red-600" />
-              </View>
-            </View>
-
-            <View className="ml-4 flex-1">
-              <View className="flex-row items-start">
-                <View className="flex-1">
-                  <LocationInput
-                    label=""
-                    value={
-                      isLoadingLocation
-                        ? 'Getting your location...'
-                        : pickupLocation.title
-                    }
-                    placeholder="Enter pickup point"
-                    isEditing={pickupInputMode === 'editing'}
-                    isHighlighted={pickupInputMode === 'highlighted'}
-                    onPress={handlePickupPress}
-                    onChangeText={(text) =>
-                      setPickupLocation((prev) => ({ ...prev, title: text }))
-                    }
-                    onClear={() =>
-                      setPickupLocation((prev) => ({ ...prev, title: '' }))
-                    }
-                    isLoading={isLoadingLocation}
-                    customInputStyle={`bg-white rounded-xl py-3 px-4 border-2 ${
-                      pickupInputMode === 'editing'
-                        ? 'border-blue-600'
-                        : pickupInputMode === 'highlighted'
-                          ? 'border-blue-600'
-                          : 'border-gray-200/50'
-                    }`}
-                  />
-                </View>
-                {pickupInputMode === 'highlighted' && (
-                  <TouchableOpacity
-                    onPress={() => handleMapPress('pickup')}
-                    className="ml-2 self-center rounded-xl border border-blue-600 bg-blue-100 p-2 active:bg-blue-100"
-                  >
-                    <MaterialCommunityIcons
-                      name="map-marker"
-                      size={24}
-                      color="#2563EB"
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              <View className="h-3" />
-
-              <View className="flex-row items-start">
-                <View className="flex-1">
-                  <LocationInput
-                    label=""
-                    value={destinationLocation.title}
-                    placeholder="Enter drop-off point"
-                    isEditing={destinationInputMode === 'editing'}
-                    isHighlighted={destinationInputMode === 'highlighted'}
-                    onPress={handleDestinationPress}
-                    onChangeText={(text) =>
-                      setDestinationLocation((prev) => ({
-                        ...prev,
-                        title: text,
-                      }))
-                    }
-                    onClear={() =>
-                      setDestinationLocation((prev) => ({ ...prev, title: '' }))
-                    }
-                    customInputStyle={`bg-white rounded-xl py-3 px-4 border-2 ${
-                      destinationInputMode === 'editing'
-                        ? 'border-red-600'
-                        : destinationInputMode === 'highlighted'
-                          ? 'border-red-600'
-                          : 'border-gray-200/50'
-                    }`}
-                  />
-                </View>
-                {destinationInputMode === 'highlighted' && (
-                  <TouchableOpacity
-                    onPress={() => handleMapPress('destination')}
-                    className="ml-2 self-center rounded-xl border border-red-600 bg-red-100 p-2 active:bg-red-600"
-                  >
-                    <MaterialCommunityIcons
-                      name="map-marker"
-                      size={24}
-                      color="#dc2626"
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderCurrentLocationButton = () => (
-    <TouchableOpacity
-      onPress={handleUseCurrentLocation}
-      disabled={isLoadingLocation}
-      className="flex-row items-center bg-white px-4 py-3 active:bg-gray-50"
-    >
-      <View className="rounded-full bg-blue-50 p-2">
-        <MaterialCommunityIcons
-          name="crosshairs-gps"
-          size={24}
-          color="#3B82F6"
-        />
-      </View>
-      <View className="ml-3 flex-1">
-        <Text className="font-medium text-gray-900">Use current location</Text>
-        <Text className="text-sm text-gray-500">
-          {isLoadingLocation
-            ? 'Getting your location...'
-            : 'Quick select your current position'}
-        </Text>
-      </View>
-      {isLoadingLocation && <ActivityIndicator size="small" color="#3B82F6" />}
-    </TouchableOpacity>
-  );
-
-  const renderSuggestions = () => (
-    <View className="mt-2 bg-white">
-      <View className="border-b border-gray-100 px-4 py-3">
-        <Text className="text-sm font-medium text-gray-900">
-          {isTyping || isLoading ? 'Searching...' : 'Suggestions'}
-        </Text>
-      </View>
-
-      {isTyping || isLoading ? (
-        <View className="flex items-center justify-center py-8">
-          <LoadingDots size={8} spacing={4} color="#3B82F6" />
-        </View>
-      ) : suggestions.length > 0 ? (
-        suggestions.map((location, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() => handleSuggestionSelect(location)}
-            className="px-4 py-3 active:bg-gray-50"
-          >
-            <View className="flex-row items-center">
-              <View className="rounded-full bg-gray-100 p-2">
-                <MaterialCommunityIcons
-                  name="map-marker"
-                  size={20}
-                  color="#4B5563"
-                />
-              </View>
-              <View className="ml-3 flex-1">
-                <Text className="font-medium text-gray-900" numberOfLines={1}>
-                  {location.title}
-                </Text>
-                <Text className="text-sm text-gray-500" numberOfLines={2}>
-                  {location.address}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))
-      ) : (
-        <View className="items-center px-4 py-12">
-          <MaterialCommunityIcons name="map-search" size={48} color="#9CA3AF" />
-          <Text className="mt-4 text-center text-gray-400">
-            Type to search for locations
-          </Text>
-        </View>
-      )}
-    </View>
-  );
-
-  const renderEmptyState = () => (
-    <View className="flex-1 items-center justify-center px-6">
-      <MaterialCommunityIcons
-        name="map-marker-path"
-        size={120}
-        color="#3B82F6"
-      />
-      <Text className="mt-6 text-center text-xl font-semibold text-gray-900">
-        Where would you like to go?
-      </Text>
-      <Text className="mt-2 text-center leading-5 text-gray-500">
-        Enter your pickup and destination locations above to get started with
-        your journey
-      </Text>
-    </View>
-  );
-
   // Main Render
   return (
     <SafeView>
       <TouchableWithoutFeedback onPress={handleOutsidePress}>
         <View className="flex-1 bg-gray-100">
-          {renderNavigationHeader()}
-          {renderHeader()}
+          {RenderNavigationHeader({ router })}
+          {RenderHeader({
+            pickupInputMode,
+            destinationInputMode,
+            pickupLocation,
+            destinationLocation,
+            isLoadingLocation,
+            handlePickupPress,
+            handleDestinationPress,
+            handleMapPress,
+            setPickupLocation,
+            setDestinationLocation,
+          })}
 
           {/* Main Content Area */}
           <View className="flex-1">
@@ -602,28 +377,20 @@ export default function RideRequest() {
                 showsVerticalScrollIndicator={false}
               >
                 <View className="border-t border-gray-200 bg-white">
-                  {renderCurrentLocationButton()}
-                  {renderSuggestions()}
-                </View>
-                {DEBUG_MODE &&
-                  renderDebugInfo({
-                    pickupInputMode,
-                    pickupLocation,
-                    previousPickupLocation,
-                    destinationInputMode,
-                    destinationLocation,
-                    previousDestinationLocation,
+                  {RenderCurrentLocationButton({
+                    handleUseCurrentLocation,
                     isLoadingLocation,
+                  })}
+                  {RenderSuggestions({
                     isTyping,
                     isLoading,
-                    currentLocation,
-                    sessionToken,
                     suggestions,
-                    selectedMapLocation,
+                    handleSuggestionSelect,
                   })}
+                </View>
               </ScrollView>
             ) : (
-              renderEmptyState()
+              RenderEmptyState()
             )}
           </View>
 
@@ -673,6 +440,26 @@ export default function RideRequest() {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Debug Info Overlay */}
+          <View className="pointer-events-none absolute left-20 top-0 z-50 max-h-[50%]">
+            {DEBUG_MODE &&
+              RenderDebugInfo({
+                pickupInputMode,
+                pickupLocation,
+                previousPickupLocation,
+                destinationInputMode,
+                destinationLocation,
+                previousDestinationLocation,
+                isLoadingLocation,
+                isTyping,
+                isLoading,
+                currentLocation,
+                sessionToken,
+                suggestions,
+                selectedMapLocation,
+              })}
+          </View>
         </View>
       </TouchableWithoutFeedback>
     </SafeView>
