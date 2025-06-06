@@ -3,7 +3,7 @@ const config = {
   singleQuote: true,
   endOfLine: 'auto',
   trailingComma: 'es5',
-  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  plugins: ['prettier-plugin-tailwindcss'],
   importOrder: ['^react$', '^[a-z]', '^@/', '^[./]'],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,

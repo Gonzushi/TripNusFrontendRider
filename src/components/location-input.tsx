@@ -1,6 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export interface LocationInputProps {
   label: string;
@@ -12,7 +12,7 @@ export interface LocationInputProps {
   onChangeText: (text: string) => void;
   onClear: () => void;
   onSubmitEditing?: () => void;
-  returnKeyType?: "done" | "go" | "next" | "search" | "send";
+  returnKeyType?: 'done' | 'go' | 'next' | 'search' | 'send';
   blurOnSubmit?: boolean;
   isLoading?: boolean;
   customInputStyle?: string;
@@ -36,7 +36,7 @@ export default function LocationInput({
     <View>
       {label && (
         <Text
-          className={customLabelStyle || "text-xs font-medium text-gray-500"}
+          className={customLabelStyle || 'text-xs font-medium text-gray-500'}
         >
           {label}
         </Text>
@@ -47,7 +47,7 @@ export default function LocationInput({
             value={value}
             onChangeText={onChangeText}
             placeholder={placeholder}
-            className={customInputStyle || "bg-gray-100 rounded-lg py-3 px-4"}
+            className={customInputStyle || 'rounded-lg bg-gray-100 px-4 py-3'}
             autoFocus
           />
           {value.length > 0 && (
@@ -64,14 +64,14 @@ export default function LocationInput({
           onPress={onPress}
           className={
             customInputStyle ||
-            `bg-gray-100 rounded-lg py-3 px-4 ${
-              isHighlighted ? "border-2 border-blue-500" : ""
+            `rounded-lg bg-gray-100 px-4 py-3 ${
+              isHighlighted ? 'border-2 border-blue-500' : ''
             }`
           }
         >
           <Text
-            className={`${value ? "text-gray-900" : "text-gray-500"} ${
-              isLoading ? "opacity-50" : ""
+            className={`${value ? 'text-gray-900' : 'text-gray-500'} ${
+              isLoading ? 'opacity-50' : ''
             }`}
             numberOfLines={1}
           >

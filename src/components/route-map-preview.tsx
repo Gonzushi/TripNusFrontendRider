@@ -1,8 +1,9 @@
-import type { LocationDetail } from "@/types/location";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useEffect, useRef } from "react";
-import { Dimensions, View } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useEffect, useRef } from 'react';
+import { Dimensions, View } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+
+import type { LocationDetail } from '@/types/location';
 
 interface RouteMapPreviewProps {
   pickupLocation: LocationDetail;
@@ -14,7 +15,7 @@ export default function RouteMapPreview({
   destinationLocation,
 }: RouteMapPreviewProps) {
   const mapRef = useRef<MapView>(null);
-  const { width, height } = Dimensions.get("window");
+  const { width, height } = Dimensions.get('window');
   const ASPECT_RATIO = width / height;
   const LATITUDE_DELTA = 0.0922;
   const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
@@ -61,7 +62,7 @@ export default function RouteMapPreview({
       <MapView
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: '100%', height: '100%' }}
         initialRegion={{
           latitude: centerLat,
           longitude: centerLng,

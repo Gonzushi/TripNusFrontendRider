@@ -1,5 +1,6 @@
-import * as Notifications from 'expo-notifications';
+import type * as Notifications from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
+
 import {
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,

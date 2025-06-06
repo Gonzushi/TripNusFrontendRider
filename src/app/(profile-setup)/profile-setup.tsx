@@ -1,10 +1,11 @@
-import { AuthContext } from '@/lib/auth';
-import { ApiResponse } from '@/types/api';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { AuthContext } from '@/lib/auth';
+import { type ApiResponse } from '@/types/api';
 
 // Component interfaces
 interface ProfileFormData {
@@ -157,9 +158,9 @@ export default function ProfileSetup() {
         {/* Top Section */}
         <View>
           {/* Logo Section */}
-          <View className="items-center mt-6">
+          <View className="mt-6 items-center">
             <View className="flex-row items-center">
-              <View className="bg-blue-600 w-12 h-12 rounded-xl items-center justify-center mr-2">
+              <View className="mr-2 h-12 w-12 items-center justify-center rounded-xl bg-blue-600">
                 <Ionicons name="car" size={30} color="white" />
               </View>
               <Text className="text-2xl font-bold text-blue-600">TripNus</Text>
@@ -170,29 +171,29 @@ export default function ProfileSetup() {
         {/* Main Content - Centered */}
         <View className="px-6">
           {/* Header */}
-          <View className="items-center mb-8">
-            <View className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center mb-4">
+          <View className="mb-8 items-center">
+            <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-blue-100">
               <Ionicons name="person" size={32} color="#2563EB" />
             </View>
-            <Text className="text-2xl font-bold text-gray-900 mb-2">
+            <Text className="mb-2 text-2xl font-bold text-gray-900">
               Complete Your Profile
             </Text>
-            <Text className="text-base text-gray-600 text-center">
+            <Text className="text-center text-base text-gray-600">
               Please provide your name to continue using TripNus
             </Text>
           </View>
 
           {/* Form */}
-          <View className="space-y-4 mx-2">
+          <View className="mx-2 space-y-4">
             {/* First Name Input */}
             <View className="mb-4">
-              <Text className="text-sm text-gray-700 mb-1.5">First Name *</Text>
-              <View className="flex-row items-center bg-gray-50 rounded-xl border border-gray-200">
+              <Text className="mb-1.5 text-sm text-gray-700">First Name *</Text>
+              <View className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50">
                 <View className="pl-4 pr-2">
                   <Ionicons name="person" size={20} color="#6B7280" />
                 </View>
                 <TextInput
-                  className="flex-1 py-3 px-2"
+                  className="flex-1 px-2 py-3"
                   placeholder="Enter your first name"
                   value={formData.firstName}
                   onChangeText={(text) =>
@@ -207,15 +208,15 @@ export default function ProfileSetup() {
 
             {/* Last Name Input */}
             <View className="mb-4">
-              <Text className="text-sm text-gray-700 mb-1.5">
+              <Text className="mb-1.5 text-sm text-gray-700">
                 Last Name (Optional)
               </Text>
-              <View className="flex-row items-center bg-gray-50 rounded-xl border border-gray-200">
+              <View className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50">
                 <View className="pl-4 pr-2">
                   <Ionicons name="person-outline" size={20} color="#6B7280" />
                 </View>
                 <TextInput
-                  className="flex-1 py-3 px-2"
+                  className="flex-1 px-2 py-3"
                   placeholder="Enter your last name"
                   value={formData.lastName}
                   onChangeText={(text) =>
@@ -230,17 +231,17 @@ export default function ProfileSetup() {
 
             {/* Phone Number Input */}
             <View className="mb-4">
-              <Text className="text-sm text-gray-700 mb-1.5">
+              <Text className="mb-1.5 text-sm text-gray-700">
                 Phone Number *
               </Text>
-              <View className="flex-row items-center bg-gray-50 rounded-xl border border-gray-200">
+              <View className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50">
                 <View className="pl-4 pr-2">
                   <Ionicons name="call" size={20} color="#6B7280" />
                 </View>
-                <View className="flex-row items-center flex-1">
-                  <Text className="text-gray-900 pl-2">+62</Text>
+                <View className="flex-1 flex-row items-center">
+                  <Text className="pl-2 text-gray-900">+62</Text>
                   <TextInput
-                    className="flex-1 py-3 px-2"
+                    className="flex-1 px-2 py-3"
                     placeholder="812XXXXXXXX"
                     value={formData.phoneNumber.replace('+62', '')}
                     onChangeText={(text) => {
@@ -257,18 +258,18 @@ export default function ProfileSetup() {
                   />
                 </View>
               </View>
-              <Text className="text-xs text-gray-500 mt-1">
+              <Text className="mt-1 text-xs text-gray-500">
                 Format: +62812XXXXXXXX
               </Text>
             </View>
           </View>
 
           {/* Buttons */}
-          <View className="mt-8 space-y-4 mx-2">
+          <View className="mx-2 mt-8 space-y-4">
             <TouchableOpacity
               className={`${
                 isLoading ? 'bg-blue-300' : 'bg-blue-600'
-              } py-4 rounded-xl items-center flex-row justify-center mb-4`}
+              } mb-4 flex-row items-center justify-center rounded-xl py-4`}
               onPress={handleSubmit}
               disabled={isLoading}
             >
@@ -278,7 +279,7 @@ export default function ProfileSetup() {
                 color="white"
                 style={{ marginRight: 8 }}
               />
-              <Text className="text-white font-semibold text-base">
+              <Text className="text-base font-semibold text-white">
                 {isLoading ? 'Setting up...' : 'Continue'}
               </Text>
             </TouchableOpacity>
@@ -288,7 +289,7 @@ export default function ProfileSetup() {
         {/* Bottom Section */}
         <View>
           {/* Terms */}
-          <Text className="text-sm text-gray-500 text-center px-6 mb-4">
+          <Text className="mb-4 px-6 text-center text-sm text-gray-500">
             By continuing, you agree to our Terms of Service
           </Text>
         </View>

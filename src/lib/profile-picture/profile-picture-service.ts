@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import path from 'path';
+
 import { SUPABASE_STORAGE_URL } from './constants';
-import { PreparedImage } from './types';
+import { type PreparedImage } from './types';
 import { compressImage, getFileInfo, getStorageKey } from './utils';
 
 // Clears a user's profile picture from storage

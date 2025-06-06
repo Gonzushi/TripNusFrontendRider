@@ -1,5 +1,6 @@
 import { getApp, getApps, initializeApp } from '@react-native-firebase/app';
 import { Platform } from 'react-native';
+
 import firebaseConfig from './firebase-config';
 
 export async function initializeFirebase() {

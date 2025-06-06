@@ -1,8 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-
-import React from 'react';
-
 import { usePathname, useRouter } from 'expo-router';
+import React from 'react';
 import { Animated, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -47,7 +45,7 @@ export function TabBar() {
 
   return (
     <View
-      className="flex-row items-center justify-around bg-white border-t border-gray-100"
+      className="flex-row items-center justify-around border-t border-gray-100 bg-white"
       style={{
         paddingBottom: insets.bottom,
         shadowColor: '#000',
@@ -87,8 +85,8 @@ export function TabBar() {
               />
             </Animated.View>
             <Text
-              className={`text-xs mt-1 ${
-                isActive ? 'text-blue-600 font-medium' : 'text-gray-500'
+              className={`mt-1 text-xs ${
+                isActive ? 'font-medium text-blue-600' : 'text-gray-500'
               }`}
             >
               {item.name}

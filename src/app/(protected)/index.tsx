@@ -1,8 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-
-import { useCallback, useContext, useEffect, useState } from 'react';
-
 import { useRouter } from 'expo-router';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -95,29 +93,29 @@ export default function Index() {
     <SafeView isShowingTabBar={true}>
       <ScrollView className="flex-1 bg-white">
         {/* Header Section */}
-        <View className="px-4 pt-6 pb-4">
+        <View className="px-4 pb-4 pt-6">
           <View className="flex-row items-center justify-between">
-            <View className="flex-1 mr-4">
+            <View className="mr-4 flex-1">
               <View className="flex-row items-baseline">
                 <Text className="text-3xl text-gray-600">Hi, </Text>
                 <Text className="text-3xl font-bold text-blue-600">
                   {authData?.firstName || 'Hendry'}
                 </Text>
               </View>
-              <Text className="text-lg text-gray-600 mt-2 leading-6">
+              <Text className="mt-2 text-lg leading-6 text-gray-600">
                 Ready for your next adventure?
               </Text>
             </View>
             <TouchableOpacity
               onPress={handleProfilePress}
-              className="w-20 h-20 items-center justify-center"
+              className="h-20 w-20 items-center justify-center"
             >
-              <View className="absolute w-[72px] h-[72px] rounded-full border-2 border-blue-500" />
-              <View className="w-16 h-16 bg-gray-200 rounded-full items-center justify-center overflow-hidden">
+              <View className="absolute h-[72px] w-[72px] rounded-full border-2 border-blue-500" />
+              <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gray-200">
                 {profilePictureUri ? (
                   <Image
                     source={{ uri: profilePictureUri }}
-                    className="w-full h-full"
+                    className="h-full w-full"
                     resizeMode="cover"
                   />
                 ) : (
@@ -156,13 +154,13 @@ export default function Index() {
         </View> */}
 
         {/* Search Input */}
-        <View className="px-4 mt-2">
+        <View className="mt-2 px-4">
           <TouchableOpacity
             onPress={handleSearchPress}
-            className="bg-gray-50 rounded-xl p-4 flex-row items-center border border-gray-200 active:bg-gray-100"
+            className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50 p-4 active:bg-gray-100"
           >
             <Ionicons name="location" size={20} color="#6B7280" />
-            <Text className="flex-1 ml-3 text-gray-500">
+            <Text className="ml-3 flex-1 text-gray-500">
               Enter your destination
             </Text>
             <Ionicons name="search" size={20} color="#6B7280" />
@@ -170,55 +168,55 @@ export default function Index() {
         </View>
 
         {/* Start Trip Button */}
-        <View className="px-4 mt-4">
+        <View className="mt-4 px-4">
           <TouchableOpacity
             onPress={handleSearchPress}
-            className="bg-blue-600 rounded-xl py-4 flex-row items-center justify-center"
+            className="flex-row items-center justify-center rounded-xl bg-blue-600 py-4"
           >
             <Ionicons name="car" size={20} color="white" className="mr-2" />
-            <Text className="text-white font-semibold text-base ml-2">
+            <Text className="ml-2 text-base font-semibold text-white">
               Start Trip
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Tagline */}
-        <View className="px-4 mt-4">
+        <View className="mt-4 px-4">
           <Text className="text-center text-gray-500">
             TripNus — Fast, safe, and reliable rides
           </Text>
         </View>
 
         {/* Divider */}
-        <View className="mt-8 mb-6 px-4">
+        <View className="mb-6 mt-8 px-4">
           <View className="h-[1px] bg-gray-300" />
         </View>
 
         {/* Community Support Section */}
         <View className="px-4">
-          <View className="bg-blue-50/50 rounded-xl p-5 border border-blue-100/50">
+          <View className="rounded-xl border border-blue-100/50 bg-blue-50/50 p-5">
             <View className="flex-row items-start">
               <View className="flex-1">
-                <Text className="text-base font-medium text-gray-800 mb-1">
+                <Text className="mb-1 text-base font-medium text-gray-800">
                   Support Local Innovation
                 </Text>
-                <Text className="text-sm text-gray-600 leading-5">
+                <Text className="text-sm leading-5 text-gray-600">
                   Help us grow this local ride-sharing community. Share TripNus
                   with your friends and be part of Indonesia's transportation
                   future.
                 </Text>
                 <TouchableOpacity
                   onPress={handleInvite}
-                  className="flex-row items-center mt-4"
+                  className="mt-4 flex-row items-center"
                 >
-                  <Text className="text-blue-600 font-medium mr-1">
+                  <Text className="mr-1 font-medium text-blue-600">
                     Share TripNus
                   </Text>
                   <Ionicons name="arrow-forward" size={16} color="#2563EB" />
                 </TouchableOpacity>
               </View>
               <View className="ml-4">
-                <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
+                <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                   <Ionicons name="share-social" size={20} color="#3B82F6" />
                 </View>
               </View>

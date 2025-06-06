@@ -1,7 +1,8 @@
-import { SafeView } from '@/lib/safe-view';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+
+import { SafeView } from '@/lib/safe-view';
 
 export default function Activity() {
   const [activeTab, setActiveTab] = useState<'all' | 'completed' | 'cancelled'>(
@@ -17,21 +18,21 @@ export default function Activity() {
     >
       <View className="flex-1 bg-white">
         {/* Enhanced Header */}
-        <View className="bg-blue-600 px-4 pt-6 pb-12">
+        <View className="bg-blue-600 px-4 pb-12 pt-6">
           <View className="items-center">
-            <Text className="text-white text-2xl font-bold mb-1">
+            <Text className="mb-1 text-2xl font-bold text-white">
               Trip History
             </Text>
-            <Text className="text-white/80 text-sm">
+            <Text className="text-sm text-white/80">
               View all your past rides and their details
             </Text>
           </View>
         </View>
 
         {/* Tabs */}
-        <View className="flex-row px-4 py-5 bg-white border-b border-gray-100 -mt-6 rounded-t-3xl">
+        <View className="-mt-6 flex-row rounded-t-3xl border-b border-gray-100 bg-white px-4 py-5">
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full ${
+            className={`rounded-full px-4 py-2 ${
               activeTab === 'all' ? 'bg-blue-600' : 'bg-gray-100'
             }`}
             onPress={() => setActiveTab('all')}
@@ -45,7 +46,7 @@ export default function Activity() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full ml-2 ${
+            className={`ml-2 rounded-full px-4 py-2 ${
               activeTab === 'completed' ? 'bg-blue-600' : 'bg-gray-100'
             }`}
             onPress={() => setActiveTab('completed')}
@@ -59,7 +60,7 @@ export default function Activity() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full ml-2 ${
+            className={`ml-2 rounded-full px-4 py-2 ${
               activeTab === 'cancelled' ? 'bg-blue-600' : 'bg-gray-100'
             }`}
             onPress={() => setActiveTab('cancelled')}
@@ -75,13 +76,13 @@ export default function Activity() {
         </View>
 
         <ScrollView className="flex-1 bg-gray-50">
-          <View className="p-4 space-y-6">
+          <View className="space-y-6 p-4">
             {/* Trip Card */}
-            <TouchableOpacity className="bg-white rounded-lg p-5 shadow-sm my-2">
-              <View className="flex-row justify-between items-start mb-4">
+            <TouchableOpacity className="my-2 rounded-lg bg-white p-5 shadow-sm">
+              <View className="mb-4 flex-row items-start justify-between">
                 <View className="flex-row items-center">
-                  <View className="h-2 w-2 rounded-full bg-green-500 mr-2" />
-                  <Text className="text-green-500 font-medium">Completed</Text>
+                  <View className="mr-2 h-2 w-2 rounded-full bg-green-500" />
+                  <Text className="font-medium text-green-500">Completed</Text>
                 </View>
                 <View className="items-end">
                   <Text className="text-xl font-bold">$24.50</Text>
@@ -92,40 +93,40 @@ export default function Activity() {
 
               <View className="space-y-4">
                 <View className="flex-row items-start">
-                  <View className="w-6 items-center mt-1">
+                  <View className="mt-1 w-6 items-center">
                     <View className="h-3 w-3 rounded-full bg-blue-500" />
                   </View>
                   <View className="ml-2 flex-1">
-                    <Text className="text-gray-900 font-medium mb-1">
+                    <Text className="mb-1 font-medium text-gray-900">
                       Downtown Mall
                     </Text>
-                    <Text className="text-sm text-gray-500 leading-5">
+                    <Text className="text-sm leading-5 text-gray-500">
                       123 Main Street, City Center
                     </Text>
                   </View>
                 </View>
 
                 <View className="flex-row items-start">
-                  <View className="w-6 items-center mt-1">
+                  <View className="mt-1 w-6 items-center">
                     <View className="h-3 w-3 rounded-full bg-red-500" />
                   </View>
                   <View className="ml-2 flex-1">
-                    <Text className="text-gray-900 font-medium mb-1">
+                    <Text className="mb-1 font-medium text-gray-900">
                       Airport Terminal
                     </Text>
-                    <Text className="text-sm text-gray-500 leading-5">
+                    <Text className="text-sm leading-5 text-gray-500">
                       456 Airport Blvd, Terminal 2
                     </Text>
                   </View>
                 </View>
               </View>
 
-              <View className="flex-row items-center mt-4 pt-4 border-t border-gray-100">
+              <View className="mt-4 flex-row items-center border-t border-gray-100 pt-4">
                 <Ionicons name="car-outline" size={20} color="#6B7280" />
-                <Text className="text-gray-500 ml-2">Standard Ride</Text>
+                <Text className="ml-2 text-gray-500">Standard Ride</Text>
                 <View className="flex-1 items-end">
                   <View className="flex-row items-center">
-                    <Text className="text-yellow-500 mr-1">5.0</Text>
+                    <Text className="mr-1 text-yellow-500">5.0</Text>
                     <View className="flex-row">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Ionicons
@@ -142,11 +143,11 @@ export default function Activity() {
             </TouchableOpacity>
 
             {/* Cancelled Trip Card Example */}
-            <TouchableOpacity className="bg-white rounded-lg p-5 shadow-sm my-2">
-              <View className="flex-row justify-between items-start mb-4">
+            <TouchableOpacity className="my-2 rounded-lg bg-white p-5 shadow-sm">
+              <View className="mb-4 flex-row items-start justify-between">
                 <View className="flex-row items-center">
-                  <View className="h-2 w-2 rounded-full bg-red-500 mr-2" />
-                  <Text className="text-red-500 font-medium">Cancelled</Text>
+                  <View className="mr-2 h-2 w-2 rounded-full bg-red-500" />
+                  <Text className="font-medium text-red-500">Cancelled</Text>
                 </View>
                 <View className="items-end">
                   <Text className="text-xl font-bold text-gray-400">$0.00</Text>
@@ -157,37 +158,37 @@ export default function Activity() {
 
               <View className="space-y-4">
                 <View className="flex-row items-start">
-                  <View className="w-6 items-center mt-1">
+                  <View className="mt-1 w-6 items-center">
                     <View className="h-3 w-3 rounded-full bg-blue-500" />
                   </View>
                   <View className="ml-2 flex-1">
-                    <Text className="text-gray-900 font-medium mb-1">
+                    <Text className="mb-1 font-medium text-gray-900">
                       Restaurant Plaza
                     </Text>
-                    <Text className="text-sm text-gray-500 leading-5">
+                    <Text className="text-sm leading-5 text-gray-500">
                       555 Food Court, Shopping Center
                     </Text>
                   </View>
                 </View>
 
                 <View className="flex-row items-start">
-                  <View className="w-6 items-center mt-1">
+                  <View className="mt-1 w-6 items-center">
                     <View className="h-3 w-3 rounded-full bg-gray-400" />
                   </View>
                   <View className="ml-2 flex-1">
-                    <Text className="text-gray-900 font-medium mb-1">
+                    <Text className="mb-1 font-medium text-gray-900">
                       City Park
                     </Text>
-                    <Text className="text-sm text-gray-500 leading-5">
+                    <Text className="text-sm leading-5 text-gray-500">
                       777 Green Street, Park Entrance
                     </Text>
                   </View>
                 </View>
               </View>
 
-              <View className="flex-row items-center mt-4 pt-4 border-t border-gray-100">
+              <View className="mt-4 flex-row items-center border-t border-gray-100 pt-4">
                 <Ionicons name="car-outline" size={20} color="#6B7280" />
-                <Text className="text-gray-500 ml-2">Standard Ride</Text>
+                <Text className="ml-2 text-gray-500">Standard Ride</Text>
                 <View className="flex-1 items-end">
                   <Text className="text-red-500">Cancelled by driver</Text>
                 </View>

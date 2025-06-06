@@ -1,9 +1,10 @@
-import { AuthContext } from '@/lib/auth';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { AuthContext } from '@/lib/auth';
 
 export default function ResendActivation() {
   const { email } = useLocalSearchParams();
@@ -66,9 +67,9 @@ export default function ResendActivation() {
         {/* Top Section */}
         <View>
           {/* Logo Section */}
-          <View className="items-center mt-6">
+          <View className="mt-6 items-center">
             <View className="flex-row items-center">
-              <View className="bg-blue-600 w-12 h-12 rounded-xl items-center justify-center mr-2">
+              <View className="mr-2 h-12 w-12 items-center justify-center rounded-xl bg-blue-600">
                 <Ionicons name="car" size={30} color="white" />
               </View>
               <Text className="text-2xl font-bold text-blue-600">TripNus</Text>
@@ -79,27 +80,27 @@ export default function ResendActivation() {
         {/* Main Content - Centered */}
         <View className="px-6">
           {/* Header */}
-          <View className="items-center mb-8">
-            <View className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center mb-4">
+          <View className="mb-8 items-center">
+            <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-blue-100">
               <Ionicons name="mail-unread" size={32} color="#2563EB" />
             </View>
-            <Text className="text-2xl font-bold text-gray-900 mb-2">
+            <Text className="mb-2 text-2xl font-bold text-gray-900">
               Activate Your Account
             </Text>
-            <Text className="text-base text-gray-600 text-center">
+            <Text className="text-center text-base text-gray-600">
               Your email {email} needs to be verified. Click the button below to
               send an activation link to your email.
             </Text>
           </View>
 
           {/* Buttons */}
-          <View className="mt-8 space-y-4 mx-2">
+          <View className="mx-2 mt-8 space-y-4">
             <TouchableOpacity
               className={`${
                 countdown > 0 || attempts >= maxAttempts || isLoading
                   ? 'bg-gray-300'
                   : 'bg-blue-600'
-              } py-4 rounded-xl items-center flex-row justify-center mb-4`}
+              } mb-4 flex-row items-center justify-center rounded-xl py-4`}
               onPress={handleResend}
               disabled={countdown > 0 || attempts >= maxAttempts || isLoading}
             >
@@ -109,7 +110,7 @@ export default function ResendActivation() {
                 color="white"
                 style={{ marginRight: 8 }}
               />
-              <Text className="text-white font-semibold text-base">
+              <Text className="text-base font-semibold text-white">
                 {isLoading
                   ? 'Sending...'
                   : countdown > 0
@@ -120,22 +121,22 @@ export default function ResendActivation() {
               </Text>
             </TouchableOpacity>
 
-            <Text className="text-sm text-gray-500 text-center mt-4">
+            <Text className="mt-4 text-center text-sm text-gray-500">
               {maxAttempts - attempts} attempts remaining
             </Text>
 
-            <View className="flex-row items-center justify-center my-4">
-              <View className="flex-1 h-[1px] bg-gray-200" />
+            <View className="my-4 flex-row items-center justify-center">
+              <View className="h-[1px] flex-1 bg-gray-200" />
               <Text className="mx-4 text-gray-500">or</Text>
-              <View className="flex-1 h-[1px] bg-gray-200" />
+              <View className="h-[1px] flex-1 bg-gray-200" />
             </View>
 
             <TouchableOpacity
-              className="py-4 rounded-xl items-center"
+              className="items-center rounded-xl py-4"
               onPress={() => router.back()}
               disabled={isLoading}
             >
-              <Text className="text-blue-600 font-semibold text-base">
+              <Text className="text-base font-semibold text-blue-600">
                 Back to Login
               </Text>
             </TouchableOpacity>
@@ -145,7 +146,7 @@ export default function ResendActivation() {
         {/* Bottom Section */}
         <View>
           {/* Terms */}
-          <Text className="text-sm text-gray-500 text-center px-6 mb-4">
+          <Text className="mb-4 px-6 text-center text-sm text-gray-500">
             By continuing, you agree to our Terms of Service
           </Text>
         </View>

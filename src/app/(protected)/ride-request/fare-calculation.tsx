@@ -1,9 +1,7 @@
 import Env from '@env';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-
-import React, { useContext, useEffect, useRef, useState } from 'react';
-
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,11 +10,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthContext } from '@/lib/auth';
-import { FareResponse, Location, RouteDetails } from '@/types/fare';
+import {
+  type FareResponse,
+  type Location,
+  type RouteDetails,
+} from '@/types/fare';
 
 // Constants
 const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
@@ -114,26 +116,26 @@ const LocationMarker = ({ type, coordinate }: LocationMarkerProps) => (
 );
 
 const AddressCard = ({ pickup, dropoff, onBack }: AddressCardProps) => (
-  <View className="absolute top-20 left-4 right-4 z-10">
+  <View className="absolute left-4 right-4 top-20 z-10">
     <View className="flex-row items-center space-x-3">
       <TouchableOpacity
         onPress={onBack}
-        className="bg-white p-2.5 rounded-xl shadow self-start mr-3 my-6"
+        className="my-6 mr-3 self-start rounded-xl bg-white p-2.5 shadow"
       >
         <Ionicons name="arrow-back" size={18} color="#111827" />
       </TouchableOpacity>
 
-      <View className="flex-1 bg-white rounded-xl shadow-lg py-2.5 px-3">
+      <View className="flex-1 rounded-xl bg-white px-3 py-2.5 shadow-lg">
         <View className="flex-row items-center space-x-3">
-          <View className="justify-between mr-4 ml-2" style={{ width: 12 }}>
-            <View className="w-3 h-3 rounded-full bg-blue-600 mx-auto" />
-            <View className="w-[1px] h-6 bg-gray-300 mx-auto" />
-            <View className="w-3 h-3 rounded-full bg-red-600 mx-auto" />
+          <View className="ml-2 mr-4 justify-between" style={{ width: 12 }}>
+            <View className="mx-auto h-3 w-3 rounded-full bg-blue-600" />
+            <View className="mx-auto h-6 w-[1px] bg-gray-300" />
+            <View className="mx-auto h-3 w-3 rounded-full bg-red-600" />
           </View>
           <View className="flex-1 space-y-2 py-2">
             <View className="border-b border-gray-100 pb-2">
               <Text
-                className="text-gray-900 text-sm font-medium"
+                className="text-sm font-medium text-gray-900"
                 numberOfLines={1}
               >
                 {pickup.address}
@@ -141,7 +143,7 @@ const AddressCard = ({ pickup, dropoff, onBack }: AddressCardProps) => (
             </View>
             <View>
               <Text
-                className="text-gray-900 text-sm font-medium pt-2"
+                className="pt-2 text-sm font-medium text-gray-900"
                 numberOfLines={1}
               >
                 {dropoff.address}
@@ -170,13 +172,13 @@ const VehicleOption = ({
   return (
     <TouchableOpacity
       onPress={onSelect}
-      className={`px-3 py-2.5 mb-2 rounded-xl border ${
+      className={`mb-2 rounded-xl border px-3 py-2.5 ${
         isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white'
       }`}
     >
       <View className="flex-row items-center">
         <View
-          className={`p-1.5 rounded-lg ${
+          className={`rounded-lg p-1.5 ${
             isSelected ? 'bg-blue-100' : 'bg-gray-100'
           }`}
         >
@@ -186,7 +188,7 @@ const VehicleOption = ({
             color={isSelected ? '#3B82F6' : '#4B5563'}
           />
         </View>
-        <View className="flex-row flex-1 items-center justify-between ml-3">
+        <View className="ml-3 flex-1 flex-row items-center justify-between">
           <View>
             <Text className="font-medium text-gray-900">{vehicle.name}</Text>
           </View>
@@ -272,20 +274,20 @@ const decodePolyline = (encoded: string) => {
 };
 
 const NoRouteError = ({ onBack }: { onBack: () => void }) => (
-  <View className="flex-1 bg-gray-100 items-center justify-center px-4">
+  <View className="flex-1 items-center justify-center bg-gray-100 px-4">
     <MaterialCommunityIcons name="map-marker-off" size={48} color="#EF4444" />
-    <Text className="text-gray-900 font-medium text-lg mt-4 text-center">
+    <Text className="mt-4 text-center text-lg font-medium text-gray-900">
       No Route Available
     </Text>
-    <Text className="text-gray-600 text-center mt-2 mb-6">
+    <Text className="mb-6 mt-2 text-center text-gray-600">
       We couldn't find a valid route between these locations. The destination
       might be unreachable or too far.
     </Text>
     <TouchableOpacity
       onPress={onBack}
-      className="bg-blue-600 px-6 py-3 rounded-xl active:bg-blue-600"
+      className="rounded-xl bg-blue-600 px-6 py-3 active:bg-blue-600"
     >
-      <Text className="text-white font-semibold">
+      <Text className="font-semibold text-white">
         Choose Different Location
       </Text>
     </TouchableOpacity>
@@ -596,9 +598,9 @@ export default function FareCalculation() {
                 </MapView>
               </View>
             ) : (
-              <View className="flex-1 bg-white items-center justify-center pt-40">
+              <View className="flex-1 items-center justify-center bg-white pt-40">
                 <ActivityIndicator size="large" color="#3B82F6" />
-                <Text className="text-gray-600 text-center px-4">
+                <Text className="px-4 text-center text-gray-600">
                   Calculating the best route for you...
                 </Text>
               </View>
@@ -608,11 +610,11 @@ export default function FareCalculation() {
           </View>
 
           {/* Details Section */}
-          <View className="flex-1 bg-white rounded-t-xl -mt-1 pt-4 shadow-xl">
+          <View className="-mt-1 flex-1 rounded-t-xl bg-white pt-4 shadow-xl">
             <ScrollView className="flex-1">
               {/* Vehicle Selection */}
               <View className="px-4 py-2">
-                <Text className="text-base font-medium text-gray-900 mb-2">
+                <Text className="mb-2 text-base font-medium text-gray-900">
                   Select Vehicle Type
                 </Text>
                 <View className="space-y-2">
@@ -629,14 +631,14 @@ export default function FareCalculation() {
               </View>
 
               {/* Payment Method */}
-              <View className="px-4 py-2 border-t border-gray-100">
-                <Text className="text-base font-medium text-gray-900 mb-2">
+              <View className="border-t border-gray-100 px-4 py-2">
+                <Text className="mb-2 text-base font-medium text-gray-900">
                   Payment Method
                 </Text>
-                <View className="bg-white px-3 py-2.5 rounded-xl border border-gray-200">
+                <View className="rounded-xl border border-gray-200 bg-white px-3 py-2.5">
                   <View className="flex-row items-center justify-between">
                     <View className="flex-row items-center">
-                      <View className="bg-blue-50 p-1.5 rounded-lg">
+                      <View className="rounded-lg bg-blue-50 p-1.5">
                         <MaterialCommunityIcons
                           name="qrcode-scan"
                           size={20}
@@ -662,7 +664,7 @@ export default function FareCalculation() {
 
             {/* Bottom Bar */}
             <View
-              className="px-4 py-3 bg-white border-t border-gray-200"
+              className="border-t border-gray-200 bg-white px-4 py-3"
               style={{ paddingBottom: insets.bottom + 12 }}
             >
               <View className="flex-row items-center justify-between">
@@ -682,13 +684,13 @@ export default function FareCalculation() {
                 <TouchableOpacity
                   onPress={handleConfirmRide}
                   disabled={!isPolylineDrawn}
-                  className={`px-6 py-3 rounded-xl ${
+                  className={`rounded-xl px-6 py-3 ${
                     isPolylineDrawn
                       ? 'bg-blue-600 active:bg-blue-700'
                       : 'bg-gray-300'
                   }`}
                 >
-                  <Text className="text-white font-semibold">Confirm Ride</Text>
+                  <Text className="font-semibold text-white">Confirm Ride</Text>
                 </TouchableOpacity>
               </View>
             </View>

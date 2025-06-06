@@ -1,7 +1,8 @@
 // Core imports
 import Env from '@env';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-
+import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
 import React, {
   Fragment,
   useCallback,
@@ -9,9 +10,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-
-import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
@@ -24,16 +22,16 @@ import {
 } from 'react-native';
 
 // Local imports
-import LoadingDots from '@/components/LoadingDots';
-import LocationInput from '@/components/LocationInput';
-import RouteMapPreview from '@/components/RouteMapPreview';
+import LoadingDots from '@/components/loading-dots';
+import LocationInput from '@/components/location-input';
+import RouteMapPreview from '@/components/route-map-preview';
 import { SafeView } from '@/lib/safe-view';
-import { useLocationStore } from '@/store/useLocationStore';
+import { useLocationStore } from '@/store/use-location-store';
 import type {
   LocationDetail,
   LocationSuggestion as LocationSuggestionType,
 } from '@/types/location';
-import { isLocationInIndonesia } from '@/utils/locationUtils';
+import { isLocationInIndonesia } from '@/utils/location-utils';
 
 // Constants
 const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
@@ -559,11 +557,11 @@ export default function RideRequest() {
 
   // Render Components
   const renderNavigationHeader = () => (
-    <View className="flex-row items-center justify-between px-4 py-3 bg-white">
+    <View className="flex-row items-center justify-between bg-white px-4 py-3">
       <TouchableOpacity onPress={() => router.back()}>
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
-      <Text className="text-black text-lg font-semibold">Request a Ride</Text>
+      <Text className="text-lg font-semibold text-black">Request a Ride</Text>
       <View style={{ width: 24 }} />
     </View>
   );
@@ -578,17 +576,17 @@ export default function RideRequest() {
     >
       <View className="p-3">
         {/* Search Card */}
-        <View className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-          <View className="flex-row items-start ">
+        <View className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+          <View className="flex-row items-start">
             <View className="">
               <View className="items-center space-y-1 py-4">
-                <View className="w-3 h-3 rounded-full bg-blue-600 self-center" />
-                <View className="w-0.5 h-14 bg-gray-300" />
-                <View className="w-3 h-3 rounded-full bg-red-600 self-center" />
+                <View className="h-3 w-3 self-center rounded-full bg-blue-600" />
+                <View className="h-14 w-0.5 bg-gray-300" />
+                <View className="h-3 w-3 self-center rounded-full bg-red-600" />
               </View>
             </View>
 
-            <View className="flex-1 ml-4">
+            <View className="ml-4 flex-1">
               <View className="flex-row items-start">
                 <View className="flex-1">
                   <LocationInput
@@ -621,7 +619,7 @@ export default function RideRequest() {
                 {pickupInputMode === 'highlighted' && (
                   <TouchableOpacity
                     onPress={() => handleMapPress('pickup')}
-                    className="ml-2 bg-blue-100 p-2 rounded-xl active:bg-blue-100 border border-blue-600 self-center"
+                    className="ml-2 self-center rounded-xl border border-blue-600 bg-blue-100 p-2 active:bg-blue-100"
                   >
                     <MaterialCommunityIcons
                       name="map-marker"
@@ -664,7 +662,7 @@ export default function RideRequest() {
                 {destinationInputMode === 'highlighted' && (
                   <TouchableOpacity
                     onPress={() => handleMapPress('destination')}
-                    className="ml-2 bg-red-100 p-2 rounded-xl active:bg-red-600 border border-red-600 self-center"
+                    className="ml-2 self-center rounded-xl border border-red-600 bg-red-100 p-2 active:bg-red-600"
                   >
                     <MaterialCommunityIcons
                       name="map-marker"
@@ -687,7 +685,7 @@ export default function RideRequest() {
       disabled={isLoadingLocation}
       className="flex-row items-center bg-white px-4 py-3 active:bg-gray-50"
     >
-      <View className="bg-blue-50 p-2 rounded-full">
+      <View className="rounded-full bg-blue-50 p-2">
         <MaterialCommunityIcons
           name="crosshairs-gps"
           size={24}
@@ -695,8 +693,8 @@ export default function RideRequest() {
         />
       </View>
       <View className="ml-3 flex-1">
-        <Text className="text-gray-900 font-medium">Use current location</Text>
-        <Text className="text-gray-500 text-sm">
+        <Text className="font-medium text-gray-900">Use current location</Text>
+        <Text className="text-sm text-gray-500">
           {isLoadingLocation
             ? 'Getting your location...'
             : 'Quick select your current position'}
@@ -707,15 +705,15 @@ export default function RideRequest() {
   );
 
   const renderSuggestions = () => (
-    <View className="bg-white mt-2">
-      <View className="px-4 py-3 border-b border-gray-100">
+    <View className="mt-2 bg-white">
+      <View className="border-b border-gray-100 px-4 py-3">
         <Text className="text-sm font-medium text-gray-900">
           {isTyping || isLoading ? 'Searching...' : 'Suggestions'}
         </Text>
       </View>
 
       {isTyping || isLoading ? (
-        <View className="py-8 flex items-center justify-center">
+        <View className="flex items-center justify-center py-8">
           <LoadingDots size={8} spacing={4} color="#3B82F6" />
         </View>
       ) : suggestions.length > 0 ? (
@@ -726,7 +724,7 @@ export default function RideRequest() {
             className="px-4 py-3 active:bg-gray-50"
           >
             <View className="flex-row items-center">
-              <View className="bg-gray-100 p-2 rounded-full">
+              <View className="rounded-full bg-gray-100 p-2">
                 <MaterialCommunityIcons
                   name="map-marker"
                   size={20}
@@ -734,10 +732,10 @@ export default function RideRequest() {
                 />
               </View>
               <View className="ml-3 flex-1">
-                <Text className="text-gray-900 font-medium" numberOfLines={1}>
+                <Text className="font-medium text-gray-900" numberOfLines={1}>
                   {location.title}
                 </Text>
-                <Text className="text-gray-500 text-sm" numberOfLines={2}>
+                <Text className="text-sm text-gray-500" numberOfLines={2}>
                   {location.address}
                 </Text>
               </View>
@@ -745,9 +743,9 @@ export default function RideRequest() {
           </TouchableOpacity>
         ))
       ) : (
-        <View className="py-12 px-4 items-center">
+        <View className="items-center px-4 py-12">
           <MaterialCommunityIcons name="map-search" size={48} color="#9CA3AF" />
-          <Text className="text-gray-400 text-center mt-4">
+          <Text className="mt-4 text-center text-gray-400">
             Type to search for locations
           </Text>
         </View>
@@ -756,43 +754,43 @@ export default function RideRequest() {
   );
 
   const renderDebugInfo = () => (
-    <View className="mt-4 mx-4 p-4 bg-black/90 rounded-lg mb-8">
-      <Text className="text-white font-mono text-base font-bold mb-4">
+    <View className="mx-4 mb-8 mt-4 rounded-lg bg-black/90 p-4">
+      <Text className="mb-4 font-mono text-base font-bold text-white">
         Debug Info
       </Text>
 
-      <View className="border-b border-white/20 pb-3 mb-3">
-        <Text className="text-white font-mono text-sm font-semibold mb-2">
+      <View className="mb-3 border-b border-white/20 pb-3">
+        <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Input States
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • pickupInputMode: {String(pickupInputMode)}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • destinationInputMode: {String(destinationInputMode)}
         </Text>
       </View>
 
-      <View className="border-b border-white/20 pb-3 mb-3">
-        <Text className="text-white font-mono text-sm font-semibold mb-2">
+      <View className="mb-3 border-b border-white/20 pb-3">
+        <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Loading States
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • isLoadingLocation: {String(isLoadingLocation)}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • isTyping: {String(isTyping)}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • isLoading: {String(isLoading)}
         </Text>
       </View>
 
-      <View className="border-b border-white/20 pb-3 mb-3">
-        <Text className="text-white font-mono text-sm font-semibold mb-2">
+      <View className="mb-3 border-b border-white/20 pb-3">
+        <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Current Location
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • coordinates:{' '}
           {currentLocation
             ? `${currentLocation.latitude.toFixed(
@@ -802,20 +800,20 @@ export default function RideRequest() {
         </Text>
       </View>
 
-      <View className="border-b border-white/20 pb-3 mb-3">
-        <Text className="text-white font-mono text-sm font-semibold mb-2">
+      <View className="mb-3 border-b border-white/20 pb-3">
+        <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Pickup Location
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • title: {pickupLocation.title || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • address: {pickupLocation.address || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • place_id: {pickupLocation.place_id || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • coordinates:{' '}
           {pickupLocation.coordinates
             ? `${pickupLocation.coordinates.latitude.toFixed(
@@ -825,20 +823,20 @@ export default function RideRequest() {
         </Text>
       </View>
 
-      <View className="border-b border-white/20 pb-3 mb-3">
-        <Text className="text-white font-mono text-sm font-semibold mb-2">
+      <View className="mb-3 border-b border-white/20 pb-3">
+        <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Previous Pickup Location
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • title: {previousPickupLocation.title || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • address: {previousPickupLocation.address || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • place_id: {previousPickupLocation.place_id || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • coordinates:{' '}
           {previousPickupLocation.coordinates
             ? `${previousPickupLocation.coordinates.latitude.toFixed(
@@ -848,20 +846,20 @@ export default function RideRequest() {
         </Text>
       </View>
 
-      <View className="border-b border-white/20 pb-3 mb-3">
-        <Text className="text-white font-mono text-sm font-semibold mb-2">
+      <View className="mb-3 border-b border-white/20 pb-3">
+        <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Destination Location
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • title: {destinationLocation.title || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • address: {destinationLocation.address || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • place_id: {destinationLocation.place_id || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • coordinates:{' '}
           {destinationLocation.coordinates
             ? `${destinationLocation.coordinates.latitude.toFixed(
@@ -871,20 +869,20 @@ export default function RideRequest() {
         </Text>
       </View>
 
-      <View className="border-b border-white/20 pb-3 mb-3">
-        <Text className="text-white font-mono text-sm font-semibold mb-2">
+      <View className="mb-3 border-b border-white/20 pb-3">
+        <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Previous Destination Location
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • title: {previousDestinationLocation.title || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • address: {previousDestinationLocation.address || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • place_id: {previousDestinationLocation.place_id || 'null'}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • coordinates:{' '}
           {previousDestinationLocation.coordinates
             ? `${previousDestinationLocation.coordinates.latitude.toFixed(
@@ -896,37 +894,37 @@ export default function RideRequest() {
         </Text>
       </View>
 
-      <View className="border-b border-white/20 pb-3 mb-3">
-        <Text className="text-white font-mono text-sm font-semibold mb-2">
+      <View className="mb-3 border-b border-white/20 pb-3">
+        <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Search
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • sessionToken: {sessionToken}
         </Text>
-        <Text className="text-white/80 font-mono text-xs">
+        <Text className="font-mono text-xs text-white/80">
           • suggestions count: {suggestions.length}
         </Text>
       </View>
 
       <View>
-        <Text className="text-white font-mono text-sm font-semibold mb-2">
+        <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Selected Map Location
         </Text>
         {selectedMapLocation ? (
           <Fragment>
-            <Text className="text-white/80 font-mono text-xs">
+            <Text className="font-mono text-xs text-white/80">
               • type: {selectedMapLocation.type}
             </Text>
-            <Text className="text-white/80 font-mono text-xs">
+            <Text className="font-mono text-xs text-white/80">
               • title: {selectedMapLocation.location.title || 'null'}
             </Text>
-            <Text className="text-white/80 font-mono text-xs">
+            <Text className="font-mono text-xs text-white/80">
               • address: {selectedMapLocation.location.address || 'null'}
             </Text>
-            <Text className="text-white/80 font-mono text-xs">
+            <Text className="font-mono text-xs text-white/80">
               • place_id: {selectedMapLocation.location.place_id || 'null'}
             </Text>
-            <Text className="text-white/80 font-mono text-xs">
+            <Text className="font-mono text-xs text-white/80">
               • coordinates:{' '}
               {selectedMapLocation.location.coordinates
                 ? `${selectedMapLocation.location.coordinates.latitude.toFixed(
@@ -938,7 +936,7 @@ export default function RideRequest() {
             </Text>
           </Fragment>
         ) : (
-          <Text className="text-white/80 font-mono text-xs">• null</Text>
+          <Text className="font-mono text-xs text-white/80">• null</Text>
         )}
       </View>
     </View>
@@ -951,10 +949,10 @@ export default function RideRequest() {
         size={120}
         color="#3B82F6"
       />
-      <Text className="text-xl font-semibold text-gray-900 mt-6 text-center">
+      <Text className="mt-6 text-center text-xl font-semibold text-gray-900">
         Where would you like to go?
       </Text>
-      <Text className="text-gray-500 text-center mt-2 leading-5">
+      <Text className="mt-2 text-center leading-5 text-gray-500">
         Enter your pickup and destination locations above to get started with
         your journey
       </Text>
@@ -987,7 +985,7 @@ export default function RideRequest() {
                 className="flex-1"
                 showsVerticalScrollIndicator={false}
               >
-                <View className="bg-white border-t border-gray-200">
+                <View className="border-t border-gray-200 bg-white">
                   {renderCurrentLocationButton()}
                   {renderSuggestions()}
                 </View>
@@ -1000,11 +998,11 @@ export default function RideRequest() {
 
           {/* Bottom Fixed Section */}
           {!pickupInputMode && !destinationInputMode && (
-            <View className="bg-white px-6 pt-4 pb-8 border-t border-gray-200">
+            <View className="border-t border-gray-200 bg-white px-6 pb-8 pt-4">
               {/* Tip Section */}
-              <View className="flex-row items-center mb-4 mt-2">
+              <View className="mb-4 mt-2 flex-row items-center">
                 <Ionicons name="bulb" size={20} color="#3B82F6" />
-                <Text className="text-blue-600 ml-2 text-sm">
+                <Text className="ml-2 text-sm text-blue-600">
                   Tip: Make sure your pickup point is accurate for faster
                   pickup!
                 </Text>
@@ -1017,7 +1015,7 @@ export default function RideRequest() {
                   !pickupLocation.coordinates ||
                   !destinationLocation.coordinates
                 }
-                className={`py-4 rounded-xl flex-row items-center justify-center mb-4 mt-2 ${
+                className={`mb-4 mt-2 flex-row items-center justify-center rounded-xl py-4 ${
                   pickupLocation.coordinates && destinationLocation.coordinates
                     ? 'bg-blue-600 active:bg-blue-700'
                     : 'bg-gray-300'
@@ -1029,15 +1027,15 @@ export default function RideRequest() {
                   color="white"
                   className="mr-2"
                 />
-                <Text className="text-white font-semibold ml-2">
+                <Text className="ml-2 font-semibold text-white">
                   Get Fare Estimate
                 </Text>
               </TouchableOpacity>
 
               {/* Cancel Button */}
               <TouchableOpacity onPress={() => router.back()}>
-                <View className="py-4 border border-gray-200 rounded-xl mb-4">
-                  <Text className="text-gray-600 font-medium text-center">
+                <View className="mb-4 rounded-xl border border-gray-200 py-4">
+                  <Text className="text-center font-medium text-gray-600">
                     Cancel
                   </Text>
                 </View>

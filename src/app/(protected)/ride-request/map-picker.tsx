@@ -1,12 +1,13 @@
-import { SafeView } from '@/lib/safe-view';
-import { useLocationStore } from '@/store/useLocationStore';
-import { LocationDetail } from '@/types/location';
 import Env from '@env';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+
+import { SafeView } from '@/lib/safe-view';
+import { useLocationStore } from '@/store/use-location-store';
+import { type LocationDetail } from '@/types/location';
 
 // Get Google Maps API key from environment variables
 const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
@@ -99,42 +100,42 @@ export default function MapPicker() {
       <View className="flex-1 bg-gray-50">
         {/* Debug Info */}
         {dev && (
-          <View className="absolute top-20 left-4 z-50 bg-black/80 p-4 rounded-lg max-w-[300px]">
-            <Text className="text-white font-mono text-xs mb-2">
+          <View className="absolute left-4 top-20 z-50 max-w-[300px] rounded-lg bg-black/80 p-4">
+            <Text className="mb-2 font-mono text-xs text-white">
               Debug Info:
             </Text>
 
-            <Text className="text-white font-mono text-xs mb-1">States:</Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="mb-1 font-mono text-xs text-white">States:</Text>
+            <Text className="font-mono text-xs text-white">
               • isLoading: {String(isLoading)}
             </Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="font-mono text-xs text-white">
               • isMapMoving: {String(isMapMoving)}
             </Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="font-mono text-xs text-white">
               • isMapReady: {String(isMapReady)}
             </Text>
 
-            <Text className="text-white font-mono text-xs mt-2 mb-1">
+            <Text className="mb-1 mt-2 font-mono text-xs text-white">
               Selected Location:
             </Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="font-mono text-xs text-white">
               • lat: {selectedLocation.latitude.toFixed(6)}
             </Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="font-mono text-xs text-white">
               • lng: {selectedLocation.longitude.toFixed(6)}
             </Text>
 
-            <Text className="text-white font-mono text-xs mt-2 mb-1">
+            <Text className="mb-1 mt-2 font-mono text-xs text-white">
               Location Details:
             </Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="font-mono text-xs text-white">
               • title: {locationDetail?.title || 'null'}
             </Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="font-mono text-xs text-white">
               • address: {locationDetail?.address || 'null'}
             </Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="font-mono text-xs text-white">
               • coordinates:{' '}
               {locationDetail?.coordinates
                 ? `\n  lat: ${locationDetail.coordinates.latitude.toFixed(
@@ -143,29 +144,29 @@ export default function MapPicker() {
                 : 'null'}
             </Text>
 
-            <Text className="text-white font-mono text-xs mt-2 mb-1">
+            <Text className="mb-1 mt-2 font-mono text-xs text-white">
               Route Params:
             </Text>
-            <Text className="text-white font-mono text-xs">• type: {type}</Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="font-mono text-xs text-white">• type: {type}</Text>
+            <Text className="font-mono text-xs text-white">
               • initialLat: {initialLatitude}
             </Text>
-            <Text className="text-white font-mono text-xs">
+            <Text className="font-mono text-xs text-white">
               • initialLng: {initialLongitude}
             </Text>
           </View>
         )}
 
         {/* Header */}
-        <View className="bg-white px-4 py-3 flex-row items-center justify-between border-b border-gray-200">
+        <View className="flex-row items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
           <TouchableOpacity
             onPress={() => router.back()}
-            className="p-2 -ml-2"
+            className="-ml-2 p-2"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <Ionicons name="arrow-back" size={24} color="#111827" />
           </TouchableOpacity>
-          <Text className="text-gray-900 font-semibold text-lg">
+          <Text className="text-lg font-semibold text-gray-900">
             {type === 'pickup'
               ? 'Set Pickup Location'
               : 'Set Drop-off Location'}
@@ -174,7 +175,7 @@ export default function MapPicker() {
         </View>
 
         {/* Map Container */}
-        <View className="flex-1 relative">
+        <View className="relative flex-1">
           <MapView
             ref={mapRef}
             provider={PROVIDER_GOOGLE}
@@ -220,7 +221,7 @@ export default function MapPicker() {
           {/* My Location Button */}
           <TouchableOpacity
             onPress={handleMyLocation}
-            className="absolute right-4 top-4 bg-white rounded-full w-12 h-12 items-center justify-center shadow-xl"
+            className="absolute right-4 top-4 h-12 w-12 items-center justify-center rounded-full bg-white shadow-xl"
             style={{
               shadowColor: '#000',
               shadowOffset: {
@@ -238,34 +239,34 @@ export default function MapPicker() {
 
         {/* Bottom Sheet */}
         <View className="bg-white p-6 shadow-lg">
-          <View className="min-h-[100px] justify-center mb-4">
+          <View className="mb-4 min-h-[100px] justify-center">
             {!isMapReady ? (
               <View className="items-center py-4">
                 <ActivityIndicator size="large" color="#3B82F6" />
-                <Text className="text-gray-500 mt-3 text-base">
+                <Text className="mt-3 text-base text-gray-500">
                   Loading map...
                 </Text>
               </View>
             ) : isLoading || isMapMoving ? (
               <View className="items-center py-4">
                 <ActivityIndicator size="large" color="#3B82F6" />
-                <Text className="text-gray-500 mt-3 text-base">
+                <Text className="mt-3 text-base text-gray-500">
                   Getting location...
                 </Text>
               </View>
             ) : (
               <>
-                <View className="flex-row items-center mb-2">
+                <View className="mb-2 flex-row items-center">
                   <MaterialCommunityIcons
                     name="map-marker"
                     size={24}
                     color={type === 'pickup' ? '#3B82F6' : '#EF4444'}
                   />
-                  <Text className="text-gray-900 font-semibold text-xl flex-1">
+                  <Text className="flex-1 text-xl font-semibold text-gray-900">
                     {' ' + locationDetail?.title || 'Unknown Location'}
                   </Text>
                 </View>
-                <Text className="text-gray-600 text-base mb-2 pl-8">
+                <Text className="mb-2 pl-8 text-base text-gray-600">
                   {locationDetail?.address || 'Address not found'}
                 </Text>
               </>
@@ -276,7 +277,7 @@ export default function MapPicker() {
             disabled={
               !isMapReady || isLoading || isMapMoving || !locationDetail
             }
-            className={`py-5 px-6 rounded-2xl mt-2 mb-8 shadow-sm ${
+            className={`mb-8 mt-2 rounded-2xl px-6 py-5 shadow-sm ${
               !isMapReady || isLoading || isMapMoving || !locationDetail
                 ? 'bg-gray-300'
                 : type === 'pickup'
@@ -284,7 +285,7 @@ export default function MapPicker() {
                   : 'bg-red-600 active:bg-red-700'
             }`}
           >
-            <Text className="text-white font-semibold text-center text-lg">
+            <Text className="text-center text-lg font-semibold text-white">
               {!isMapReady
                 ? 'Loading Map...'
                 : isLoading || isMapMoving

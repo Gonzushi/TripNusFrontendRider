@@ -1,9 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-
-import { useContext, useEffect, useState } from 'react';
-
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -40,7 +38,7 @@ const ProfilePicture = ({
   onUpdate: () => void;
 }) => (
   <View className="relative">
-    <View className="w-28 h-28 rounded-full bg-white/20 items-center justify-center overflow-hidden">
+    <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-white/20">
       {uri ? (
         <Image
           key={imageKey}
@@ -48,7 +46,7 @@ const ProfilePicture = ({
             uri: `${uri}?timestamp=${Date.now()}`,
             cache: 'reload',
           }}
-          className="w-full h-full"
+          className="h-full w-full"
           resizeMode="cover"
         />
       ) : (
@@ -56,7 +54,7 @@ const ProfilePicture = ({
       )}
     </View>
     <TouchableOpacity
-      className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow"
+      className="absolute bottom-0 right-0 rounded-full bg-white p-2 shadow"
       onPress={onUpdate}
       disabled={uploading}
     >
@@ -90,12 +88,12 @@ const MenuItem = ({
   textColor?: string;
 }) => (
   <TouchableOpacity
-    className="flex-row items-center bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100"
+    className="mb-3 flex-row items-center rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
     onPress={onPress}
     disabled={loading}
   >
     <View
-      className={`w-10 h-10 ${bgColor} rounded-full items-center justify-center`}
+      className={`h-10 w-10 ${bgColor} items-center justify-center rounded-full`}
     >
       {loading ? (
         <ActivityIndicator size="small" color={iconColor} />
@@ -103,9 +101,9 @@ const MenuItem = ({
         <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
       )}
     </View>
-    <View className="flex-1 ml-3">
-      <Text className={`${textColor} font-medium text-base`}>{title}</Text>
-      <Text className="text-gray-500 text-sm">{subtitle}</Text>
+    <View className="ml-3 flex-1">
+      <Text className={`${textColor} text-base font-medium`}>{title}</Text>
+      <Text className="text-sm text-gray-500">{subtitle}</Text>
     </View>
     <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
   </TouchableOpacity>
@@ -282,9 +280,9 @@ export default function Profile() {
 
   if (!authState?.authData?.session) {
     return (
-      <View className="flex-1 bg-white items-center justify-center">
+      <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-gray-600 mt-4">Loading...</Text>
+        <Text className="mt-4 text-gray-600">Loading...</Text>
       </View>
     );
   }
@@ -297,37 +295,37 @@ export default function Profile() {
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
-          <Text className="text-white text-lg font-semibold">Profile</Text>
+          <Text className="text-lg font-semibold text-white">Profile</Text>
           <View style={{ width: 24 }} />
         </View>
 
         {/* Profile Header */}
-        <View className="items-center pt-8 pb-10">
+        <View className="items-center pb-10 pt-8">
           <ProfilePicture
             uri={profilePictureUri}
             imageKey={imageKey}
             uploading={uploading}
             onUpdate={handleProfilePictureUpdate}
           />
-          <Text className="text-white text-2xl font-semibold mt-4">
+          <Text className="mt-4 text-2xl font-semibold text-white">
             {authState.authData.firstName} {authState.authData.lastName}
           </Text>
 
           {/* Contact Information */}
-          <View className="mt-3 px-4 w-full">
-            <View className="flex-row flex-wrap justify-center items-center gap-3">
-              <View className="flex-row items-center bg-white/10 rounded-full px-4 py-2 flex-shrink">
+          <View className="mt-3 w-full px-4">
+            <View className="flex-row flex-wrap items-center justify-center gap-3">
+              <View className="flex-shrink flex-row items-center rounded-full bg-white/10 px-4 py-2">
                 <Ionicons name="mail-outline" size={16} color="white" />
                 <Text
-                  className="text-white/90 text-base ml-2 flex-shrink"
+                  className="ml-2 flex-shrink text-base text-white/90"
                   numberOfLines={1}
                 >
                   {authState.authData.user.email}
                 </Text>
               </View>
-              <View className="flex-row items-center bg-white/10 rounded-full px-4 py-2">
+              <View className="flex-row items-center rounded-full bg-white/10 px-4 py-2">
                 <Ionicons name="call-outline" size={16} color="white" />
-                <Text className="text-white/90 text-base ml-2">
+                <Text className="ml-2 text-base text-white/90">
                   +{authState.authData.user.phone}
                 </Text>
               </View>
@@ -336,7 +334,7 @@ export default function Profile() {
         </View>
 
         {/* Menu Options */}
-        <View className="flex-1 bg-white rounded-t-3xl">
+        <View className="flex-1 rounded-t-3xl bg-white">
           <ScrollView className="flex-1 pt-4">
             <View className="px-4">
               <MenuItem

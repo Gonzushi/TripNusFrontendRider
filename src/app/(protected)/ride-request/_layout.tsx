@@ -1,5 +1,5 @@
-import { Stack } from "expo-router";
-import React from "react";
+import { Stack } from 'expo-router';
+import React from 'react';
 
 export default function RideRequestLayout() {
   return (
@@ -22,7 +22,6 @@ export default function RideRequestLayout() {
           headerShown: false,
         }}
       />
-
     </Stack>
   );
 }

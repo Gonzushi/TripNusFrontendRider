@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Animated, View } from "react-native";
+import { useEffect, useRef } from 'react';
+import { Animated, View } from 'react-native';
 
 interface LoadingDotsProps {
   color?: string;
@@ -8,7 +8,7 @@ interface LoadingDotsProps {
 }
 
 export default function LoadingDots({
-  color = "#3B82F6",
+  color = '#3B82F6',
   size = 5,
   spacing = 3,
 }: LoadingDotsProps) {

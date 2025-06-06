@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { ProfilePictureInfo } from './types';
+
+import { type ProfilePictureInfo } from './types';
 
 // Gets the storage key for a user's profile picture
 export const getStorageKey = (userId: string) => `profile-picture-${userId}`;

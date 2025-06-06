@@ -1,5 +1,5 @@
 import { API_BASE_URL } from './constants';
-import { ApiRequestResponse, AuthData } from './types';
+import { type ApiRequestResponse, type AuthData } from './types';
 
 export const apiRequest = async <T>(
   endpoint: string,

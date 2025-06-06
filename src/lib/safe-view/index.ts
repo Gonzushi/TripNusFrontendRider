@@ -1,1 +1,1 @@
-export { default as SafeView } from './safeView';
+export { default as SafeView } from './safe-view';

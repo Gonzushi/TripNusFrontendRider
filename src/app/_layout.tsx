@@ -1,8 +1,10 @@
-import { AuthProvider } from '@/lib/auth';
-import { initializeFirebase } from '@/lib/firebase';
+import '../../global.css';
+
 import { Stack } from 'expo-router';
 import React from 'react';
-import '../../global.css';
+
+import { AuthProvider } from '@/lib/auth';
+import { initializeFirebase } from '@/lib/firebase';
 
 // Initialize Firebase
 initializeFirebase();

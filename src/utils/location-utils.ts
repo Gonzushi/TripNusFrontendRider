@@ -1,7 +1,7 @@
 type Coordinates = {
   latitude: number;
   longitude: number;
-}
+};
 
 // Indonesia's rough bounding box
 const INDONESIA_BOUNDS = {

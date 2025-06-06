@@ -1,21 +1,21 @@
-export type LocationCoordinates ={
+export type LocationCoordinates = {
   latitude: number;
   longitude: number;
-}
+};
 
 export type LocationDetail = {
   title: string;
   address: string;
   place_id?: string;
   coordinates?: LocationCoordinates;
-}
+};
 
 export type LocationSuggestion = {
   title: string;
   address: string;
-  type: "api" | "recent" | "popular";
+  type: 'api' | 'recent' | 'popular';
   place_id?: string;
-}
+};
 
 export type GooglePlacesAutocompleteResult = {
   description: string;
@@ -24,7 +24,7 @@ export type GooglePlacesAutocompleteResult = {
     main_text: string;
     secondary_text: string;
   };
-}
+};
 
 export type GooglePlaceDetails = {
   formatted_address: string;
@@ -36,4 +36,4 @@ export type GooglePlaceDetails = {
   };
   name: string;
   place_id: string;
-}
+};

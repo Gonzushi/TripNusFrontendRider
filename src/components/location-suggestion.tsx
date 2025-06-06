@@ -1,7 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-
 import type { ComponentProps } from 'react';
-
 import { Text, TouchableOpacity, View } from 'react-native';
 
 interface LocationSuggestionProps {
@@ -50,17 +48,17 @@ export default function LocationSuggestion({
 
   return (
     <TouchableOpacity
-      className="flex-row items-center px-4 py-4 border-b border-gray-100 active:bg-gray-50"
+      className="flex-row items-center border-b border-gray-100 px-4 py-4 active:bg-gray-50"
       onPress={onPress}
     >
       <View
-        className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${bgColor}`}
+        className={`mr-3 h-10 w-10 items-center justify-center rounded-full ${bgColor}`}
       >
         <Ionicons name={name} size={20} color={iconColor} />
       </View>
       <View>
-        <Text className="text-gray-800 font-medium">{title}</Text>
-        <Text className="text-gray-500 text-sm">{address}</Text>
+        <Text className="font-medium text-gray-800">{title}</Text>
+        <Text className="text-sm text-gray-500">{address}</Text>
       </View>
     </TouchableOpacity>
   );

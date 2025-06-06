@@ -1,5 +1,6 @@
-import { LocationDetail } from "@/types/location";
-import { create } from "zustand";
+import { create } from 'zustand';
+
+import { type LocationDetail } from '@/types/location';
 
 type LocationStore = {
   selectedMapLocation: {

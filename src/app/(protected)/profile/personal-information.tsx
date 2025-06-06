@@ -1,8 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-
-import React, { useContext, useState } from 'react';
-
 import { useRouter } from 'expo-router';
+import React, { useContext, useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -14,7 +12,7 @@ import {
 
 import { AuthContext } from '@/lib/auth';
 import { SafeView } from '@/lib/safe-view';
-import { ApiResponse } from '@/types/api';
+import { type ApiResponse } from '@/types/api';
 
 interface FormData {
   firstName: string;
@@ -162,10 +160,10 @@ export default function PersonalInformation() {
 
     return (
       <View className="mb-4">
-        <Text className="text-sm text-gray-700 mb-1.5">
+        <Text className="mb-1.5 text-sm text-gray-700">
           {label} {isOptional ? '(Optional)' : '*'}
         </Text>
-        <View className="flex-row items-center bg-gray-50 rounded-xl border border-gray-200">
+        <View className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50">
           <View className="pl-4 pr-2">
             <Ionicons
               name={
@@ -180,13 +178,13 @@ export default function PersonalInformation() {
             />
           </View>
           {isPhoneNumber ? (
-            <View className="flex-row items-center flex-1">
+            <View className="flex-1 flex-row items-center">
               <View className="border-r border-gray-200 pr-2">
-                <Text className="text-gray-900 py-3 pl-2">+62</Text>
+                <Text className="py-3 pl-2 text-gray-900">+62</Text>
               </View>
               {isEditing ? (
                 <TextInput
-                  className="flex-1 py-3 px-3"
+                  className="flex-1 px-3 py-3"
                   placeholder="812 3456 7890"
                   value={formatPhoneNumber(value)}
                   onChangeText={(text) => {
@@ -204,14 +202,14 @@ export default function PersonalInformation() {
                   blurOnSubmit={true}
                 />
               ) : (
-                <Text className="flex-1 py-3 px-3 text-gray-900">
+                <Text className="flex-1 px-3 py-3 text-gray-900">
                   {formatPhoneNumber(value)}
                 </Text>
               )}
             </View>
           ) : isEditing ? (
             <TextInput
-              className="flex-1 py-3 px-2"
+              className="flex-1 px-2 py-3"
               placeholder={`Enter your ${label.toLowerCase()}`}
               value={value}
               onChangeText={(text) =>
@@ -222,13 +220,13 @@ export default function PersonalInformation() {
               placeholderTextColor="#9CA3AF"
             />
           ) : (
-            <Text className="flex-1 py-3 px-2 text-gray-900">
+            <Text className="flex-1 px-2 py-3 text-gray-900">
               {value || 'Not set'}
             </Text>
           )}
         </View>
         {isPhoneNumber && (
-          <Text className="text-xs text-gray-500 mt-1">
+          <Text className="mt-1 text-xs text-gray-500">
             Enter your phone number
           </Text>
         )}
@@ -269,7 +267,7 @@ export default function PersonalInformation() {
               >
                 <Ionicons name="arrow-back" size={24} color="black" />
               </TouchableOpacity>
-              <Text className="text-black text-lg font-semibold">
+              <Text className="text-lg font-semibold text-black">
                 Personal Information
               </Text>
               <View style={{ width: 24 }} />
@@ -279,14 +277,14 @@ export default function PersonalInformation() {
           {/* Main Content - Centered */}
           <View className="px-6">
             {/* Header */}
-            <View className="items-center mb-8">
-              <View className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center mb-4">
+            <View className="mb-8 items-center">
+              <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-blue-100">
                 <Ionicons name="person" size={32} color="#2563EB" />
               </View>
-              <Text className="text-2xl font-bold text-gray-900 mb-2">
+              <Text className="mb-2 text-2xl font-bold text-gray-900">
                 {isEditing ? 'Update Your Profile' : 'Profile Information'}
               </Text>
-              <Text className="text-base text-gray-600 text-center">
+              <Text className="text-center text-base text-gray-600">
                 {isEditing
                   ? 'Make changes to your personal information'
                   : 'View your personal information'}
@@ -294,18 +292,18 @@ export default function PersonalInformation() {
             </View>
 
             {/* Form */}
-            <View className="space-y-4 mx-2">
+            <View className="mx-2 space-y-4">
               {renderField('First Name', formData.firstName, 'firstName')}
               {renderField('Last Name', formData.lastName, 'lastName')}
               {renderField('Phone Number', formData.phoneNumber, 'phoneNumber')}
             </View>
 
             {/* Buttons */}
-            <View className="mt-8 space-y-4 mx-2">
+            <View className="mx-2 mt-8 space-y-4">
               <TouchableOpacity
                 className={`${
                   isLoading ? 'bg-blue-300' : 'bg-blue-600'
-                } py-4 rounded-xl items-center flex-row justify-center mb-4`}
+                } mb-4 flex-row items-center justify-center rounded-xl py-4`}
                 onPress={isEditing ? handleUpdate : () => setIsEditing(true)}
                 disabled={isLoading}
               >
@@ -315,7 +313,7 @@ export default function PersonalInformation() {
                   color="white"
                   style={{ marginRight: 8 }}
                 />
-                <Text className="text-white font-semibold text-base">
+                <Text className="text-base font-semibold text-white">
                   {isLoading
                     ? 'Updating...'
                     : isEditing
@@ -328,9 +326,9 @@ export default function PersonalInformation() {
                 <TouchableOpacity
                   onPress={handleCancel}
                   disabled={isLoading}
-                  className="py-4 border border-gray-200 rounded-xl"
+                  className="rounded-xl border border-gray-200 py-4"
                 >
-                  <Text className="text-gray-600 text-center font-medium">
+                  <Text className="text-center font-medium text-gray-600">
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -340,7 +338,7 @@ export default function PersonalInformation() {
 
           {/* Bottom Section */}
           <View>
-            <Text className="text-sm text-gray-500 text-center px-6 mb-12">
+            <Text className="mb-12 px-6 text-center text-sm text-gray-500">
               Your information is securely stored
             </Text>
           </View>

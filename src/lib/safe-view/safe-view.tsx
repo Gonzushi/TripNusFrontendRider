@@ -2,8 +2,9 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { TabBar } from './tab-bar';
-import { SafeViewProps } from './types';
+import { type SafeViewProps } from './types';
 
 export default function SafeView({
   children,

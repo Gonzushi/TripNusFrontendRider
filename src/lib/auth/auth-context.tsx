@@ -1,13 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { SplashScreen, useRouter } from 'expo-router';
 import React, {
-  PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   useEffect,
   useState,
 } from 'react';
-
-import { SplashScreen, useRouter } from 'expo-router';
 import { ActivityIndicator, Alert, View } from 'react-native';
 
 import {
@@ -24,7 +22,11 @@ import {
   resendActivationApi,
 } from './api';
 import { AUTH_STORAGE_KEY } from './constants';
-import { AuthContextType, AuthData, AuthStateInternal } from './types';
+import {
+  type AuthContextType,
+  type AuthData,
+  type AuthStateInternal,
+} from './types';
 
 // Create context with default values
 export const AuthContext = createContext<AuthContextType>({
