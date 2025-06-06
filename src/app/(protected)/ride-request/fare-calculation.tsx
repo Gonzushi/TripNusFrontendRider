@@ -1,9 +1,9 @@
-import { AuthContext } from '@/lib/auth';
-import { FareResponse, Location, RouteDetails } from '@/types/fare';
 import Env from '@env';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+
 import React, { useContext, useEffect, useRef, useState } from 'react';
+
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
@@ -12,15 +12,61 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { AuthContext } from '@/lib/auth';
+import { FareResponse, Location, RouteDetails } from '@/types/fare';
 
 // Constants
 const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
 const dev = false;
 
+// Types
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
+type VehicleType = {
+  id: 'motorcycle' | 'car';
+  name: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+};
+
+type DebugData = {
+  hasRef: boolean;
+  polylineLength: number;
+  polylineData: Array<Coordinates>;
+};
+
+type MapRef = React.RefObject<MapView | null>;
+
+type LocationMarkerProps = {
+  type: 'pickup' | 'dropoff';
+  coordinate: Coordinates;
+};
+
+type AddressCardProps = {
+  pickup: Location;
+  dropoff: Location;
+  onBack: () => void;
+};
+
+type VehicleOptionProps = {
+  vehicle: Vehicle;
+  isSelected: boolean;
+  fares: FareResponse | null;
+  onSelect: () => void;
+};
+
+type DebugOverlayProps = {
+  mapRef: MapRef;
+  routeDetails: RouteDetails;
+};
+
 // Vehicle Configuration
-const VEHICLES = [
+const VEHICLES: readonly VehicleType[] = [
   {
     id: 'motorcycle',
     name: 'TripNus Bike',
@@ -37,28 +83,22 @@ type Vehicle = (typeof VEHICLES)[number];
 
 // Debug Tools
 const debugTools = {
-  log: (message: string, data?: any) => {
+  log: (message: string, data?: unknown) => {
     if (dev) console.log(`[DEBUG] ${message}`, data || '');
   },
-  mapState: (ref: any, polyline: any) => {
+  mapState: (ref: MapRef, polyline: Array<Coordinates>) => {
     if (dev) {
-      console.log('[MAP STATE]', {
+      console.log('[DEBUG] [MAP STATE]', {
         hasRef: !!ref?.current,
         polylineLength: polyline?.length || 0,
         polylineData: polyline?.slice(0, 2) || [],
-      });
+      } as DebugData);
     }
   },
 };
 
 // Components
-const LocationMarker = ({
-  type,
-  coordinate,
-}: {
-  type: 'pickup' | 'dropoff';
-  coordinate: { latitude: number; longitude: number };
-}) => (
+const LocationMarker = ({ type, coordinate }: LocationMarkerProps) => (
   <Marker
     coordinate={coordinate}
     title={`${type === 'pickup' ? 'Pickup' : 'Drop-off'} Location`}
@@ -73,15 +113,7 @@ const LocationMarker = ({
   </Marker>
 );
 
-const AddressCard = ({
-  pickup,
-  dropoff,
-  onBack,
-}: {
-  pickup: Location;
-  dropoff: Location;
-  onBack: () => void;
-}) => (
+const AddressCard = ({ pickup, dropoff, onBack }: AddressCardProps) => (
   <View className="absolute top-20 left-4 right-4 z-10">
     <View className="flex-row items-center space-x-3">
       <TouchableOpacity
@@ -132,12 +164,7 @@ const VehicleOption = ({
   isSelected,
   fares,
   onSelect,
-}: {
-  vehicle: Vehicle;
-  isSelected: boolean;
-  fares: FareResponse | null;
-  onSelect: () => void;
-}) => {
+}: VehicleOptionProps) => {
   const fare = fares?.[vehicle.id as keyof FareResponse];
 
   return (
@@ -154,7 +181,7 @@ const VehicleOption = ({
           }`}
         >
           <MaterialCommunityIcons
-            name={vehicle.icon as any}
+            name={vehicle.icon}
             size={20}
             color={isSelected ? '#3B82F6' : '#4B5563'}
           />
@@ -172,13 +199,7 @@ const VehicleOption = ({
   );
 };
 
-const DebugOverlay = ({
-  mapRef,
-  routeDetails,
-}: {
-  mapRef: any;
-  routeDetails: RouteDetails;
-}) => {
+const DebugOverlay = ({ mapRef, routeDetails }: DebugOverlayProps) => {
   if (!dev) return null;
 
   return (
@@ -275,13 +296,12 @@ const NoRouteError = ({ onBack }: { onBack: () => void }) => (
 export default function FareCalculation() {
   const authState = useContext(AuthContext);
   const router = useRouter();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<MapView | null>(null);
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
 
   // States
   const [isPolylineDrawn, setIsPolylineDrawn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle>(VEHICLES[0]);
   const [routeDetails, setRouteDetails] = useState<RouteDetails>({
     distance: 0,
@@ -367,7 +387,6 @@ export default function FareCalculation() {
 
   const fetchRouteDetails = async () => {
     try {
-      setIsLoading(true);
       debugTools.log('Fetching route details...');
 
       const response = await fetch(
@@ -460,7 +479,6 @@ export default function FareCalculation() {
       });
       return null;
     } finally {
-      setIsLoading(false);
     }
   };
 
@@ -508,7 +526,7 @@ export default function FareCalculation() {
       if (response.ok) {
         // Navigate to ride tracking or confirmation screen
         router.replace({
-          pathname: '/(protected)/(home)/ride-request',
+          pathname: '/(protected)/ride-request',
           params: {
             rideId: data.data.id,
             status: 'finding-driver',

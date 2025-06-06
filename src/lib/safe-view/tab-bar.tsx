@@ -1,9 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import { usePathname, useRouter } from 'expo-router';
+
 import React from 'react';
+
+import { usePathname, useRouter } from 'expo-router';
 import { Animated, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { TAB_CONFIG } from './constants';
+
+type TabPath = (typeof TAB_CONFIG)[keyof typeof TAB_CONFIG]['path'];
 
 function useTabAnimation() {
   const animatedValues = React.useRef(
@@ -66,7 +71,7 @@ export function TabBar() {
             onPress={() => {
               animatePress(key);
               if (pathname !== item.path) {
-                router.replace(item.path as any);
+                router.replace(item.path as TabPath);
               }
             }}
           >

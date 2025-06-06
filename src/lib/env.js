@@ -4,12 +4,12 @@
  * You can only access the client environment variables here.
  * NOTE: We use js file so we can load the client env types
  */
-
 import Constants from 'expo-constants';
+
 /**
  *  @type {typeof import('../../env.js').ClientEnv}
  */
-//@ts-ignore // Don't worry about TypeScript here; we know we're passing the correct environment variables to `extra` in `app.config.ts`.
+//@ts-expect-error Don't worry about TypeScript here; we know we're passing the correct environment variables to `extra` in `app.config.ts`.
 const Env = Constants.expoConfig?.extra ?? {};
 
 export default Env;

@@ -1,16 +1,20 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import React, {
+  PropsWithChildren,
+  createContext,
+  useEffect,
+  useState,
+} from 'react';
+
+import { SplashScreen, useRouter } from 'expo-router';
+import { ActivityIndicator, Alert, View } from 'react-native';
+
 import {
   clearProfilePicture,
   downloadAndSaveProfilePicture,
 } from '@/lib/profile-picture';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SplashScreen, useRouter } from 'expo-router';
-import React, {
-  createContext,
-  PropsWithChildren,
-  useEffect,
-  useState,
-} from 'react';
-import { ActivityIndicator, Alert, View } from 'react-native';
+
 import {
   changePasswordApi,
   loginApi,
@@ -162,8 +166,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     } catch (error) {
       console.error('Error during logout:', error);
     } finally {
+      const userId = authState.data?.user.id;
       await updateAuthState({ isLoggedIn: false, data: null });
-      await clearProfilePicture(authState.data?.user.id!);
+      if (userId) {
+        await clearProfilePicture(userId);
+      }
       router.replace('/welcome');
     }
   };

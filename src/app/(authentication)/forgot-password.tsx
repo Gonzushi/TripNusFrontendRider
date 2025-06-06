@@ -1,30 +1,32 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from '@expo/vector-icons';
+
+import { useState } from 'react';
+
+import { useRouter } from 'expo-router';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const handleResetPassword = async () => {
     if (!email) {
-      Alert.alert("Error", "Please enter your email address");
+      Alert.alert('Error', 'Please enter your email address');
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await fetch(
-        "https://rest.trip-nus.com/auth/reset-password-for-email",
+        'https://rest.trip-nus.com/auth/reset-password-for-email',
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            accept: "application/json",
-            "Content-Type": "application/json",
+            accept: 'application/json',
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             email,
@@ -36,23 +38,28 @@ export default function ForgotPassword() {
 
       if (data.status === 200) {
         Alert.alert(
-          "Success",
-          "Password reset instructions have been sent to your email",
+          'Success',
+          'Password reset instructions have been sent to your email',
           [
             {
-              text: "Back to Login",
+              text: 'Back to Login',
               onPress: () => router.back(),
             },
           ]
         );
       } else {
         Alert.alert(
-          "Error",
-          data.message || "Failed to send reset password email"
+          'Error',
+          data.message || 'Failed to send reset password email'
         );
       }
     } catch (error) {
-      Alert.alert("Error", "An error occurred while connecting to the server");
+      Alert.alert(
+        'Error',
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while connecting to the server'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -123,7 +130,7 @@ export default function ForgotPassword() {
           <View className="mt-8 space-y-4 mx-2">
             <TouchableOpacity
               className={`${
-                isLoading ? "bg-blue-300" : "bg-blue-600"
+                isLoading ? 'bg-blue-300' : 'bg-blue-600'
               } py-4 rounded-xl items-center flex-row justify-center mb-4`}
               onPress={handleResetPassword}
               disabled={isLoading}
@@ -135,7 +142,7 @@ export default function ForgotPassword() {
                 style={{ marginRight: 8 }}
               />
               <Text className="text-white font-semibold text-base">
-                {isLoading ? "Sending..." : "Send Reset Instructions"}
+                {isLoading ? 'Sending...' : 'Send Reset Instructions'}
               </Text>
             </TouchableOpacity>
 

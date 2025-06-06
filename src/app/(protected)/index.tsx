@@ -1,10 +1,8 @@
-import { AuthContext } from '@/lib/auth';
-import { getProfilePictureUri } from '@/lib/profile-picture';
-import { SafeView } from '@/lib/safe-view';
-import type { LocationDetail } from '@/types/location';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+
 import { useCallback, useContext, useEffect, useState } from 'react';
+
+import { useRouter } from 'expo-router';
 import {
   Image,
   ScrollView,
@@ -14,7 +12,10 @@ import {
   View,
 } from 'react-native';
 
-const dev = true;
+import { AuthContext } from '@/lib/auth';
+import { getProfilePictureUri } from '@/lib/profile-picture';
+import { SafeView } from '@/lib/safe-view';
+import type { LocationDetail } from '@/types/location';
 
 export default function Index() {
   const { authData } = useContext(AuthContext);
@@ -25,12 +26,11 @@ export default function Index() {
   );
 
   // Store current location details for reuse
-  const [currentLocationDetails, setCurrentLocationDetails] =
-    useState<LocationDetail>({
-      title: 'Current Location',
-      address: 'Getting your location...',
-      coordinates: undefined,
-    });
+  const currentLocationDetails: LocationDetail = {
+    title: 'Current Location',
+    address: 'Getting your location...',
+    coordinates: undefined,
+  };
 
   const refreshProfilePicture = async () => {
     if (authData?.user.id) {

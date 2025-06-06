@@ -1,9 +1,8 @@
-import { AuthContext } from '@/lib/auth';
-import { SafeView } from '@/lib/safe-view';
-import { ApiResponse } from '@/types/api';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+
 import React, { useContext, useState } from 'react';
+
+import { useRouter } from 'expo-router';
 import {
   Alert,
   Keyboard,
@@ -12,6 +11,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+import { AuthContext } from '@/lib/auth';
+import { SafeView } from '@/lib/safe-view';
+import { ApiResponse } from '@/types/api';
 
 interface FormData {
   firstName: string;
@@ -119,8 +122,11 @@ export default function PersonalInformation() {
 
       Alert.alert('Success', 'Profile updated successfully');
       setIsEditing(false);
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update profile');
+    } catch (error: unknown) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to update profile'
+      );
     } finally {
       setIsLoading(false);
     }

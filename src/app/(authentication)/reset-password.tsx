@@ -1,9 +1,12 @@
-import { AuthContext } from '@/lib/auth';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+
 import { useContext, useEffect, useState } from 'react';
+
+import { router, useLocalSearchParams } from 'expo-router';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { AuthContext } from '@/lib/auth';
 
 interface PasswordRequirement {
   label: string;
@@ -92,17 +95,21 @@ export default function ResetPassword() {
     try {
       await changePassword(urlParams.type, urlParams.tokenHash, password);
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred', [
-        {
-          text: 'OK',
-          onPress: () => {
-            if (router.canDismiss()) {
-              router.dismissAll();
-            }
-            router.replace('/welcome');
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'An unexpected error occurred',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              if (router.canDismiss()) {
+                router.dismissAll();
+              }
+              router.replace('/welcome');
+            },
           },
-        },
-      ]);
+        ]
+      );
     } finally {
       setIsLoading(false);
     }

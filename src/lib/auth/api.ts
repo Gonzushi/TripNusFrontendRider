@@ -25,7 +25,10 @@ export const apiRequest = async <T>(
         apiOutput.status >= 400 ? apiOutput.message || 'Unknown error' : null,
     };
   } catch (error) {
-    return { data: null, error: 'Network error occurred' };
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : 'Network error occurred',
+    };
   }
 };
 

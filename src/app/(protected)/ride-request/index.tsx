@@ -1,8 +1,7 @@
 // Core imports
-import { SafeView } from '@/lib/safe-view';
+import Env from '@env';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+
 import React, {
   Fragment,
   useCallback,
@@ -10,6 +9,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
+
+import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
@@ -25,13 +27,13 @@ import {
 import LoadingDots from '@/components/LoadingDots';
 import LocationInput from '@/components/LocationInput';
 import RouteMapPreview from '@/components/RouteMapPreview';
+import { SafeView } from '@/lib/safe-view';
 import { useLocationStore } from '@/store/useLocationStore';
 import type {
   LocationDetail,
   LocationSuggestion as LocationSuggestionType,
 } from '@/types/location';
 import { isLocationInIndonesia } from '@/utils/locationUtils';
-import Env from '@env';
 
 // Constants
 const GOOGLE_API_KEY = Env.GOOGLE_API_KEY;
@@ -40,7 +42,7 @@ const SEARCH_DEBOUNCE_MS = 500;
 const DEBUG_MODE = false;
 
 // Debug utility
-const debugLog = (message: string, data?: any) => {
+const debugLog = (message: string, data?: unknown) => {
   if (DEBUG_MODE) {
     if (data) {
       console.log(`[DEBUG] ${message}:`, data);
@@ -53,9 +55,22 @@ const debugLog = (message: string, data?: any) => {
 // Types
 type InputMode = 'highlighted' | 'editing' | false;
 
+type GooglePlaceLocation = {
+  latitude: number;
+  longitude: number;
+};
+
+type GooglePlace = {
+  id: string;
+  displayName: {
+    text: string;
+  };
+  formattedAddress: string;
+  location?: GooglePlaceLocation;
+};
+
 export default function RideRequest() {
   const router = useRouter();
-  const params = useLocalSearchParams();
   const { selectedMapLocation, clearSelectedMapLocation } = useLocationStore();
 
   // Store current location details for reuse
@@ -286,7 +301,7 @@ export default function RideRequest() {
         if (data.places) {
           // Transform Places API suggestions to our format
           const apiSuggestions: LocationSuggestionType[] = data.places.map(
-            (place: any) => ({
+            (place: GooglePlace) => ({
               title: place.displayName.text,
               address: place.formattedAddress,
               type: 'api',

@@ -1,13 +1,9 @@
-import { AuthContext } from '@/lib/auth';
-import {
-  downloadAndSaveProfilePicture,
-  getProfilePictureUri,
-} from '@/lib/profile-picture';
-import { SafeView } from '@/lib/safe-view';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+
+import { useContext, useEffect, useState } from 'react';
+
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -17,6 +13,19 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+import { AuthContext } from '@/lib/auth';
+import {
+  downloadAndSaveProfilePicture,
+  getProfilePictureUri,
+} from '@/lib/profile-picture';
+import { SafeView } from '@/lib/safe-view';
+
+type FormDataFile = {
+  uri: string;
+  name: string;
+  type: string | undefined;
+};
 
 // Profile Picture Component
 const ProfilePicture = ({
@@ -71,7 +80,7 @@ const MenuItem = ({
   loading,
   textColor = 'text-gray-900',
 }: {
-  icon: any;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
   iconColor: string;
   bgColor: string;
   title: string;
@@ -131,8 +140,13 @@ export default function Profile() {
     try {
       await authState.logOut();
       router.replace('/welcome');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to sign out. Please try again.');
+    } catch (error: unknown) {
+      Alert.alert(
+        'Error',
+        error instanceof Error
+          ? error.message
+          : 'Failed to sign out. Please try again.'
+      );
     } finally {
       setIsSigningOut(false);
     }
@@ -167,11 +181,14 @@ export default function Profile() {
       setUploading(true);
       const localUri = result.assets[0].uri;
       const formData = new FormData();
-      formData.append('file', {
+      const fileToUpload: FormDataFile = {
         uri: localUri,
-        name: localUri.split('/').pop(),
+        name: localUri.split('/').pop() || 'image.jpg',
         type: result.assets[0].mimeType,
-      } as any);
+      };
+
+      // @ts-expect-error React Native's FormData accepts File-like objects
+      formData.append('file', fileToUpload);
 
       try {
         const response = await fetch(
@@ -228,9 +245,14 @@ export default function Profile() {
                 ]
               );
             }
-          } catch (error) {
+          } catch (error: unknown) {
             console.error('Error updating profile picture:', error);
-            Alert.alert('Error', 'Failed to save profile picture');
+            Alert.alert(
+              'Error',
+              error instanceof Error
+                ? error.message
+                : 'Failed to save profile picture'
+            );
           }
         } else {
           Alert.alert(
@@ -238,11 +260,21 @@ export default function Profile() {
             data.message || 'Failed to update profile picture'
           );
         }
-      } catch (error) {
-        Alert.alert('Error', 'Failed to upload image. Please try again.');
+      } catch (error: unknown) {
+        console.error('Error uploading image:', error);
+        Alert.alert(
+          'Error',
+          error instanceof Error
+            ? error.message
+            : 'Failed to upload image. Please try again.'
+        );
       }
-    } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+    } catch (error: unknown) {
+      console.error('Unexpected error:', error);
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'An unexpected error occurred'
+      );
     } finally {
       setUploading(false);
     }

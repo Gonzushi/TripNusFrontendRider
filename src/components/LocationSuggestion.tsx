@@ -1,12 +1,17 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+
+import type { ComponentProps } from 'react';
+
+import { Text, TouchableOpacity, View } from 'react-native';
 
 interface LocationSuggestionProps {
   title: string;
   address: string;
-  type: "api" | "recent" | "popular";
+  type: 'api' | 'recent' | 'popular';
   onPress: () => void;
 }
+
+type IconName = ComponentProps<typeof Ionicons>['name'];
 
 export default function LocationSuggestion({
   title,
@@ -14,25 +19,29 @@ export default function LocationSuggestion({
   type,
   onPress,
 }: LocationSuggestionProps) {
-  const getIconProps = () => {
+  const getIconProps = (): {
+    name: IconName;
+    bgColor: string;
+    iconColor: string;
+  } => {
     switch (type) {
-      case "api":
+      case 'api':
         return {
-          name: "location",
-          bgColor: "bg-green-100",
-          iconColor: "#10B981",
+          name: 'location',
+          bgColor: 'bg-green-100',
+          iconColor: '#10B981',
         };
-      case "recent":
+      case 'recent':
         return {
-          name: "time",
-          bgColor: "bg-blue-100",
-          iconColor: "#3B82F6",
+          name: 'time',
+          bgColor: 'bg-blue-100',
+          iconColor: '#3B82F6',
         };
       default:
         return {
-          name: "star",
-          bgColor: "bg-purple-100",
-          iconColor: "#8B5CF6",
+          name: 'star',
+          bgColor: 'bg-purple-100',
+          iconColor: '#8B5CF6',
         };
     }
   };
@@ -47,7 +56,7 @@ export default function LocationSuggestion({
       <View
         className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${bgColor}`}
       >
-        <Ionicons name={name as any} size={20} color={iconColor} />
+        <Ionicons name={name} size={20} color={iconColor} />
       </View>
       <View>
         <Text className="text-gray-800 font-medium">{title}</Text>
