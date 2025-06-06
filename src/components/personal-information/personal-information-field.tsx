@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Keyboard, Text, TextInput, View } from 'react-native';
 
-interface Props {
+type Props = {
   label: string;
   value: string;
   field: 'firstName' | 'lastName' | 'phoneNumber';
