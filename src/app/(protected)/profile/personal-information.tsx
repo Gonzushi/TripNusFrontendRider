@@ -4,7 +4,7 @@ import React from 'react';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 
 import { PersonalInformationField } from '@/features/personal-information';
-import { usePersonalInformationForm } from '@/lib/hooks/use-personal-information-form';
+import { usePersonalInformationForm } from '@/features/personal-information/use-personal-information-form';
 import { SafeView } from '@/lib/safe-view';
 
 export default function PersonalInformation() {

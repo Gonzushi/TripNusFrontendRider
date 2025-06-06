@@ -9,7 +9,7 @@ type Props = {
   isEditing: boolean;
   isLoading: boolean;
   onChange: (value: string) => void;
-}
+};
 
 export function PersonalInformationField({
   label,
