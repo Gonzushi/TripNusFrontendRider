@@ -20,6 +20,9 @@ const path = require('path');
 const APP_ENV = process.env.APP_ENV ?? 'development';
 const envPath = path.resolve(__dirname, `.env.${APP_ENV}`);
 
+console.log('\nRunning env.js first with APP_ENV = ', APP_ENV, '\n');
+console.log('envPath = ', envPath, '\n');
+
 require('dotenv').config({
   path: envPath,
 });
@@ -72,7 +75,7 @@ const withEnvSuffix = (name) => {
  */
 
 const client = z.object({
-  APP_ENV: z.enum(['development', 'staging', 'production']),
+  APP_ENV: z.enum(['development', 'staging', 'production', 'preview']),
   NAME: z.string(),
   SCHEME: z.string(),
   BUNDLE_ID: z.string(),
@@ -89,6 +92,7 @@ const buildTime = z.object({
   EXPO_ACCOUNT_OWNER: z.string(),
   EAS_PROJECT_ID: z.string(),
   // ADD YOUR BUILD TIME ENV VARS HERE
+  GOOGLE_SERVICES_FILE: z.string(),
   API_URL: z.string(),
   GOOGLE_API_KEY: z.string(),
 });
@@ -117,6 +121,7 @@ const _buildTimeEnv = {
   EXPO_ACCOUNT_OWNER,
   EAS_PROJECT_ID,
   // ADD YOUR ENV VARS HERE TOO
+  GOOGLE_SERVICES_FILE: `./google-services.${APP_ENV}.json`,
   API_URL: process.env.API_URL,
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
 };

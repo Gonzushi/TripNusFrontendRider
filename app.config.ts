@@ -2,13 +2,17 @@ import type { ConfigContext, ExpoConfig } from '@expo/config';
 
 import { ClientEnv, Env } from './env';
 
+console.log('Running app.config.ts \n');
+console.log('Env', Env);
+console.log('ClientEnv', ClientEnv);
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: Env.NAME,
   description: `${Env.NAME} Mobile App`,
   owner: Env.EXPO_ACCOUNT_OWNER,
   scheme: Env.SCHEME,
-  slug: 'tripnus-rider',
+  slug: 'TripNusFrontendRider',
   version: Env.VERSION.toString(),
   orientation: 'portrait',
   icon: './assets/images/icon.png',
@@ -38,7 +42,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     package: Env.PACKAGE,
     edgeToEdgeEnabled: false,
-    googleServicesFile: './google-services.json',
+    googleServicesFile: Env.GOOGLE_SERVICES_FILE,
     config: {
       googleMaps: {
         apiKey: Env.GOOGLE_API_KEY,

@@ -3,7 +3,6 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "build-apk": "eas build --platform android --profile preview --local",
     "start": "cross-env EXPO_NO_DOTENV=1 expo start --dev-client",
     "prebuild": "cross-env EXPO_NO_DOTENV=1 expo prebuild",
     "android": "cross-env EXPO_NO_DOTENV=1 expo run:android",
@@ -20,12 +19,12 @@
     "prebuild:production": "cross-env APP_ENV=production npm run prebuild",
     "android:production": "cross-env APP_ENV=production npm run android",
     "ios:production": "cross-env APP_ENV=production npm run ios",
-    "build:development:ios": "cross-env APP_ENV=development EXPO_NO_DOTENV=1 eas build --profile development --platform ios",
-    "build:development:android": "cross-env APP_ENV=development EXPO_NO_DOTENV=1 eas build --profile development --platform android ",
-    "build:staging:ios": "cross-env APP_ENV=staging EXPO_NO_DOTENV=1 eas build --profile staging --platform ios",
-    "build:staging:android": "cross-env APP_ENV=staging EXPO_NO_DOTENV=1 eas build --profile staging --platform android ",
-    "build:production:ios": "cross-env APP_ENV=production EXPO_NO_DOTENV=1 eas build --profile production --platform ios",
-    "build:production:android": "cross-env APP_ENV=production EXPO_NO_DOTENV=1 eas build --profile production --platform android ",
+    "build:development:ios": "clear & cross-env APP_ENV=development EXPO_NO_DOTENV=1 eas build --profile development --platform ios --local",
+    "build:development:android": "clear & cross-env APP_ENV=development EXPO_NO_DOTENV=1 eas build --profile development --platform android --local",
+    "build:staging:ios": "clear & cross-env APP_ENV=staging EXPO_NO_DOTENV=1 eas build --profile staging --platform ios --local",
+    "build:staging:android": "clear & cross-env APP_ENV=staging EXPO_NO_DOTENV=1 eas build --profile staging --platform android --local",
+    "build:production:ios": "clear & cross-env APP_ENV=production EXPO_NO_DOTENV=1 eas build --profile production --platform ios --local",
+    "build:production:android": "clear & cross-env APP_ENV=production EXPO_NO_DOTENV=1 eas build --profile production --platform android --local",
     "prepare": "husky",
     "app-release": "cross-env SKIP_BRANCH_PROTECTION=true np --no-publish --no-cleanup --no-release-draft",
     "version": "npm run prebuild && git add .",
@@ -82,7 +81,8 @@
     "react-native-webview": "^13.13.5",
     "tailwindcss": "^3.4.17",
     "zod": "^3.25.51",
-    "zustand": "^5.0.5"
+    "zustand": "^5.0.5",
+    "expo-dev-client": "~5.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
