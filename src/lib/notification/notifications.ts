@@ -2,6 +2,10 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
+import Env from '@/lib/env';
+
+const EAS_PROJECT_ID = Env.EAS_PROJECT_ID;
+
 // Define the background notification task handler
 Notifications.registerTaskAsync('background-notification-task');
 
@@ -15,27 +19,14 @@ Notifications.setNotificationHandler({
     shouldShowList: true,
     priority: Notifications.AndroidNotificationPriority.HIGH,
   }),
-});
 
-// Handle background notifications
-Notifications.setNotificationHandler({
-  handleNotification: async () => {
-    // You can customize how notifications are handled in the background
-    return {
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-      shouldShowBanner: true,
-      shouldShowList: true,
-      priority: Notifications.AndroidNotificationPriority.HIGH,
-    };
-  },
   handleSuccess: async (notificationId) => {
     console.log(
       'Background notification handled successfully:',
       notificationId
     );
   },
+
   handleError: async (notificationId, error) => {
     console.error(
       'Error handling background notification:',
@@ -77,19 +68,19 @@ export async function registerForPushNotificationsAsync() {
 
       if (finalStatus !== 'granted') {
         console.log('Failed to get push token: Permission denied');
-        return;
+        return null;
       }
 
       console.log('Getting Expo push token...');
       token = await Notifications.getExpoPushTokenAsync({
-        projectId: '1a0bc73d-f154-487d-a6aa-2aae52766930',
+        projectId: EAS_PROJECT_ID,
       });
       console.log('Successfully got push token:', token);
     } else {
       console.log('Must use physical device for Push Notifications');
     }
 
-    return token?.data;
+    return token ? token.data : null;
   } catch (error) {
     console.error('Error in registerForPushNotificationsAsync:', error);
     return null;
@@ -108,9 +99,4 @@ export function addNotificationResponseReceivedListener(
   callback: (response: Notifications.NotificationResponse) => void
 ) {
   return Notifications.addNotificationResponseReceivedListener(callback);
-}
-
-// Function to handle background notifications
-export function defineBackgroundNotificationTask() {
-  return Notifications.registerTaskAsync('background-notification-task');
 }

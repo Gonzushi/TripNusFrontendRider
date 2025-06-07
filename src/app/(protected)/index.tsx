@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { AuthContext } from '@/lib/auth';
+import NotificationDebug from '@/lib/notification/notification-debug';
 import { getProfilePictureUri } from '@/lib/profile-picture';
 import { SafeView } from '@/lib/safe-view';
 
@@ -278,6 +279,8 @@ export default function Index() {
         </View>
 
         <CommunitySupport onShare={handleInvite} />
+
+        <NotificationDebug />
 
         <View className="h-8" />
       </ScrollView>

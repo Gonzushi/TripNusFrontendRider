@@ -1,9 +1,10 @@
 import { Text, View } from 'react-native';
 
-import { useNotifications } from '@/abackup/use-notifications';
+import { useNotification } from './notification-provider';
 
 export default function NotificationDebug() {
-  const { expoPushToken, notification, error } = useNotifications();
+  const { expoPushToken, lastNotification, lastNotificationResponse, error } =
+    useNotification();
 
   return (
     <View className="m-4 rounded-lg bg-black/90 p-4">
@@ -29,13 +30,28 @@ export default function NotificationDebug() {
         <Text className="mb-2 font-mono text-sm font-semibold text-white">
           Last Notification
         </Text>
-        {notification ? (
+        {lastNotification ? (
           <Text className="font-mono text-xs text-white/80">
-            {JSON.stringify(notification, null, 2)}
+            {JSON.stringify(lastNotification, null, 2)}
           </Text>
         ) : (
           <Text className="font-mono text-xs text-white/80">
             No notifications received
+          </Text>
+        )}
+      </View>
+
+      <View>
+        <Text className="my-2 font-mono text-sm font-semibold text-white">
+          Last Notification Response
+        </Text>
+        {lastNotificationResponse ? (
+          <Text className="font-mono text-xs text-white/80">
+            {JSON.stringify(lastNotificationResponse, null, 2)}
+          </Text>
+        ) : (
+          <Text className="font-mono text-xs text-white/80">
+            No notifications response received
           </Text>
         )}
       </View>

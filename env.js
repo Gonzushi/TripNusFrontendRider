@@ -75,7 +75,7 @@ const withEnvSuffix = (name) => {
  */
 
 const client = z.object({
-  APP_ENV: z.enum(['development', 'staging', 'production', 'preview']),
+  APP_ENV: z.enum(['development', 'staging', 'production']),
   NAME: z.string(),
   SCHEME: z.string(),
   BUNDLE_ID: z.string(),
@@ -83,6 +83,7 @@ const client = z.object({
   VERSION: z.string(),
 
   // ADD YOUR CLIENT ENV VARS HERE
+  EAS_PROJECT_ID: z.string(),
   API_URL: z.string(),
   GOOGLE_API_KEY: z.string(),
   SUPABASE_STORAGE_URL: z.string(),
@@ -107,6 +108,7 @@ const _clientEnv = {
   BUNDLE_ID: withEnvSuffix(BUNDLE_ID),
   PACKAGE: withEnvSuffix(PACKAGE),
   VERSION: packageJSON.version,
+  EAS_PROJECT_ID,
 
   // ADD YOUR ENV VARS HERE TOO
   API_URL: process.env.API_URL,
