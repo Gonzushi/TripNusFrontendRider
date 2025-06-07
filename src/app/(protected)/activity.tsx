@@ -18,7 +18,7 @@ export default function Activity() {
     >
       <View className="flex-1 bg-white">
         {/* Enhanced Header */}
-        <View className="bg-blue-600 px-4 pb-8 pt-4">
+        <View className="-mb-4 bg-blue-600 px-4 pb-16 pt-4">
           <View className="items-center">
             <Text className="mb-1 text-xl font-bold text-white">
               Riwayat Perjalanan
@@ -75,21 +75,26 @@ export default function Activity() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1 bg-gray-50">
+        <ScrollView className="flex-1 bg-white">
           <View className="space-y-3 p-4">
             {/* Trip Card */}
-            <TouchableOpacity className="rounded-2xl border border-blue-100 bg-white shadow-sm">
+            <TouchableOpacity className="rounded-2xl border border-blue-100 bg-blue-50 shadow-sm">
               <View className="px-3 py-3">
                 {/* Status and Icon */}
                 <View className="mb-2 flex-row items-center justify-between">
-                  <View className="h-9 w-9 items-center justify-center rounded-full bg-blue-50">
-                    <Ionicons name="car" size={24} color="#3B82F6" />
+                  <View className="flex-row items-center space-x-3">
+                    <View className="h-9 w-9 items-center justify-center rounded-full bg-blue-50/90">
+                      <Ionicons name="car" size={24} color="#3B82F6" />
+                    </View>
+                    <Text className="ml-4 text-sm text-gray-900">
+                      Standard Ride • 4.2 km • 15 menit
+                    </Text>
                   </View>
-                  <View className="flex-row items-center space-x-2">
-                    <View className="h-2 w-2 rounded-full bg-green-500" />
+                  <View className="flex-row items-center">
                     <Text className="text-sm font-medium text-green-600">
                       Selesai
                     </Text>
+                    <Text className="px-1.5 text-green-600">•</Text>
                   </View>
                 </View>
 
@@ -127,10 +132,10 @@ export default function Activity() {
                 </View>
 
                 {/* Bottom Info */}
-                <View className="mt-2 flex-row items-center justify-between border-t border-gray-50 pt-2">
+                <View className="mt-2 flex-row items-center justify-between border-t border-blue-200 pt-2">
                   <View>
                     <Text className="text-lg font-bold text-gray-800">
-                      Rp24.500
+                      Rp 24.500
                     </Text>
                     <Text className="text-[11px] text-gray-600">
                       15 Des 2024 • 14:30
@@ -154,18 +159,23 @@ export default function Activity() {
             </TouchableOpacity>
 
             {/* Cancelled Trip Card */}
-            <TouchableOpacity className="rounded-2xl border border-red-100 bg-white shadow-sm">
+            <TouchableOpacity className="my-4 rounded-2xl border border-red-100 bg-red-50 shadow-sm">
               <View className="px-3 py-3">
                 {/* Status and Icon */}
                 <View className="mb-2 flex-row items-center justify-between">
-                  <View className="h-9 w-9 items-center justify-center rounded-full bg-red-50">
-                    <Ionicons name="close-circle" size={24} color="#EF4444" />
+                  <View className="flex-row items-center space-x-3">
+                    <View className="h-9 w-9 items-center justify-center rounded-full bg-red-50/90">
+                      <Ionicons name="close-circle" size={24} color="#EF4444" />
+                    </View>
+                    <Text className="ml-4 text-sm text-gray-900">
+                      Standard Ride • 2.8 km • 10 menit
+                    </Text>
                   </View>
-                  <View className="flex-row items-center space-x-2">
-                    <View className="h-2 w-2 rounded-full bg-red-500" />
+                  <View className="flex-row items-center">
                     <Text className="text-sm font-medium text-red-600">
                       Dibatalkan
                     </Text>
+                    <Text className="px-1.5 text-red-600">•</Text>
                   </View>
                 </View>
 
@@ -203,9 +213,11 @@ export default function Activity() {
                 </View>
 
                 {/* Bottom Info */}
-                <View className="mt-2 flex-row items-center justify-between border-t border-gray-50 pt-2">
+                <View className="mt-2 flex-row items-center justify-between border-t border-red-200 pt-2">
                   <View>
-                    <Text className="text-lg font-bold text-gray-400">Rp0</Text>
+                    <Text className="text-lg font-bold text-gray-400">
+                      Rp 0
+                    </Text>
                     <Text className="text-[11px] text-gray-600">
                       10 Des 2024 • 19:45
                     </Text>
