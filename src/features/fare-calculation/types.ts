@@ -1,3 +1,27 @@
+import { type MaterialCommunityIcons } from '@expo/vector-icons';
+import type MapView from 'react-native-maps';
+
+import { type VEHICLES } from './constants';
+
+export type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
+export type Location = {
+  latitude: number;
+  longitude: number;
+  address: string;
+};
+
+export type Vehicle = (typeof VEHICLES)[number];
+
+export type VehicleType = {
+  id: 'motorcycle' | 'car';
+  name: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+};
+
 export type FareBreakdown = {
   base_fare: number;
   distance_fare: number;
@@ -28,8 +52,4 @@ export type RouteDetails = {
   error?: 'NO_ROUTE' | 'NETWORK_ERROR' | null;
 };
 
-export type Location = {
-  latitude: number;
-  longitude: number;
-  address: string;
-};
+export type MapRef = React.RefObject<MapView | null>;

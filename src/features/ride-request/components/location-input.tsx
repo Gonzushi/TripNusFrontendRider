@@ -53,7 +53,7 @@ export default function LocationInput({
           {value.length > 0 && (
             <TouchableOpacity
               onPress={onClear}
-              className="absolute right-3 top-3"
+              className="absolute right-3 top-3 self-center"
             >
               <Ionicons name="close-circle" size={20} color="#9CA3AF" />
             </TouchableOpacity>

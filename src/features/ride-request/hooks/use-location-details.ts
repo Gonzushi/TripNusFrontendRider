@@ -7,7 +7,7 @@ export function useLocationDetails() {
   const [locationDetail, setLocationDetail] = useState<LocationDetail | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchLocationDetails = useCallback(
     async (selectedLocation: Coordinates) => {
@@ -41,6 +41,7 @@ export function useLocationDetails() {
   return {
     locationDetail,
     isLoading,
+    setIsLoading,
     fetchLocationDetails,
   };
 }

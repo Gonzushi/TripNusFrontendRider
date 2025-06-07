@@ -47,9 +47,12 @@ function Header({
           <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gray-200">
             {profilePictureUri ? (
               <Image
-                source={{ uri: profilePictureUri }}
                 className="h-full w-full"
                 resizeMode="cover"
+                source={{
+                  uri: `${profilePictureUri}?timestamp=${Date.now()}`,
+                  cache: 'reload',
+                }}
               />
             ) : (
               <Ionicons name="person" size={32} color="#4B5563" />

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { AuthContext } from '@/lib/auth';
 
@@ -53,7 +53,7 @@ function Logo() {
 function Header() {
   return (
     <View className="mb-8 items-center">
-      <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+      <View className="mb-4 mt-12  h-16 w-16 items-center justify-center rounded-full bg-blue-100">
         <Ionicons name="person-add" size={32} color="#2563EB" />
       </View>
       <Text className="mb-2 text-2xl font-bold text-gray-900">Buat Akun</Text>
@@ -157,7 +157,7 @@ export default function Register() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <ScrollView className="flex-1 bg-white">
       <View className="flex-1 justify-between">
         {/* Brand Logo */}
         <View>
@@ -240,6 +240,6 @@ export default function Register() {
           </Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }

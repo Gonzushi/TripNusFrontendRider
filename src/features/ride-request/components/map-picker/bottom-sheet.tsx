@@ -21,25 +21,25 @@ export function LocationBottomSheet({
   onConfirm,
 }: BottomSheetProps) {
   const renderLoadingState = (message: string) => (
-    <View className="items-center py-4">
+    <View className="items-center py-3">
       <ActivityIndicator size="large" color="#3B82F6" />
-      <Text className="mt-3 text-base text-gray-500">{message}</Text>
+      <Text className="mt-2 text-sm text-gray-500">{message}</Text>
     </View>
   );
 
   const renderLocationDetails = () => (
     <View>
-      <View className="mb-2 flex-row items-center">
+      <View className="mb-1 flex-row items-center">
         <MaterialCommunityIcons
           name="map-marker"
-          size={24}
+          size={20}
           color={type === 'pickup' ? '#3B82F6' : '#EF4444'}
         />
-        <Text className="flex-1 text-xl font-semibold text-gray-900">
+        <Text className="flex-1 text-lg font-semibold text-gray-900">
           {' ' + locationDetail?.title || 'Lokasi Tidak Diketahui'}
         </Text>
       </View>
-      <Text className="mb-2 pl-8 text-base text-gray-600">
+      <Text className="mb-2 pl-7 text-sm text-gray-600">
         {locationDetail?.address || 'Alamat tidak ditemukan'}
       </Text>
     </View>
@@ -54,8 +54,8 @@ export function LocationBottomSheet({
   };
 
   return (
-    <View className="bg-white p-6 shadow-lg">
-      <View className="mb-4 min-h-[100px] justify-center">
+    <View className="bg-white p-4 shadow-lg">
+      <View className="mb-3 min-h-[80px] justify-center">
         {!isMapReady
           ? renderLoadingState('Memuat peta...')
           : isLoading || isMapMoving
@@ -65,7 +65,7 @@ export function LocationBottomSheet({
       <TouchableOpacity
         onPress={onConfirm}
         disabled={!isMapReady || isLoading || isMapMoving || !locationDetail}
-        className={`mb-8 mt-2 rounded-2xl px-6 py-5 shadow-sm ${
+        className={`mb-8 rounded-xl px-4 py-3 shadow-sm ${
           !isMapReady || isLoading || isMapMoving || !locationDetail
             ? 'bg-gray-300'
             : type === 'pickup'
@@ -73,7 +73,7 @@ export function LocationBottomSheet({
               : 'bg-red-600 active:bg-red-700'
         }`}
       >
-        <Text className="text-center text-lg font-semibold text-white">
+        <Text className="text-center text-base font-semibold text-white">
           {getConfirmButtonText()}
         </Text>
       </TouchableOpacity>

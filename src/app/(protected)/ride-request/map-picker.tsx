@@ -8,6 +8,7 @@ import {
   LocationBottomSheet,
   MapPickerHeader,
 } from '@/features/ride-request/components/map-picker/';
+import DebugOverlay from '@/features/ride-request/components/map-picker/debug-overlay';
 import {
   useLocationDetails,
   useLocationStore,
@@ -15,6 +16,8 @@ import {
 } from '@/features/ride-request/hooks';
 import { type Coordinates } from '@/features/ride-request/types';
 import { SafeView } from '@/lib/safe-view';
+
+const DEBUG_MODE = false;
 
 export default function MapPicker() {
   const router = useRouter();
@@ -36,18 +39,28 @@ export default function MapPicker() {
     handleMyLocation,
   } = useMapInteraction(initialCoordinates);
 
-  const { locationDetail, isLoading, fetchLocationDetails } =
+  const { locationDetail, isLoading, setIsLoading, fetchLocationDetails } =
     useLocationDetails();
 
-  // Fetch location details when map stops moving
   useEffect(() => {
+    if (isMapMoving) {
+      setIsLoading(true);
+      return;
+    }
+
     if (isMapReady && !isMapMoving) {
       const timer = setTimeout(() => {
         fetchLocationDetails(selectedLocation);
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [selectedLocation, isMapMoving, fetchLocationDetails, isMapReady]);
+  }, [
+    selectedLocation,
+    isMapMoving,
+    fetchLocationDetails,
+    isMapReady,
+    setIsLoading,
+  ]);
 
   const handleConfirm = () => {
     if (locationDetail) {
@@ -68,6 +81,19 @@ export default function MapPicker() {
   return (
     <SafeView>
       <View className="flex-1 bg-gray-50">
+        {DEBUG_MODE && (
+          <DebugOverlay
+            variables={{
+              type,
+              initialCoordinates,
+              selectedLocation,
+              isMapMoving,
+              isMapReady,
+              isLoading,
+              locationDetail,
+            }}
+          />
+        )}
         <MapPickerHeader router={router} type={type as string} />
 
         {/* Map Container */}
@@ -80,11 +106,19 @@ export default function MapPicker() {
             showsMyLocationButton={false}
             initialRegion={{
               ...initialCoordinates,
-              latitudeDelta: 0.005,
-              longitudeDelta: 0.005,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
             }}
             onMapReady={() => {
               handleMapReady();
+              mapRef.current?.animateToRegion(
+                {
+                  ...initialCoordinates,
+                  latitudeDelta: 0.002,
+                  longitudeDelta: 0.002,
+                },
+                500
+              );
               fetchLocationDetails(selectedLocation);
             }}
             onRegionChangeComplete={handleRegionChangeComplete}
@@ -119,6 +153,7 @@ export default function MapPicker() {
           </TouchableOpacity>
         </View>
 
+            
         <LocationBottomSheet
           isMapReady={isMapReady}
           isLoading={isLoading}
