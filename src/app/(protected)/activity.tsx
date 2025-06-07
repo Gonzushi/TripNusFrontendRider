@@ -18,121 +18,132 @@ export default function Activity() {
     >
       <View className="flex-1 bg-white">
         {/* Enhanced Header */}
-        <View className="bg-blue-600 px-4 pb-12 pt-6">
+        <View className="bg-blue-600 px-4 pb-8 pt-4">
           <View className="items-center">
-            <Text className="mb-1 text-2xl font-bold text-white">
-              Trip History
+            <Text className="mb-1 text-xl font-bold text-white">
+              Riwayat Perjalanan
             </Text>
-            <Text className="text-sm text-white/80">
-              View all your past rides and their details
+            <Text className="text-xs text-white/80">
+              Lihat semua perjalanan Anda sebelumnya
             </Text>
           </View>
         </View>
 
         {/* Tabs */}
-        <View className="-mt-6 flex-row rounded-t-3xl border-b border-gray-100 bg-white px-4 py-5">
+        <View className="-mt-4 flex-row rounded-t-3xl border-b border-gray-100 bg-white px-4 py-3">
           <TouchableOpacity
-            className={`rounded-full px-4 py-2 ${
+            className={`rounded-full px-4 py-1.5 ${
               activeTab === 'all' ? 'bg-blue-600' : 'bg-gray-100'
             }`}
             onPress={() => setActiveTab('all')}
           >
             <Text
-              className={`${
+              className={`text-sm ${
                 activeTab === 'all' ? 'text-white' : 'text-gray-600'
               } font-medium`}
             >
-              All
+              Semua
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className={`ml-2 rounded-full px-4 py-2 ${
+            className={`ml-2 rounded-full px-4 py-1.5 ${
               activeTab === 'completed' ? 'bg-blue-600' : 'bg-gray-100'
             }`}
             onPress={() => setActiveTab('completed')}
           >
             <Text
-              className={`${
+              className={`text-sm ${
                 activeTab === 'completed' ? 'text-white' : 'text-gray-600'
               } font-medium`}
             >
-              Completed
+              Selesai
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className={`ml-2 rounded-full px-4 py-2 ${
+            className={`ml-2 rounded-full px-4 py-1.5 ${
               activeTab === 'cancelled' ? 'bg-blue-600' : 'bg-gray-100'
             }`}
             onPress={() => setActiveTab('cancelled')}
           >
             <Text
-              className={`${
+              className={`text-sm ${
                 activeTab === 'cancelled' ? 'text-white' : 'text-gray-600'
               } font-medium`}
             >
-              Cancelled
+              Dibatalkan
             </Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView className="flex-1 bg-gray-50">
-          <View className="space-y-6 p-4">
+          <View className="space-y-3 p-4">
             {/* Trip Card */}
-            <TouchableOpacity className="my-2 rounded-lg bg-white p-5 shadow-sm">
-              <View className="mb-4 flex-row items-start justify-between">
-                <View className="flex-row items-center">
-                  <View className="mr-2 h-2 w-2 rounded-full bg-green-500" />
-                  <Text className="font-medium text-green-500">Completed</Text>
-                </View>
-                <View className="items-end">
-                  <Text className="text-xl font-bold">$24.50</Text>
-                  <Text className="text-sm text-gray-500">Dec 15, 2024</Text>
-                  <Text className="text-sm text-gray-500">2:30 PM</Text>
-                </View>
-              </View>
-
-              <View className="space-y-4">
-                <View className="flex-row items-start">
-                  <View className="mt-1 w-6 items-center">
-                    <View className="h-3 w-3 rounded-full bg-blue-500" />
+            <TouchableOpacity className="rounded-2xl border border-blue-100 bg-white shadow-sm">
+              <View className="px-3 py-3">
+                {/* Status and Icon */}
+                <View className="mb-2 flex-row items-center justify-between">
+                  <View className="h-9 w-9 items-center justify-center rounded-full bg-blue-50">
+                    <Ionicons name="car" size={24} color="#3B82F6" />
                   </View>
-                  <View className="ml-2 flex-1">
-                    <Text className="mb-1 font-medium text-gray-900">
-                      Downtown Mall
-                    </Text>
-                    <Text className="text-sm leading-5 text-gray-500">
-                      123 Main Street, City Center
+                  <View className="flex-row items-center space-x-2">
+                    <View className="h-2 w-2 rounded-full bg-green-500" />
+                    <Text className="text-sm font-medium text-green-600">
+                      Selesai
                     </Text>
                   </View>
                 </View>
 
-                <View className="flex-row items-start">
-                  <View className="mt-1 w-6 items-center">
-                    <View className="h-3 w-3 rounded-full bg-red-500" />
+                {/* Route Info */}
+                <View className="mt-1 space-y-1.5">
+                  <View className="flex-row">
+                    <View className="mt-1.5 h-2 w-2 rounded-full bg-blue-500" />
+                    <View className="flex-1 pl-3">
+                      <Text
+                        className="text-sm font-medium text-gray-900"
+                        numberOfLines={1}
+                      >
+                        Downtown Mall
+                      </Text>
+                      <Text className="text-xs text-gray-500" numberOfLines={1}>
+                        123 Main Street, City Center
+                      </Text>
+                    </View>
                   </View>
-                  <View className="ml-2 flex-1">
-                    <Text className="mb-1 font-medium text-gray-900">
-                      Airport Terminal
-                    </Text>
-                    <Text className="text-sm leading-5 text-gray-500">
-                      456 Airport Blvd, Terminal 2
-                    </Text>
+
+                  <View className="flex-row">
+                    <View className="mt-1.5 h-2 w-2 rounded-full bg-red-500" />
+                    <View className="flex-1 pl-3">
+                      <Text
+                        className="text-sm font-medium text-gray-900"
+                        numberOfLines={1}
+                      >
+                        Airport Terminal
+                      </Text>
+                      <Text className="text-xs text-gray-500" numberOfLines={1}>
+                        456 Airport Blvd, Terminal 2
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
 
-              <View className="mt-4 flex-row items-center border-t border-gray-100 pt-4">
-                <Ionicons name="car-outline" size={20} color="#6B7280" />
-                <Text className="ml-2 text-gray-500">Standard Ride</Text>
-                <View className="flex-1 items-end">
+                {/* Bottom Info */}
+                <View className="mt-2 flex-row items-center justify-between border-t border-gray-50 pt-2">
+                  <View>
+                    <Text className="text-lg font-bold text-gray-800">
+                      Rp24.500
+                    </Text>
+                    <Text className="text-[11px] text-gray-600">
+                      15 Des 2024 • 14:30
+                    </Text>
+                  </View>
                   <View className="flex-row items-center">
-                    <Text className="mr-1 text-yellow-500">5.0</Text>
+                    <Text className="mr-1 text-xs text-yellow-500">5.0</Text>
                     <View className="flex-row">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Ionicons
                           key={star}
                           name="star"
-                          size={14}
+                          size={12}
                           color="#FCD34D"
                         />
                       ))}
@@ -142,55 +153,66 @@ export default function Activity() {
               </View>
             </TouchableOpacity>
 
-            {/* Cancelled Trip Card Example */}
-            <TouchableOpacity className="my-2 rounded-lg bg-white p-5 shadow-sm">
-              <View className="mb-4 flex-row items-start justify-between">
-                <View className="flex-row items-center">
-                  <View className="mr-2 h-2 w-2 rounded-full bg-red-500" />
-                  <Text className="font-medium text-red-500">Cancelled</Text>
-                </View>
-                <View className="items-end">
-                  <Text className="text-xl font-bold text-gray-400">$0.00</Text>
-                  <Text className="text-sm text-gray-500">Dec 10, 2024</Text>
-                  <Text className="text-sm text-gray-500">7:45 PM</Text>
-                </View>
-              </View>
-
-              <View className="space-y-4">
-                <View className="flex-row items-start">
-                  <View className="mt-1 w-6 items-center">
-                    <View className="h-3 w-3 rounded-full bg-blue-500" />
+            {/* Cancelled Trip Card */}
+            <TouchableOpacity className="rounded-2xl border border-red-100 bg-white shadow-sm">
+              <View className="px-3 py-3">
+                {/* Status and Icon */}
+                <View className="mb-2 flex-row items-center justify-between">
+                  <View className="h-9 w-9 items-center justify-center rounded-full bg-red-50">
+                    <Ionicons name="close-circle" size={24} color="#EF4444" />
                   </View>
-                  <View className="ml-2 flex-1">
-                    <Text className="mb-1 font-medium text-gray-900">
-                      Restaurant Plaza
-                    </Text>
-                    <Text className="text-sm leading-5 text-gray-500">
-                      555 Food Court, Shopping Center
+                  <View className="flex-row items-center space-x-2">
+                    <View className="h-2 w-2 rounded-full bg-red-500" />
+                    <Text className="text-sm font-medium text-red-600">
+                      Dibatalkan
                     </Text>
                   </View>
                 </View>
 
-                <View className="flex-row items-start">
-                  <View className="mt-1 w-6 items-center">
-                    <View className="h-3 w-3 rounded-full bg-gray-400" />
+                {/* Route Info */}
+                <View className="mt-1 space-y-1.5">
+                  <View className="flex-row">
+                    <View className="mt-1.5 h-2 w-2 rounded-full bg-blue-500" />
+                    <View className="flex-1 pl-3">
+                      <Text
+                        className="text-sm font-medium text-gray-900"
+                        numberOfLines={1}
+                      >
+                        Restaurant Plaza
+                      </Text>
+                      <Text className="text-xs text-gray-500" numberOfLines={1}>
+                        555 Food Court, Shopping Center
+                      </Text>
+                    </View>
                   </View>
-                  <View className="ml-2 flex-1">
-                    <Text className="mb-1 font-medium text-gray-900">
-                      City Park
-                    </Text>
-                    <Text className="text-sm leading-5 text-gray-500">
-                      777 Green Street, Park Entrance
-                    </Text>
+
+                  <View className="flex-row">
+                    <View className="mt-1.5 h-2 w-2 rounded-full bg-gray-400" />
+                    <View className="flex-1 pl-3">
+                      <Text
+                        className="text-sm font-medium text-gray-900"
+                        numberOfLines={1}
+                      >
+                        City Park
+                      </Text>
+                      <Text className="text-xs text-gray-500" numberOfLines={1}>
+                        777 Green Street, Park Entrance
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
 
-              <View className="mt-4 flex-row items-center border-t border-gray-100 pt-4">
-                <Ionicons name="car-outline" size={20} color="#6B7280" />
-                <Text className="ml-2 text-gray-500">Standard Ride</Text>
-                <View className="flex-1 items-end">
-                  <Text className="text-red-500">Cancelled by driver</Text>
+                {/* Bottom Info */}
+                <View className="mt-2 flex-row items-center justify-between border-t border-gray-50 pt-2">
+                  <View>
+                    <Text className="text-lg font-bold text-gray-400">Rp0</Text>
+                    <Text className="text-[11px] text-gray-600">
+                      10 Des 2024 • 19:45
+                    </Text>
+                  </View>
+                  <Text className="text-xs text-red-500">
+                    Dibatalkan oleh pengemudi
+                  </Text>
                 </View>
               </View>
             </TouchableOpacity>
