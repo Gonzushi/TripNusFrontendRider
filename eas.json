@@ -58,7 +58,6 @@
       }
     },
     "simulator": {
-      "pnpm": "9.12.3",
       "ios": {
         "simulator": true,
         "image": "latest"

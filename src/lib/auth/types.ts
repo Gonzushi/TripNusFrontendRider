@@ -93,7 +93,10 @@ export type AuthData = {
   riderId: string;
   riderProfilePictureUrl: string | null;
   driverId: string | null;
+  driverFirstName: string | null;
+  driverLastName: string | null;
   driverProfilePictureUrl: string | null;
+  driverStatus: string | null;
 };
 
 export type AuthStateInternal = {
@@ -116,6 +119,8 @@ export type AuthContextType = {
   ) => Promise<void>;
   logIn: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
+  refreshToken: (data: AuthData) => Promise<AuthData | null>;
+  checkAndRefreshToken: (data: AuthData) => Promise<AuthData | null>;
 };
 
 export type ApiRequestResponse<T> = {

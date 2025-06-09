@@ -33,6 +33,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         'This app uses your location to show nearby places.',
       NSLocationAlwaysUsageDescription:
         'This app uses your location in the background to improve your experience.',
+      ITSAppUsesNonExemptEncryption: false,
     },
   },
   android: {

@@ -201,17 +201,7 @@ export default function ProfileSetup() {
         ...authData,
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim() || null,
-        user: {
-          ...authData.user,
-          phone: formData.phoneNumber.trim(),
-        },
-        session: {
-          ...authData.session,
-          user: {
-            ...authData.session.user,
-            phone: formData.phoneNumber.trim(),
-          },
-        },
+        phone: formData.phoneNumber.trim(),
       };
       await setAuthData(updatedAuthData);
       router.replace('/profile-success');

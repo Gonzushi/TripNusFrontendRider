@@ -41,6 +41,8 @@ export const AuthContext = createContext<AuthContextType>({
   changePassword: async () => {},
   logIn: async () => {},
   logOut: async () => {},
+  refreshToken: async () => null,
+  checkAndRefreshToken: async () => null,
 });
 
 export function AuthProvider({ children }: PropsWithChildren) {
@@ -72,6 +74,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const now = Math.floor(Date.now() / 1000);
     if (data.session.expires_at > now) return data;
 
+    const newData = await refreshTokenApi(data.session.refresh_token);
+    if (newData) {
+      await updateAuthState({ isLoggedIn: true, data: newData });
+    } else {
+      await updateAuthState({ isLoggedIn: false, data: null });
+    }
+    return newData;
+  };
+
+  const refreshToken = async (data: AuthData): Promise<AuthData | null> => {
     const newData = await refreshTokenApi(data.session.refresh_token);
     if (newData) {
       await updateAuthState({ isLoggedIn: true, data: newData });
@@ -224,11 +236,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         if (value) {
           const storedState = JSON.parse(value);
           if (storedState.isLoggedIn && storedState.data) {
-            const validData = await checkAndRefreshToken(storedState.data);
-            await updateAuthState({
-              isLoggedIn: !!validData,
-              data: validData,
-            });
+            await checkAndRefreshToken(storedState.data);
           }
         }
       } catch (error) {
@@ -267,6 +275,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         forgotPassword,
         logIn,
         logOut,
+        refreshToken,
+        checkAndRefreshToken,
       }}
     >
       {children}

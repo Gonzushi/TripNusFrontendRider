@@ -123,7 +123,7 @@ const _buildTimeEnv = {
   EXPO_ACCOUNT_OWNER,
   EAS_PROJECT_ID,
   // ADD YOUR ENV VARS HERE TOO
-  GOOGLE_SERVICES_FILE: `./google-services.${APP_ENV}.json`,
+  GOOGLE_SERVICES_FILE: `./google-services.json`,
   API_URL: process.env.API_URL,
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
 };

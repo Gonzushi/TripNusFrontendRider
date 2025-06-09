@@ -6,6 +6,10 @@ import { AuthContext } from './auth-context';
 export default function AuthCheck({ children }: { children: React.ReactNode }) {
   const authState = useContext(AuthContext);
 
+  if (authState.authData) {
+    authState.checkAndRefreshToken(authState.authData);
+  }
+
   if (!authState.isReady) {
     return null;
   }
