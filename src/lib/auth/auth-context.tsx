@@ -236,7 +236,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
         if (value) {
           const storedState = JSON.parse(value);
           if (storedState.isLoggedIn && storedState.data) {
-            await checkAndRefreshToken(storedState.data);
+            const validData = await checkAndRefreshToken(storedState.data);
+            await updateAuthState({
+              isLoggedIn: !!validData,
+              data: validData,
+            });
           }
         }
       } catch (error) {

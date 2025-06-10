@@ -75,6 +75,11 @@ export async function registerForPushNotificationsAsync() {
       token = await Notifications.getExpoPushTokenAsync({
         projectId: EAS_PROJECT_ID,
       });
+
+      if (token.data) {
+        
+      }
+
       console.log('Successfully got push token:', token);
     } else {
       console.log('Must use physical device for Push Notifications');

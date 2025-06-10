@@ -3,6 +3,8 @@
 import type * as Notifications from 'expo-notifications';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { AuthContext } from '../auth';
+import { updateRiderProfileApi } from '../rider';
 import {
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
@@ -13,7 +15,7 @@ type NotificationContextValue = {
   expoPushToken: string | null;
   lastNotificationResponse: Notifications.NotificationResponse | null;
   lastNotification: Notifications.Notification | null;
-  error: string | null; 
+  error: string | null;
 };
 
 const NotificationContext = createContext<NotificationContextValue>({
@@ -26,6 +28,8 @@ const NotificationContext = createContext<NotificationContextValue>({
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { authData } = useContext(AuthContext);
+
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
   const [lastNotificationResponse, setLastNotificationResponse] =
     useState<Notifications.NotificationResponse | null>(null);
@@ -35,9 +39,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     registerForPushNotificationsAsync()
-      .then((token) => {
+      .then(async (token) => {
         if (token) {
           setExpoPushToken(token);
+          if (token && authData?.session.access_token) {
+            await updateRiderProfileApi(authData?.session.access_token, {
+              push_token: token,
+            });
+          }
         } else {
           setError('Failed to get push notification token.');
         }

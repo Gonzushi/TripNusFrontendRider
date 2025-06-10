@@ -14,10 +14,10 @@ initializeFirebase();
 
 export default function RootLayout() {
   return (
-    <NotificationProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <NotificationProvider>
         <Stack screenOptions={{ headerShown: false, animation: 'none' }} />
-      </AuthProvider>
-    </NotificationProvider>
+      </NotificationProvider>
+    </AuthProvider>
   );
 }
