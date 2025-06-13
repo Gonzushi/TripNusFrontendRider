@@ -141,12 +141,11 @@ export default function FareCalculation() {
       const data = await response.json();
 
       if (response.ok) {
-        // Navigate to ride tracking or confirmation screen
+        // Navigate to searching driver screen
         router.replace({
-          pathname: '/(protected)/ride-request',
+          pathname: '/active-ride/searching',
           params: {
-            rideId: data.data.id,
-            status: 'finding-driver',
+            data: JSON.stringify(data.data),
           },
         });
       } else {

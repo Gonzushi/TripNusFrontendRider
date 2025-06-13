@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { type Href, type Router, useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
   Image,
@@ -13,7 +13,31 @@ import {
 import { AuthContext } from '@/lib/auth';
 import NotificationDebug from '@/lib/notification/notification-debug';
 import { getProfilePictureUri } from '@/lib/profile-picture';
+import { getActiveRide } from '@/lib/ride/api';
 import { SafeView } from '@/lib/safe-view';
+
+// Debug
+function DebugButton({
+  router,
+  page,
+  label,
+}: {
+  router: Router;
+  page: Href;
+  label: string;
+}) {
+  return (
+    <View className="mt-4 px-4">
+      <TouchableOpacity
+        onPress={() => router.push(page)}
+        className="flex-row items-center justify-center rounded-xl bg-blue-600 py-4"
+      >
+        <Ionicons name="car" size={20} color="white" className="mr-2" />
+        <Text className="ml-2 text-base font-semibold text-white">{label}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
 
 // Header component with profile picture
 function Header({
@@ -227,8 +251,22 @@ export default function Index() {
   }, [authData?.user.id, authData?.riderProfilePictureUrl]);
 
   // Event handlers
-  const handleSearchPress = () => {
-    router.push('/ride-request');
+  const handleSearchPress = async () => {
+    const response = await getActiveRide(
+      authData!.session.access_token,
+      authData!.riderId
+    );
+
+    if (response && response.data) {
+      router.push({
+        pathname: '/active-ride/searching',
+        params: {
+          data: JSON.stringify(response.data),
+        },
+      });
+    } else {
+      router.push('/ride-request');
+    }
   };
 
   const handleInvite = async () => {
@@ -270,6 +308,12 @@ export default function Index() {
         <SearchBar onPress={handleSearchPress} />
 
         <StartTripButton onPress={handleSearchPress} />
+
+        <DebugButton
+          router={router}
+          page="/active-ride/driver-found"
+          label="Dapat Driver"
+        />
 
         <View className="mt-4 px-4">
           <Text className="text-center text-gray-500">
