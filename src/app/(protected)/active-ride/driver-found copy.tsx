@@ -16,7 +16,7 @@ export default function DriverFound() {
 
   const handleShareTrip = async () => {
     try {
-      await Share.share({
+      const result = await Share.share({
         message: `I'm on my way! Track my trip here: [Trip Link]`,
         title: 'Share Trip Details',
       });
@@ -28,6 +28,12 @@ export default function DriverFound() {
   const handleCancelTrip = () => {
     // TODO: Implement cancel trip logic
     router.back();
+  };
+
+  // TODO: Replace with actual driver location from WebSocket/Push Notification
+  const driverLocation = {
+    latitude: -6.2088,
+    longitude: 106.8456,
   };
 
   return (
@@ -53,18 +59,12 @@ export default function DriverFound() {
           provider={PROVIDER_GOOGLE}
           style={{ flex: 1 }}
           initialRegion={{
-            latitude: data.planned_pickup_coords.coordinates[1],
-            longitude: data.planned_pickup_coords.coordinates[0],
+            ...driverLocation,
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           }}
         >
-          <Marker
-            coordinate={{
-              latitude: data.planned_pickup_coords.coordinates[1],
-              longitude: data.planned_pickup_coords.coordinates[0],
-            }}
-          >
+          <Marker coordinate={driverLocation}>
             <View className="items-center">
               <View className="h-12 w-12 items-center justify-center rounded-full bg-blue-600">
                 <Ionicons name="car" size={24} color="white" />
@@ -99,23 +99,23 @@ export default function DriverFound() {
 
           <View className="flex-row items-center">
             <Image
-              source={{ uri: data.drivers.profile_picture_url }}
+              source={{ uri: params.driverPhoto }}
               className="h-14 w-14 rounded-full"
             />
             <View className="ml-3 flex-1">
               <View className="flex-row items-center">
                 <Text className="text-lg font-medium text-gray-900">
-                  {data.drivers.first_name} {data.drivers.last_name}
+                  {params.driverName}
                 </Text>
                 <View className="ml-2 flex-row items-center">
                   <Ionicons name="star" size={14} color="#EAB308" />
                   <Text className="ml-1 text-sm text-gray-600">
-                    {data.drivers.rating} rides
+                    {params.driverRating} ({params.totalRides} rides)
                   </Text>
                 </View>
               </View>
               <Text className="text-gray-600">
-                {data.drivers.vehicle_model} • {data.drivers.vehicle_color}
+                {params.carModel} • {params.carColor}
               </Text>
             </View>
           </View>
@@ -126,7 +126,7 @@ export default function DriverFound() {
                 License Plate
               </Text>
               <Text className="text-lg font-bold text-gray-900">
-                {data.drivers.vehicle_plate_number}
+                {params.licensePlate}
               </Text>
             </View>
             <TouchableOpacity
@@ -153,7 +153,7 @@ export default function DriverFound() {
                 <View className="ml-3">
                   <Text className="text-sm text-gray-600">Vehicle Type</Text>
                   <Text className="font-medium text-gray-900">
-                    {data.drivers.vehicle_type === 'car' ? 'Car' : 'Motorcycle'}
+                    {params.vehicleType === 'car' ? 'Car' : 'Motorcycle'}
                   </Text>
                 </View>
               </View>
@@ -167,7 +167,7 @@ export default function DriverFound() {
                 <View className="ml-3">
                   <Text className="text-sm text-gray-600">Color</Text>
                   <Text className="font-medium text-gray-900">
-                    {data.drivers.vehicle_color}
+                    {params.carColor}
                   </Text>
                 </View>
               </View>
@@ -181,7 +181,7 @@ export default function DriverFound() {
                 <View className="ml-3">
                   <Text className="text-sm text-gray-600">License Plate</Text>
                   <Text className="font-medium text-gray-900">
-                    {data.drivers.vehicle_plate_number}
+                    {params.licensePlate}
                   </Text>
                 </View>
               </View>

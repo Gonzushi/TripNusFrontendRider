@@ -27,13 +27,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       googleMapsApiKey: Env.GOOGLE_API_KEY,
     },
     infoPlist: {
-      UIBackgroundModes: ['remote-notification'],
+      UIBackgroundModes: ['remote-notification', 'location', 'fetch'],
       'aps-environment': 'development',
       NSLocationWhenInUseUsageDescription:
-        'This app uses your location to show nearby places.',
+        'Aplikasi ini menggunakan lokasi Anda untuk menampilkan tempat-tempat terdekat.',
       NSLocationAlwaysUsageDescription:
-        'This app uses your location in the background to improve your experience.',
+        'Aplikasi ini menggunakan lokasi Anda di latar belakang untuk meningkatkan pengalaman Anda.',
+      NSLocationAlwaysAndWhenInUseUsageDescription:
+        'TripNus memerlukan lokasi Anda untuk menyediakan pelacakan perjalanan dan layanan navigasi yang akurat, bahkan saat aplikasi berjalan di latar belakang.',
       ITSAppUsesNonExemptEncryption: false,
+      LSApplicationQueriesSchemes: ['whatsapp', 'tel', 'mailto', 'https'],
     },
   },
   android: {

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -21,7 +21,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthContext } from '@/lib/auth';
-import { updateRide } from '@/lib/ride/api';
+import { cancelRideByRiderBeforePickup } from '@/lib/ride/api';
 import { type RideResponse } from '@/lib/ride/types';
 import { SafeView } from '@/lib/safe-view';
 
@@ -33,6 +33,7 @@ export default function SearchingDriver() {
   const rideData: RideResponse['data'] = JSON.parse(params.data);
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Animation setup
   const pulseAnim = useSharedValue(1);
@@ -76,17 +77,81 @@ export default function SearchingDriver() {
   }));
 
   const handleCancelSearch = async () => {
-    const { error } = await updateRide(authData!.session.access_token, {
-      rideId: rideData!.id,
-      status: 'cancelled',
-    });
+    // Show confirmation prompt first
+    Alert.alert(
+      'Batalkan Pencarian',
+      'Apakah Anda yakin ingin membatalkan pencarian pengemudi?',
+      [
+        {
+          text: 'Tidak',
+          style: 'cancel',
+        },
+        {
+          text: 'Ya',
+          onPress: async () => {
+            try {
+              setIsCancelling(true);
+              const { error, status } =
+                await cancelRideByRiderBeforePickup(
+                  authData!.session.access_token,
+                  {
+                    ride_id: rideData!.id,
+                    rider_id: authData!.riderId,
+                  }
+                );
 
-    if (error) {
-      Alert.alert('Error', error.message);
-      return;
-    }
-
-    router.back();
+              if (status === 200) {
+                router.back();
+              } else if (status === 409) {
+                Alert.alert(
+                  'Tidak Dapat Dibatalkan',
+                  'Pengemudi sudah ditemukan. Silakan minta pengemudi untuk membatalkan perjalanan.',
+                  [
+                    {
+                      text: 'OK',
+                      onPress: () => {
+                        router.push({
+                          pathname: '/active-ride/driver-found',
+                          params: { data: params.data },
+                        });
+                      },
+                    },
+                  ]
+                );
+              } else {
+                Alert.alert(
+                  'Error',
+                  error || 'Gagal membatalkan pencarian. Silakan coba lagi.',
+                  [
+                    {
+                      text: 'Coba Lagi',
+                      onPress: handleCancelSearch,
+                    },
+                    {
+                      text: 'Batal',
+                      style: 'cancel',
+                    },
+                  ]
+                );
+              }
+            } catch {
+              Alert.alert('Error', 'Terjadi kesalahan. Silakan coba lagi.', [
+                {
+                  text: 'Coba Lagi',
+                  onPress: handleCancelSearch,
+                },
+                {
+                  text: 'Batal',
+                  style: 'cancel',
+                },
+              ]);
+            } finally {
+              setIsCancelling(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   // Update status cards based on ride status
@@ -314,11 +379,21 @@ export default function SearchingDriver() {
         >
           <TouchableOpacity
             onPress={handleCancelSearch}
+            disabled={isCancelling}
             className="w-full rounded-xl border border-red-100 bg-red-50 py-4"
           >
-            <Text className="text-center font-medium text-red-600">
-              Batalkan Pencarian
-            </Text>
+            <View className="flex-row items-center justify-center">
+              {isCancelling && (
+                <ActivityIndicator
+                  size="small"
+                  color="#DC2626"
+                  className="mr-2"
+                />
+              )}
+              <Text className="text-center font-medium text-red-600">
+                Batalkan Pencarian
+              </Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>

@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { type Href, type Router, useRouter } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
+  AppState,
   Image,
   ScrollView,
   Share,
@@ -11,33 +13,11 @@ import {
 } from 'react-native';
 
 import { AuthContext } from '@/lib/auth';
+import { webSocketService } from '@/lib/background/websocket-service';
 import NotificationDebug from '@/lib/notification/notification-debug';
 import { getProfilePictureUri } from '@/lib/profile-picture';
 import { getActiveRide } from '@/lib/ride/api';
 import { SafeView } from '@/lib/safe-view';
-
-// Debug
-function DebugButton({
-  router,
-  page,
-  label,
-}: {
-  router: Router;
-  page: Href;
-  label: string;
-}) {
-  return (
-    <View className="mt-4 px-4">
-      <TouchableOpacity
-        onPress={() => router.push(page)}
-        className="flex-row items-center justify-center rounded-xl bg-blue-600 py-4"
-      >
-        <Ionicons name="car" size={20} color="white" className="mr-2" />
-        <Text className="ml-2 text-base font-semibold text-white">{label}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 // Header component with profile picture
 function Header({
@@ -163,33 +143,57 @@ function StatsSection() {
 }
 
 // Search bar component
-function SearchBar({ onPress }: { onPress: () => void }) {
+function SearchBar({
+  onPress,
+  isLoading,
+}: {
+  onPress: () => void;
+  isLoading: boolean;
+}) {
   return (
     <View className="mt-2 px-4">
       <TouchableOpacity
         onPress={onPress}
-        className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50 p-4 active:bg-gray-100"
+        disabled={isLoading}
+        className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50 p-4 active:bg-gray-100 disabled:opacity-50"
       >
         <Ionicons name="location" size={20} color="#6B7280" />
         <Text className="ml-3 flex-1 text-gray-500">Masukkan tujuan Anda</Text>
-        <Ionicons name="search" size={20} color="#6B7280" />
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#6B7280" />
+        ) : (
+          <Ionicons name="search" size={20} color="#6B7280" />
+        )}
       </TouchableOpacity>
     </View>
   );
 }
 
 // Start trip button component
-function StartTripButton({ onPress }: { onPress: () => void }) {
+function StartTripButton({
+  onPress,
+  isLoading,
+}: {
+  onPress: () => void;
+  isLoading: boolean;
+}) {
   return (
     <View className="mt-4 px-4">
       <TouchableOpacity
         onPress={onPress}
-        className="flex-row items-center justify-center rounded-xl bg-blue-600 py-4"
+        disabled={isLoading}
+        className="flex-row items-center justify-center rounded-xl bg-blue-600 py-4 disabled:opacity-50"
       >
-        <Ionicons name="car" size={20} color="white" className="mr-2" />
-        <Text className="ml-2 text-base font-semibold text-white">
-          Mulai Perjalanan
-        </Text>
+        {isLoading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <View className="flex-row items-center">
+            <Ionicons name="car" size={20} color="white" className="mr-2" />
+            <Text className="ml-2 text-base font-semibold text-white">
+              Mulai Perjalanan
+            </Text>
+          </View>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -199,7 +203,7 @@ function StartTripButton({ onPress }: { onPress: () => void }) {
 function CommunitySupport({ onShare }: { onShare: () => void }) {
   return (
     <View className="px-4">
-      <View className="rounded-xl border border-blue-100/50 bg-blue-50/50 p-5">
+      <View className="rounded-xl border border-blue-200/100 bg-blue-50/50 p-5">
         <View className="flex-row items-start">
           <View className="flex-1">
             <Text className="mb-1 text-base font-medium text-gray-800">
@@ -237,6 +241,10 @@ export default function Index() {
   const [profilePictureUri, setProfilePictureUri] = useState<string | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [hasActiveRide, setHasActiveRide] = useState(false);
+  const [isCheckingActiveRide, setIsCheckingActiveRide] = useState(false);
 
   // Load profile picture
   const refreshProfilePicture = async () => {
@@ -246,29 +254,100 @@ export default function Index() {
     }
   };
 
-  useEffect(() => {
-    refreshProfilePicture();
-  }, [authData?.user.id, authData?.riderProfilePictureUrl]);
+  // Check for active ride
+  const checkActiveRide = useCallback(async () => {
+    if (!authData?.session.access_token) return;
 
-  // Event handlers
-  const handleSearchPress = async () => {
-    const response = await getActiveRide(
-      authData!.session.access_token,
-      authData!.riderId
-    );
+    try {
+      const response = await getActiveRide(authData.session.access_token);
+      setHasActiveRide(!!response?.data);
+    } catch (error) {
+      console.error('Error checking active ride:', error);
+    }
+  }, [authData]);
 
-    if (response && response.data) {
-      router.push({
-        pathname: '/active-ride/searching',
-        params: {
-          data: JSON.stringify(response.data),
-        },
-      });
-    } else {
-      router.push('/ride-request');
+  // Handle active ride button press
+  const handleActiveRidePress = async () => {
+    if (isCheckingActiveRide) return;
+
+    try {
+      setIsCheckingActiveRide(true);
+      const response = await getActiveRide(authData!.session.access_token);
+
+      if (response?.data) {
+        await webSocketService.connect(authData!.riderId);
+
+        if (response.data.status === 'requesting_driver') {
+          router.push({
+            pathname: '/active-ride/searching',
+            params: { data: JSON.stringify(response.data) },
+          });
+        } else if (response.data.status === 'driver_accepted') {
+          router.push({
+            pathname: '/active-ride/ride-details',
+            params: { data: JSON.stringify(response.data) },
+          });
+        }
+      } else {
+        setHasActiveRide(false);
+        webSocketService.disconnect();
+      }
+    } catch (error) {
+      console.error('Error handling active ride:', error);
+    } finally {
+      setIsCheckingActiveRide(false);
     }
   };
 
+  // Simplified search press handler
+  const handleSearchPress = useCallback(async () => {
+    if (isProcessing) return;
+
+    try {
+      setIsProcessing(true);
+      setIsLoading(true);
+      router.push('/ride-request');
+    } catch (error) {
+      console.error('Error handling search press:', error);
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 1000);
+    }
+  }, [router, isProcessing]);
+
+  // Check active ride on mount
+  useEffect(() => {
+    checkActiveRide();
+  }, [checkActiveRide]);
+
+  // Check active ride when app comes to foreground
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        checkActiveRide();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [checkActiveRide]);
+
+  // Check active ride when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      checkActiveRide();
+    }, [checkActiveRide])
+  );
+
+  // Set profile picture
+  useEffect(() => {
+    refreshProfilePicture();
+  }, []);
+
+  // Event handlers
   const handleInvite = async () => {
     try {
       const result = await Share.share({
@@ -305,15 +384,39 @@ export default function Index() {
 
         <StatsSection />
 
-        <SearchBar onPress={handleSearchPress} />
-
-        <StartTripButton onPress={handleSearchPress} />
-
-        {/* <DebugButton
-          router={router}
-          page="/active-ride/driver-found"
-          label="Dapat Driver"
-        /> */}
+        {hasActiveRide ? (
+          <View className="mt-4 px-4">
+            <TouchableOpacity
+              onPress={handleActiveRidePress}
+              disabled={isCheckingActiveRide}
+              className="flex-row items-center justify-center rounded-xl bg-blue-600 py-4 disabled:opacity-50"
+            >
+              {isCheckingActiveRide ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <View className="flex-row items-center">
+                  <Ionicons
+                    name="car"
+                    size={20}
+                    color="white"
+                    className="mr-2"
+                  />
+                  <Text className="ml-2 text-base font-semibold text-white">
+                    Lihat Perjalanan Aktif
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View>
+            <SearchBar onPress={handleSearchPress} isLoading={isLoading} />
+            <StartTripButton
+              onPress={handleSearchPress}
+              isLoading={isLoading}
+            />
+          </View>
+        )}
 
         <View className="mt-4 px-4">
           <Text className="text-center text-gray-500">

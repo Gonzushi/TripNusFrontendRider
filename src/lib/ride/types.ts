@@ -3,7 +3,7 @@ export type Point = {
   crs: {
     type: 'name';
     properties: {
-      name: 'EPSG:4326';
+      name: string;
     };
   };
   coordinates: [number, number];
@@ -11,10 +11,10 @@ export type Point = {
 
 export type FareBreakdown = {
   base_fare: number;
-  platform_fee: number;
   distance_fare: number;
   duration_fare: number;
   rounding_adjustment: number;
+  platform_fee: number;
 };
 
 export type RideStatus =
@@ -27,6 +27,33 @@ export type RideStatus =
 
 export type VehicleType = 'motorcycle' | 'car';
 export type ServiceVariant = 'standard' | 'premium';
+
+export type MatchAttempt = {
+  retry_count: number;
+  attempted_at: number;
+  message_data: {
+    fare: number;
+    type: string;
+    pickup: {
+      coords: [number, number];
+      address: string;
+    };
+    dropoff: {
+      coords: [number, number];
+      address: string;
+    };
+    ride_id: string;
+    distance_m: number;
+    duration_s: number;
+    platform_fee: number;
+    app_commission: number;
+    driver_earning: number;
+    fare_breakdown: FareBreakdown;
+    request_expired_at: number;
+    distance_to_pickup_km: number;
+  };
+  attemptedDrivers: string[];
+};
 
 export type RideData = {
   id: string;
@@ -44,6 +71,7 @@ export type RideData = {
   fare: number;
   driver_earning: number;
   app_commission: number;
+  platform_fee: number;
   fare_breakdown: FareBreakdown;
   planned_pickup_coords: Point;
   planned_pickup_address: string;
@@ -51,7 +79,24 @@ export type RideData = {
   planned_dropoff_address: string;
   actual_pickup_coords: Point | null;
   actual_dropoff_coords: Point | null;
-  platform_fee: number;
+  match_attempt?: MatchAttempt;
+  status_reason: string | null;
+  drivers: {
+    users: {
+      phone: string;
+    };
+    id: string;
+    rating: number;
+    first_name: string;
+    last_name: string;
+    vehicle_type: string;
+    vehicle_year: number;
+    vehicle_brand: string;
+    vehicle_color: string;
+    vehicle_model: string;
+    profile_picture_url: string;
+    vehicle_plate_number: string;
+  };
 };
 
 export type RideResponse = {
@@ -66,25 +111,16 @@ export type UpdateRidePayload = {
   rideId: string;
   driver_id?: string;
   status?: string;
-  ended_at?: string; // ISO format timestamp
+  ended_at?: string; 
   actual_pickup_coords?: [number, number];
   actual_dropoff_coords?: [number, number];
 };
 
-export type UpdateRideSuccessResponse = {
-  status: number; // e.g., 200
-  message: string; // e.g., "Ride is updated successfully"
-  code: 'RIDE_UPDATED';
-  data: {
-    id: string;
-    status: string;
-    driver_id: string;
-  };
+export type CancelRideResponse = {
+  status: number;
+  message?: string;
+  code: string;
+  data: RideData;
+  error?: string;
 };
 
-export type UpdateRideErrorResponse = {
-  status: number;
-  error: string;
-  message: string;
-  code: string;
-};

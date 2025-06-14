@@ -1,23 +1,15 @@
 import { API_URL } from './constants';
-import {
-  type RideResponse,
-  type UpdateRideErrorResponse,
-  type UpdateRidePayload,
-  type UpdateRideSuccessResponse,
-} from './types';
-
+import { type CancelRideResponse, type RideResponse } from './types';
 
 export async function getActiveRide(
-  access_token: string,
-  riderId: string
+  access_token: string
 ): Promise<RideResponse | null> {
-  const responseRaw = await fetch(`${API_URL}/ride/active-ride`, {
-    method: 'POST',
+  const responseRaw = await fetch(`${API_URL}/ride/active-ride-by-rider`, {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${access_token}`,
     },
-    body: JSON.stringify({ riderId }),
   });
 
   if (!responseRaw.ok) {
@@ -29,48 +21,25 @@ export async function getActiveRide(
   return response;
 }
 
-export async function updateRide(
+export async function cancelRideByRiderBeforePickup(
   access_token: string,
-  updatePayload: UpdateRidePayload
-): Promise<{
-  data: UpdateRideSuccessResponse | null;
-  error: UpdateRideErrorResponse | null;
-}> {
-  try {
-    const responseRaw = await fetch(`${API_URL}/ride/update`, {
-      method: 'PATCH',
+  body: {
+    ride_id: string;
+    rider_id: string;
+  }
+): Promise<CancelRideResponse> {
+  const responseRaw = await fetch(
+    `${API_URL}/ride/cancel-by-rider-before-pickup`,
+    {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${access_token}`,
       },
-      body: JSON.stringify(updatePayload),
-    });
-
-    const responseJson = await responseRaw.json();
-
-    if (!responseRaw.ok) {
-      return {
-        data: null,
-        error: {
-          status: responseRaw.status,
-          ...responseJson,
-        },
-      };
+      body: JSON.stringify(body),
     }
+  );
 
-    return {
-      data: responseJson,
-      error: null,
-    };
-  } catch (err) {
-    return {
-      data: null,
-      error: {
-        status: 500,
-        error: 'Internal Server Error',
-        message: (err as Error).message || 'Unexpected error occurred',
-        code: 'INTERNAL_ERROR',
-      },
-    };
-  }
+  const responseJson = await responseRaw.json();
+  return responseJson;
 }
