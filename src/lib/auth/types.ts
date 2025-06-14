@@ -87,18 +87,19 @@ export type AuthData = {
     };
   };
   userId: string;
-  firstName: string;
-  lastName: string | null;
   phone: string | null;
   riderId: string;
+  riderFirstName: string;
+  riderLastName: string | null;
   riderProfilePictureUrl: string | null;
   driverId: string | null;
   driverFirstName: string | null;
   driverLastName: string | null;
-  driverProfilePictureUrl: string | null;
-  driverStatus: string | null;
   driverVehicleType: string | null;
+  driverProfilePictureUrl: string | null;
   driverVehiclePlate: string | null;
+  driverStatus: string | null;
+  driverNotes: string | null;
 };
 
 export type AuthStateInternal = {

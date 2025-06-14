@@ -298,7 +298,7 @@ export default function Index() {
     <SafeView isShowingTabBar={true}>
       <ScrollView className="flex-1 bg-white">
         <Header
-          firstName={authData?.firstName || 'Teman'}
+          firstName={authData?.riderFirstName || 'Teman'}
           profilePictureUri={profilePictureUri}
           onProfilePress={handleProfilePress}
         />
@@ -309,11 +309,11 @@ export default function Index() {
 
         <StartTripButton onPress={handleSearchPress} />
 
-        <DebugButton
+        {/* <DebugButton
           router={router}
           page="/active-ride/driver-found"
           label="Dapat Driver"
-        />
+        /> */}
 
         <View className="mt-4 px-4">
           <Text className="text-center text-gray-500">

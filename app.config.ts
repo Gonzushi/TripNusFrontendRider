@@ -77,14 +77,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-notifications',
       {
-        // "icon": "./assets/images/notification-icon.png",
-        // "color": "#ffffff",
-        // "sounds": ["./assets/sounds/notification.wav"],
         androidMode: 'default',
         androidCollapsedTitle: 'TripNus',
         iosDisplayInForeground: true,
       },
     ],
+    [
+      'expo-image-picker',
+      {
+        photosPermission:
+          'TripNus memerlukan akses ke galeri foto Anda untuk mengupload Foto Profil.',
+      },
+    ],
+    'expo-task-manager',
   ],
   experiments: { typedRoutes: true },
   extra: { ...ClientEnv, eas: { projectId: Env.EAS_PROJECT_ID } },

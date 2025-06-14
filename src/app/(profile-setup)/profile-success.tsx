@@ -4,7 +4,6 @@ import React, { useContext, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { AuthContext } from '@/lib/auth';
-import { createRiderProfileApi } from '@/lib/user';
 
 // Logo component with TripNus branding
 function Logo() {
@@ -72,27 +71,9 @@ function ContinueButton({
 
 export default function ProfileSuccess() {
   const [isLoading, setIsLoading] = useState(false);
-  const { authData, setAuthData, logOut } = useContext(AuthContext);
+  const { authData, logOut } = useContext(AuthContext);
   const router = useRouter();
 
-  // Create rider profile if not exists
-  const createRiderProfile = async (): Promise<void> => {
-    if (!authData?.riderId && authData?.session.access_token) {
-      const response = await createRiderProfileApi(
-        authData.session.access_token
-      );
-
-      if (response.status !== 200 && response.status !== 201) {
-        throw new Error(response.message || 'Gagal membuat profil penumpang');
-      }
-
-      const { id } = response.data;
-      await setAuthData({
-        ...authData,
-        riderId: id,
-      });
-    }
-  };
 
   // Event Handlers
   const handleError = async (error: Error) => {
@@ -104,7 +85,6 @@ export default function ProfileSuccess() {
   const handleContinue = async () => {
     setIsLoading(true);
     try {
-      await createRiderProfile();
       if (router.canDismiss()) {
         router.dismissAll();
       }
@@ -126,7 +106,7 @@ export default function ProfileSuccess() {
 
         {/* Main Content */}
         <View className="px-6">
-          <Header firstName={authData?.firstName || ''} />
+          <Header firstName={authData?.riderFirstName || ''} />
 
           {/* Action Buttons */}
           <View className="mx-2 mt-8 space-y-4">

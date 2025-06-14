@@ -1,7 +1,8 @@
 import { useContext, useState } from 'react';
 
 import { AuthContext } from '@/lib/auth';
-import { updatePhoneApi, updateProfileApi } from '@/lib/user/api';
+import { updateRiderProfileApi } from '@/lib/rider';
+import { updatePhoneApi } from '@/lib/user/api';
 
 interface FormData {
   firstName: string;
@@ -14,9 +15,9 @@ export const usePersonalInformationForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    firstName: authData?.firstName || '',
-    lastName: authData?.lastName || '',
-    phoneNumber: authData?.user.phone || '',
+    firstName: authData?.riderFirstName || '',
+    lastName: authData?.riderLastName || '',
+    phoneNumber: authData?.phone || '',
   });
 
   const validateForm = () => {
@@ -41,10 +42,12 @@ export const usePersonalInformationForm = () => {
       setIsLoading(true);
 
       // Update profile (name)
-      const profileData = await updateProfileApi(
+      const profileData = await updateRiderProfileApi(
         authData?.session.access_token || '',
-        formData.firstName,
-        formData.lastName
+        {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+        }
       );
 
       if (profileData.status !== 200) {
@@ -97,9 +100,9 @@ export const usePersonalInformationForm = () => {
 
   const handleCancel = () => {
     setFormData({
-      firstName: authData?.firstName || '',
-      lastName: authData?.lastName || '',
-      phoneNumber: authData?.user.phone || '',
+      firstName: authData?.riderFirstName || '',
+      lastName: authData?.riderLastName || '',
+      phoneNumber: authData?.phone || '',
     });
     setIsEditing(false);
   };

@@ -4,10 +4,10 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { AuthContext } from '@/lib/auth';
+import { createRiderProfileApi, updateRiderProfileApi } from '@/lib/rider';
 import {
   type ProfileFormData,
   updatePhoneApi,
-  updateProfileApi,
   validateProfileForm,
 } from '@/lib/user';
 
@@ -148,7 +148,7 @@ export default function ProfileSetup() {
 
   // Effects
   useEffect(() => {
-    if (authData?.firstName && authData?.phone) {
+    if (authData?.riderFirstName && authData?.phone) {
       router.replace('/profile-success');
     }
   }, [authData]);
@@ -175,11 +175,27 @@ export default function ProfileSetup() {
         throw new Error('Token tidak valid');
       }
 
+      // Create rider profile if not exists
+      const riderData = await createRiderProfileApi(
+        authData.session.access_token
+      );
+
+      if (
+        riderData.status !== 200 &&
+        riderData.status !== 201 &&
+        riderData.status !== 400 &&
+        riderData.code !== 'RIDER_EXISTS'
+      ) {
+        throw new Error(riderData.message || 'Gagal membuat profil penumpang');
+      }
+
       // Update profile
-      const profileData = await updateProfileApi(
+      const profileData = await updateRiderProfileApi(
         authData.session.access_token,
-        formData.firstName,
-        formData.lastName
+        {
+          first_name: formData.firstName.trim(),
+          last_name: formData.lastName.trim() || undefined,
+        }
       );
 
       if (profileData.status !== 200) {
@@ -199,10 +215,12 @@ export default function ProfileSetup() {
       // Update auth data with both profile and phone updates
       const updatedAuthData = {
         ...authData,
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim() || null,
-        phone: formData.phoneNumber.trim(),
+        riderId: riderData.data.id,
+        riderFirstName: formData.firstName.trim(),
+        riderLastName: formData.lastName.trim() || null,
+        phone: formData.phoneNumber.trim().replace(/^\+/, ''),
       };
+
       await setAuthData(updatedAuthData);
       router.replace('/profile-success');
     } catch (error) {
