@@ -20,8 +20,11 @@ const path = require('path');
 const APP_ENV = process.env.APP_ENV ?? 'development';
 const envPath = path.resolve(__dirname, `.env.${APP_ENV}`);
 
-console.log('\nRunning env.js first with APP_ENV = ', APP_ENV, '\n');
-console.log('envPath = ', envPath, '\n');
+const DEBUG_MODE = false;
+if (DEBUG_MODE) {
+  console.log('\nRunning env.js first with APP_ENV = ', APP_ENV, '\n');
+  console.log('envPath = ', envPath, '\n');
+}
 
 require('dotenv').config({
   path: envPath,

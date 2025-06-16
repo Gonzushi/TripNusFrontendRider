@@ -96,6 +96,7 @@ export type RideData = {
     vehicle_model: string;
     profile_picture_url: string;
     vehicle_plate_number: string;
+    completed_rides?: number | null;
   };
 };
 
@@ -111,7 +112,7 @@ export type UpdateRidePayload = {
   rideId: string;
   driver_id?: string;
   status?: string;
-  ended_at?: string; 
+  ended_at?: string;
   actual_pickup_coords?: [number, number];
   actual_dropoff_coords?: [number, number];
 };
@@ -123,4 +124,3 @@ export type CancelRideResponse = {
   data: RideData;
   error?: string;
 };
-

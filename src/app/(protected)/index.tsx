@@ -242,7 +242,6 @@ export default function Index() {
     null
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [hasActiveRide, setHasActiveRide] = useState(false);
   const [isCheckingActiveRide, setIsCheckingActiveRide] = useState(false);
 
@@ -300,22 +299,16 @@ export default function Index() {
   };
 
   // Simplified search press handler
-  const handleSearchPress = useCallback(async () => {
-    if (isProcessing) return;
-
+  const handleSearchPress = () => {
     try {
-      setIsProcessing(true);
       setIsLoading(true);
       router.push('/ride-request');
     } catch (error) {
       console.error('Error handling search press:', error);
     } finally {
       setIsLoading(false);
-      setTimeout(() => {
-        setIsProcessing(false);
-      }, 1000);
     }
-  }, [router, isProcessing]);
+  };
 
   // Check active ride on mount
   useEffect(() => {

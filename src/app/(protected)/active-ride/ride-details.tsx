@@ -1,10 +1,11 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
+import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   Image,
   Linking,
   ScrollView,
@@ -14,7 +15,6 @@ import {
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { AuthContext } from '@/lib/auth';
 import {
   type LatLng,
   webSocketService,
@@ -25,55 +25,92 @@ import { SafeView } from '@/lib/safe-view';
 
 export default function RideDetails() {
   const router = useRouter();
-  const { authData } = useContext(AuthContext);
   const params = useLocalSearchParams<{ data: string }>();
   const rideData: RideData = JSON.parse(params.data);
-  const [riderLocation, setRiderLocation] = useState<Location | null>(null);
   const [driverLocation, setDriverLocation] = useState<LatLng | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isFollowingDriver, setIsFollowingDriver] = useState(true);
 
   const mapRef = useRef<MapView | null>(null);
   const hasInitializedMap = useRef(false);
 
-  // Subsctibe to driver's location
+  // Activate websocket when app comes to foreground
   useEffect(() => {
-    webSocketService.subscribeToDriver(rideData.drivers.id);
-
-    const handleLocationUpdate = (location: LatLng) => {
-      setDriverLocation(location);
-      console.log('driverLocation', location);
-    };
-
-    webSocketService.addDriverLocationListener(handleLocationUpdate);
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        setupWebSocket();
+      }
+    });
 
     return () => {
-      webSocketService.removeDriverLocationListener(handleLocationUpdate);
+      subscription.remove();
     };
-  }, []);
+  }, [rideData.drivers.id]);
 
-  // Request location permission and get initial location
+  // Activate websocket when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      setupWebSocket();
+
+      return () => {
+        cleanupWebSocket();
+      };
+    }, [rideData.drivers.id])
+  );
+
+  // Activate websocket when component mounts or rideData.drivers.id changes
   useEffect(() => {
-    async function getLocation() {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        setRiderLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-      }
+    setupWebSocket();
+
+    return () => {
+      cleanupWebSocket();
+    };
+  }, [rideData.drivers.id]);
+
+  // Shared location update handler
+  const handleLocationUpdate = (location: LatLng) => {
+    setDriverLocation(location);
+
+    // Update map to follow driver if following is enabled
+    if (isFollowingDriver && mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          ...location,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        },
+        500
+      );
     }
-    getLocation();
-  }, []);
+  };
+
+  // Subscribe & listen
+  const setupWebSocket = async () => {
+    try {
+      await webSocketService.unsubscribeFromDriver();
+      await webSocketService.subscribeToDriver(rideData.drivers.id);
+      webSocketService.addDriverLocationListener(handleLocationUpdate);
+    } catch (err) {
+      console.error('WebSocket setup error:', err);
+    }
+  };
+
+  // Unsubscribe & clean up
+  const cleanupWebSocket = async () => {
+    try {
+      await webSocketService.unsubscribeFromDriver();
+    } catch (err) {
+      console.error('Unsubscribe failed:', err);
+    }
+    webSocketService.removeDriverLocationListener(handleLocationUpdate);
+  };
 
   // Initial map setup
   useEffect(() => {
     if (
       !mapRef.current ||
       !rideData ||
-      !riderLocation ||
+      !driverLocation ||
       hasInitializedMap.current
     )
       return;
@@ -85,7 +122,7 @@ export default function RideDetails() {
       [
         { latitude: pickupCoords[1], longitude: pickupCoords[0] },
         { latitude: dropoffCoords[1], longitude: dropoffCoords[0] },
-        riderLocation,
+        driverLocation,
       ],
       {
         edgePadding: { top: 130, right: 50, bottom: 50, left: 50 },
@@ -93,7 +130,7 @@ export default function RideDetails() {
       }
     );
     hasInitializedMap.current = true;
-  }, [rideData, riderLocation]);
+  }, [rideData, driverLocation]);
 
   const openWhatsApp = async (phoneNumber: string) => {
     try {
@@ -221,6 +258,19 @@ export default function RideDetails() {
                   color="#EF4444"
                 />
               </Marker>
+
+              {/* Driver Location Marker */}
+              {driverLocation && (
+                <Marker coordinate={driverLocation} title="Driver Location">
+                  <View className="items-center justify-center">
+                    <MaterialCommunityIcons
+                      name="car"
+                      size={32}
+                      color="#3B82F6"
+                    />
+                  </View>
+                </Marker>
+              )}
             </MapView>
 
             {/* Map Control Buttons */}
@@ -229,6 +279,7 @@ export default function RideDetails() {
                 className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-md active:bg-gray-100"
                 onPress={() => {
                   if (mapRef.current) {
+                    setIsFollowingDriver(false);
                     mapRef.current.animateToRegion(
                       {
                         latitude: pickupCoords[1],
@@ -251,6 +302,7 @@ export default function RideDetails() {
                 className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-md active:bg-gray-100"
                 onPress={() => {
                   if (mapRef.current) {
+                    setIsFollowingDriver(false);
                     mapRef.current.animateToRegion(
                       {
                         latitude: dropoffCoords[1],
@@ -272,7 +324,8 @@ export default function RideDetails() {
               <TouchableOpacity
                 className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-md active:bg-gray-100"
                 onPress={() => {
-                  if (mapRef.current && riderLocation) {
+                  setIsFollowingDriver(false);
+                  if (mapRef.current && driverLocation) {
                     mapRef.current.fitToCoordinates(
                       [
                         {
@@ -283,7 +336,7 @@ export default function RideDetails() {
                           latitude: dropoffCoords[1],
                           longitude: dropoffCoords[0],
                         },
-                        riderLocation,
+                        driverLocation,
                       ],
                       {
                         edgePadding: {
@@ -303,12 +356,13 @@ export default function RideDetails() {
               <TouchableOpacity
                 className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-md active:bg-gray-100"
                 onPress={() => {
-                  if (mapRef.current && riderLocation) {
+                  if (mapRef.current && driverLocation) {
+                    setIsFollowingDriver(true);
                     mapRef.current.animateToRegion(
                       {
-                        ...riderLocation,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
+                        ...driverLocation,
+                        latitudeDelta: 0.005,
+                        longitudeDelta: 0.005,
                       },
                       1000
                     );

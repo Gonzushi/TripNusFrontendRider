@@ -2,9 +2,12 @@ import type { ConfigContext, ExpoConfig } from '@expo/config';
 
 import { ClientEnv, Env } from './env';
 
-console.log('Running app.config.ts \n');
-console.log('Env', Env);
-console.log('ClientEnv', ClientEnv);
+const DEBUG_MODE = false;
+if (DEBUG_MODE) {
+  console.log('Running app.config.ts \n');
+  console.log('Env', Env);
+  console.log('ClientEnv', ClientEnv);
+}
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,

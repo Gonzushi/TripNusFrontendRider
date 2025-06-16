@@ -4,8 +4,9 @@ import { io, type Socket } from 'socket.io-client';
 // Constants
 const WEBSOCKET_URL = 'wss://ws.trip-nus.com';
 // const WEBSOCKET_URL = 'http://localhost:3001';
+// const WEBSOCKET_URL = 'http://192.168.100.212:3001';
 
-export type LatLng = { lat: number; lng: number };
+export type LatLng = { latitude: number; longitude: number };
 export type DriverLocationListener = (location: LatLng) => void;
 
 class WebSocketService {
@@ -39,7 +40,8 @@ class WebSocketService {
 
   async connect(riderId: string): Promise<void> {
     if (this.socket?.connected && this.riderId === riderId) {
-      console.log('Already connected with same rider info');
+      console.log('✅ Websocket already connected with same rider info');
+      await this.sendLocationUpdate();
       return;
     }
 
@@ -54,29 +56,24 @@ class WebSocketService {
       return;
     }
 
-    
     this.riderId = riderId;
-    
+
     return new Promise<void>((resolve, reject) => {
+      console.log('Connecting to websocket');
       this.socket = io(WEBSOCKET_URL, {
         transports: ['websocket'],
       });
-      
+
+      console.log('Socket', this.socket);
       this.socket.once('connect', async () => {
         console.log(
           '✅ Websocket Connected to server with ID:',
           this.socket?.id
         );
-        console.log('Connecting to websocket with riderId:', this.riderId);
 
         try {
-          const location = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          });
-          this.currentLocation = location;
-
+          await this.getCurrentLocation();
           await this.registerRider();
-
           await this.handleDriverLocationUpdates();
 
           resolve();
@@ -107,6 +104,13 @@ class WebSocketService {
     };
   }
 
+  private async getCurrentLocation() {
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    });
+    this.currentLocation = location;
+  }
+
   private async registerRider() {
     if (!this.socket || !this.riderId || !this.currentLocation) return;
 
@@ -129,10 +133,7 @@ class WebSocketService {
     if (!this.socket || !this.riderId || !this.currentLocation) return;
 
     try {
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-      this.currentLocation = location;
+      await this.getCurrentLocation();
 
       const data = this.createRiderData();
       this.socket.emit('rider:updateLocation', data);
@@ -148,19 +149,54 @@ class WebSocketService {
   }
 
   // Subscribe to driver location
-  async subscribeToDriver(driverId: string) {
-    if (!this.socket) return;
-    this.subscribedDriverId = driverId;
-    this.socket.emit('rider:subscribeToDriver', { driverId });
+  async subscribeToDriver(driverId: string): Promise<void> {
+    // Already subscribed to the same driver
+    if (this.subscribedDriverId === driverId) {
+      return;
+    }
+
+    return new Promise((resolve, reject) => {
+      if (!this.socket) return resolve();
+
+      this.subscribedDriverId = driverId;
+
+      this.socket.emit(
+        'rider:subscribeToDriver',
+        { driverId },
+        (response: { success: boolean; message: string }) => {
+          if (response?.success) {
+            console.log('[websocket] Subscribed to driver', driverId);
+            resolve();
+          } else {
+            this.subscribedDriverId = null; // Reset on failure
+            reject(new Error('Failed to subscribe'));
+          }
+        }
+      );
+    });
   }
 
   // Unsubscribe from current driver
-  async unsubscribeFromDriver() {
+  async unsubscribeFromDriver(): Promise<void> {
     if (!this.socket || !this.subscribedDriverId) return;
-    this.socket.emit('rider:unsubscribeFromDriver', {
-      driverId: this.subscribedDriverId,
+
+    const driverId = this.subscribedDriverId;
+
+    return new Promise((resolve, reject) => {
+      this.socket!.emit(
+        'rider:unsubscribeFromDriver',
+        { driverId },
+        (response: { success: boolean; message: string }) => {
+          if (response?.success) {
+            console.log('[websocket] Unsubscribed from driver', driverId);
+            this.subscribedDriverId = null;
+            resolve();
+          } else {
+            reject(new Error('Failed to unsubscribe'));
+          }
+        }
+      );
     });
-    this.subscribedDriverId = null;
   }
 
   // Listen for driver location updates and notify listeners
@@ -190,8 +226,11 @@ class WebSocketService {
 
   // Disconnect from server
   async disconnect() {
+    console.log(' ❌ Disconnecting websocket');
     if (this.socket) {
-      await this.unsubscribeFromDriver();
+      if (this.subscribedDriverId) {
+        await this.unsubscribeFromDriver();
+      }
       this.socket.disconnect();
       this.socket = null;
       this.riderId = null;
@@ -204,15 +243,3 @@ class WebSocketService {
 
 // Export a singleton instance
 export const webSocketService = new WebSocketService();
-
-// useEffect(() => {
-//   const handleLocationUpdate = (location) => {
-//     setMapMarker(location);
-//   };
-
-//   webSocketService.addDriverLocationListener(handleLocationUpdate);
-
-//   return () => {
-//     webSocketService.removeDriverLocationListener(handleLocationUpdate);
-//   };
-// }, []);
