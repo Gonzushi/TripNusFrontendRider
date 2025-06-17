@@ -13,11 +13,12 @@ import {
 } from 'react-native';
 
 import { AuthContext } from '@/lib/auth';
-import { webSocketService } from '@/lib/background/websocket-service';
 import NotificationDebug from '@/lib/notification/notification-debug';
 import { getProfilePictureUri } from '@/lib/profile-picture';
 import { getActiveRide } from '@/lib/ride/api';
 import { SafeView } from '@/lib/safe-view';
+
+const DEBUG_MODE = true;
 
 // Header component with profile picture
 function Header({
@@ -76,6 +77,7 @@ function StatCard({
   borderColor,
   value,
   label,
+  iconSize = 22,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   iconColor: string;
@@ -83,22 +85,40 @@ function StatCard({
   borderColor: string;
   value: string;
   label: string;
+  iconSize?: number;
 }) {
   return (
     <View
-      className={`w-[31%] rounded-2xl border ${borderColor} ${bgColor} shadow-sm`}
+      className={`aspect-square w-[31%] rounded-2xl border ${borderColor} ${bgColor} shadow-sm`}
     >
-      <View className="px-3 py-4">
+      <View className="flex-1 px-3 py-4">
+        {/* Top 50%: Value and Icon */}
         <View
-          className={`mb-3 h-11 w-11 items-center justify-center rounded-full ${
-            bgColor.replace('bg-', 'bg-') + '/90'
-          }`}
+          style={{ flex: 5 }}
+          className="flex-row items-center justify-between"
         >
-          <Ionicons name={icon} size={28} color={iconColor} />
+          <Text className="text-xl font-bold text-gray-800">{value}</Text>
+          <View
+            className={`h-9 w-9 items-center justify-center rounded-full ${
+              bgColor.replace('bg-', 'bg-') + '/90'
+            }`}
+          >
+            <Ionicons name={icon} size={iconSize} color={iconColor} />
+          </View>
         </View>
-        <View>
-          <Text className="text-2xl font-bold text-gray-800">{value}</Text>
-          <Text className="mt-1 text-[13px] text-gray-600">{label}</Text>
+
+        {/* Bottom 50%: Label aligned top-left, no truncation */}
+        <View
+          style={{ flex: 5 }}
+          className="w-full items-start justify-start pt-1"
+        >
+          <Text
+            className="w-full text-[13px] leading-[17px] text-gray-600"
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {label}
+          </Text>
         </View>
       </View>
     </View>
@@ -120,6 +140,7 @@ function StatsSection() {
           borderColor="border-blue-100"
           value="82"
           label="Total Perjalanan"
+          iconSize={26}
         />
         <StatCard
           icon="map"
@@ -128,6 +149,7 @@ function StatsSection() {
           borderColor="border-purple-100"
           value="13 km"
           label="Jarak Rata-rata"
+          iconSize={20}
         />
         <StatCard
           icon="star"
@@ -136,6 +158,7 @@ function StatsSection() {
           borderColor="border-yellow-100"
           value="4.9"
           label="Penilaian"
+          iconSize={26}
         />
       </View>
     </View>
@@ -155,7 +178,7 @@ function SearchBar({
       <TouchableOpacity
         onPress={onPress}
         disabled={isLoading}
-        className="flex-row items-center rounded-xl border border-gray-200 bg-gray-50 p-4 active:bg-gray-100 disabled:opacity-50"
+        className="h-14 flex-row items-center rounded-xl border border-gray-400 bg-gray-50 px-4 active:bg-gray-100 disabled:opacity-50"
       >
         <Ionicons name="location" size={20} color="#6B7280" />
         <Text className="ml-3 flex-1 text-gray-500">Masukkan tujuan Anda</Text>
@@ -163,36 +186,6 @@ function SearchBar({
           <ActivityIndicator size="small" color="#6B7280" />
         ) : (
           <Ionicons name="search" size={20} color="#6B7280" />
-        )}
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-// Start trip button component
-function StartTripButton({
-  onPress,
-  isLoading,
-}: {
-  onPress: () => void;
-  isLoading: boolean;
-}) {
-  return (
-    <View className="mt-4 px-4">
-      <TouchableOpacity
-        onPress={onPress}
-        disabled={isLoading}
-        className="flex-row items-center justify-center rounded-xl bg-blue-600 py-4 disabled:opacity-50"
-      >
-        {isLoading ? (
-          <ActivityIndicator size="small" color="white" />
-        ) : (
-          <View className="flex-row items-center">
-            <Ionicons name="car" size={20} color="white" className="mr-2" />
-            <Text className="ml-2 text-base font-semibold text-white">
-              Mulai Perjalanan
-            </Text>
-          </View>
         )}
       </TouchableOpacity>
     </View>
@@ -268,34 +261,7 @@ export default function Index() {
   // Handle active ride button press
   const handleActiveRidePress = async () => {
     if (isCheckingActiveRide) return;
-
-    try {
-      setIsCheckingActiveRide(true);
-      const response = await getActiveRide(authData!.session.access_token);
-
-      if (response?.data) {
-        await webSocketService.connect(authData!.riderId);
-
-        if (response.data.status === 'requesting_driver') {
-          router.push({
-            pathname: '/active-ride/searching',
-            params: { data: JSON.stringify(response.data) },
-          });
-        } else if (response.data.status === 'driver_accepted') {
-          router.push({
-            pathname: '/active-ride/ride-details',
-            params: { data: JSON.stringify(response.data) },
-          });
-        }
-      } else {
-        setHasActiveRide(false);
-        webSocketService.disconnect();
-      }
-    } catch (error) {
-      console.error('Error handling active ride:', error);
-    } finally {
-      setIsCheckingActiveRide(false);
-    }
+    router.push('/active-ride/ride-details');
   };
 
   // Simplified search press handler
@@ -378,22 +344,17 @@ export default function Index() {
         <StatsSection />
 
         {hasActiveRide ? (
-          <View className="mt-4 px-4">
+          <View className="mt-2 px-4">
             <TouchableOpacity
               onPress={handleActiveRidePress}
               disabled={isCheckingActiveRide}
-              className="flex-row items-center justify-center rounded-xl bg-blue-600 py-4 disabled:opacity-50"
+              className="h-14 flex-row items-center justify-center rounded-xl bg-blue-600 px-4 disabled:opacity-50"
             >
               {isCheckingActiveRide ? (
                 <ActivityIndicator size="small" color="white" />
               ) : (
                 <View className="flex-row items-center">
-                  <Ionicons
-                    name="car"
-                    size={20}
-                    color="white"
-                    className="mr-2"
-                  />
+                  <Ionicons name="car" size={20} color="white" />
                   <Text className="ml-2 text-base font-semibold text-white">
                     Lihat Perjalanan Aktif
                   </Text>
@@ -404,10 +365,6 @@ export default function Index() {
         ) : (
           <View>
             <SearchBar onPress={handleSearchPress} isLoading={isLoading} />
-            <StartTripButton
-              onPress={handleSearchPress}
-              isLoading={isLoading}
-            />
           </View>
         )}
 
@@ -423,7 +380,7 @@ export default function Index() {
 
         <CommunitySupport onShare={handleInvite} />
 
-        <NotificationDebug />
+        {DEBUG_MODE && <NotificationDebug />}
 
         <View className="h-8" />
       </ScrollView>

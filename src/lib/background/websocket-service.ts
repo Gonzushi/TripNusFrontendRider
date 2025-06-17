@@ -1,27 +1,105 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
+import { router } from 'expo-router';
 import { io, type Socket } from 'socket.io-client';
 
+import NotificationHandler from '../notification-handler';
+import {
+  DEBOUNCE_SUB_DELAY_MS,
+  INTERNAL_SOCKET_EVENTS,
+  MAX_CACHE_AGE_MS,
+  RIDER_LOCATION_KEY,
+} from './constants';
+import { debugLog } from './utils';
+
 // Constants
+const DEBUG_MODE = false;
 const WEBSOCKET_URL = 'wss://ws.trip-nus.com';
 // const WEBSOCKET_URL = 'http://localhost:3001';
 // const WEBSOCKET_URL = 'http://192.168.100.212:3001';
 
-export type LatLng = { latitude: number; longitude: number };
-export type DriverLocationListener = (location: LatLng) => void;
+export type LocationWithHeading = {
+  latitude: number;
+  longitude: number;
+  heading_deg: number;
+};
+export type DriverLocationListener = (location: LocationWithHeading) => void;
 
 class WebSocketService {
   socket: Socket | null = null;
   private riderId: string | null = null;
   private currentLocation: Location.LocationObject | null = null;
   private subscribedDriverId: string | null = null;
-  private lastDriverLocation: LatLng | null = null;
+  private lastDriverLocation: LocationWithHeading | null = null;
   private driverLocationListeners: Set<DriverLocationListener> = new Set();
+
+  private lastSubscribeTime = 0;
+  private lastUnsubscribeTime = 0;
+
+  private isConnecting = false;
+  private hasSetupListeners = false;
+  private lastRegisterAt: number = 0;
 
   constructor() {
     this.socket = null;
     this.riderId = null;
   }
 
+  // Save current location to AsyncStorage
+  private async saveCurrentLocation() {
+    if (!this.currentLocation) return;
+
+    try {
+      await AsyncStorage.setItem(
+        RIDER_LOCATION_KEY,
+        JSON.stringify({
+          ...this.currentLocation,
+          timestamp: Date.now(),
+        })
+      );
+    } catch (error) {
+      console.warn('⚠️ Failed to save location to storage:', error);
+    }
+  }
+
+  // Load last known location from AsyncStorage
+  private async loadCachedLocation(): Promise<Location.LocationObject | null> {
+    try {
+      const json = await AsyncStorage.getItem(RIDER_LOCATION_KEY);
+      if (json) {
+        const parsed = JSON.parse(json);
+        if (
+          parsed?.coords &&
+          typeof parsed.coords.latitude === 'number' &&
+          typeof parsed.coords.longitude === 'number' &&
+          parsed.timestamp
+        ) {
+          return parsed as Location.LocationObject;
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to load location from storage:', error);
+    }
+    return null;
+  }
+
+  // Use cached location if recent, otherwise fetch new location
+  private async loadOrFetchLocation() {
+    const cached = await this.loadCachedLocation();
+
+    if (cached && cached.timestamp) {
+      const age = Date.now() - new Date(cached.timestamp).getTime();
+      if (age < MAX_CACHE_AGE_MS) {
+        this.currentLocation = cached;
+        return;
+      }
+    }
+
+    // If cache is missing or stale
+    await this.getCurrentLocation();
+  }
+
+  // Request foreground location permissions
   async requestLocationPermission(): Promise<boolean> {
     try {
       const { status: foregroundStatus } =
@@ -38,58 +116,155 @@ class WebSocketService {
     }
   }
 
+  // Log all events for debugging
+  private async watchAllSocketEvents(socket: Socket) {
+    // Custom and dynamic events
+    socket.onAny((event, ...args) => {
+      console.log(`📥 [socket:onAny] ${event} |`, ...args);
+    });
+
+    // Internal events that don't go through onAny
+    for (const event of INTERNAL_SOCKET_EVENTS) {
+      socket.on(event, (...args) => {
+        console.log(`⚙️  [socket:internal] ${event} |`, ...args);
+      });
+    }
+  }
+
+  // Connect to websocket server
   async connect(riderId: string): Promise<void> {
-    if (this.socket?.connected && this.riderId === riderId) {
-      console.log('✅ Websocket already connected with same rider info');
-      await this.sendLocationUpdate();
+    if (this.isConnecting) {
+      console.log(
+        '⚠️ WebSocket is currently connecting. Ignoring duplicate call.'
+      );
       return;
     }
 
-    if (this.socket?.connected) {
-      console.log('Disconnecting existing connection before reconnecting');
-      this.disconnect();
-    }
+    this.isConnecting = true;
 
-    const hasPermission = await this.requestLocationPermission();
-    if (!hasPermission) {
-      console.error('Location permission denied');
-      return;
-    }
-
-    this.riderId = riderId;
-
-    return new Promise<void>((resolve, reject) => {
-      console.log('Connecting to websocket');
-      this.socket = io(WEBSOCKET_URL, {
-        transports: ['websocket'],
-      });
-
-      console.log('Socket', this.socket);
-      this.socket.once('connect', async () => {
+    try {
+      if (this.socket?.connected && this.riderId === riderId) {
         console.log(
-          '✅ Websocket Connected to server with ID:',
-          this.socket?.id
+          `✅ Websocket already connected with same rider info, connection: ${this.socket.connected}`
         );
+        await this.loadOrFetchLocation();
+        await this.sendLocationUpdate();
+        return;
+      }
 
-        try {
-          await this.getCurrentLocation();
-          await this.registerRider();
-          await this.handleDriverLocationUpdates();
+      if (this.socket?.connected) {
+        console.log('Disconnecting existing connection before reconnecting');
+        this.disconnect();
+      }
 
-          resolve();
-        } catch (error) {
-          console.error('❌ Error during websocket setup:', error);
-          reject(error);
-        }
+      const hasPermission = await this.requestLocationPermission();
+      if (!hasPermission) {
+        console.error('Location permission denied');
+        return;
+      }
+
+      this.riderId = riderId;
+
+      return new Promise<void>(async (resolve, reject) => {
+        this.socket = io(WEBSOCKET_URL, {
+          transports: ['websocket'],
+          reconnection: true,
+          reconnectionAttempts: Infinity,
+          reconnectionDelay: 2000,
+        });
+
+        this.socket.once('connect', async () => {
+          // Clean up ghost socket from hot reload
+          if (globalThis.__TRIPNUS_SOCKET__?.id !== this.socket?.id) {
+            globalThis.__TRIPNUS_SOCKET__?.disconnect?.();
+          }
+          globalThis.__TRIPNUS_SOCKET__ = this.socket;
+
+          console.log(
+            '✅ Websocket Connected to server with ID:',
+            this.socket?.id
+          );
+
+          try {
+            await this.getCurrentLocation();
+            await this.registerRider();
+
+            resolve();
+          } catch (error) {
+            console.error('❌ Error during websocket setup:', error);
+            reject(error);
+          }
+        });
+
+        this.socket.once('connect_error', (err: Error) => {
+          console.error('⚠️ Connection error:', err.message);
+          this.isConnecting = false;
+          reject(err);
+        });
+
+        await this.setupEventListeners();
+        if (DEBUG_MODE) this.watchAllSocketEvents(this.socket!);
       });
+    } catch (error) {
+      console.error('❌ Unhandled error during connect:', error);
+      throw error;
+    } finally {
+      this.isConnecting = false;
+    }
+  }
 
-      this.socket.once('connect_error', (err: Error) => {
-        console.error('⚠️ Connection error:', err.message);
-        reject(err);
-      });
+  // Listen for driver location updates and notify listeners
+  private async setupEventListeners() {
+    if (!this.socket || this.hasSetupListeners) return;
+    this.hasSetupListeners = true;
+
+    this.socket.on('message', async (data) => {
+      debugLog(DEBUG_MODE, '📩 Server:', data);
+      await NotificationHandler(data, router);
+    });
+
+    this.socket.io.on('reconnect', async () => {
+      console.log('🔄 Reconnected to server');
+      try {
+        await this.loadOrFetchLocation();
+        await this.registerRider();
+      } catch (error) {
+        console.error('❌ Failed to re-register after reconnect:', error);
+      }
+    });
+
+    this.socket.io.on('reconnect_failed', () => {
+      console.warn(
+        '⚠️ Socket temporarily unable to reconnect. Will keep trying.'
+      );
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('❌ Websocket is disconnected due to:', reason);
+    });
+
+    this.socket.on('connect_error', (err: Error) => {
+      console.error('⚠️ Connection error (repeat):', err.message);
+    });
+
+    this.socket?.on('driver:locationUpdate', (payload: LocationWithHeading) => {
+      this.lastDriverLocation = payload;
+      for (const listener of this.driverLocationListeners) {
+        listener(payload);
+      }
     });
   }
 
+  // Fetch current GPS location
+  private async getCurrentLocation() {
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    });
+    this.currentLocation = location;
+    await this.saveCurrentLocation();
+  }
+
+  // Build driver data payload for register/update
   private createRiderData() {
     if (!this.riderId || !this.currentLocation)
       throw new Error('Missing rider data');
@@ -104,15 +279,13 @@ class WebSocketService {
     };
   }
 
-  private async getCurrentLocation() {
-    const location = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    });
-    this.currentLocation = location;
-  }
-
+  // Emit rider registration event
   private async registerRider() {
     if (!this.socket || !this.riderId || !this.currentLocation) return;
+
+    const now = Date.now();
+    if (now - this.lastRegisterAt < 3000) return;
+    this.lastRegisterAt = now;
 
     try {
       const data = this.createRiderData();
@@ -129,12 +302,11 @@ class WebSocketService {
     }
   }
 
+  // Emit location update to server
   async sendLocationUpdate() {
     if (!this.socket || !this.riderId || !this.currentLocation) return;
 
     try {
-      await this.getCurrentLocation();
-
       const data = this.createRiderData();
       this.socket.emit('rider:updateLocation', data);
 
@@ -150,17 +322,20 @@ class WebSocketService {
 
   // Subscribe to driver location
   async subscribeToDriver(driverId: string): Promise<void> {
-    // Already subscribed to the same driver
-    if (this.subscribedDriverId === driverId) {
+    const now = Date.now();
+
+    if (now - this.lastSubscribeTime < DEBOUNCE_SUB_DELAY_MS) {
       return;
     }
 
+    this.lastSubscribeTime = now;
+
+    if (!this.socket) return;
+
+    this.subscribedDriverId = driverId;
+
     return new Promise((resolve, reject) => {
-      if (!this.socket) return resolve();
-
-      this.subscribedDriverId = driverId;
-
-      this.socket.emit(
+      this.socket!.emit(
         'rider:subscribeToDriver',
         { driverId },
         (response: { success: boolean; message: string }) => {
@@ -168,7 +343,7 @@ class WebSocketService {
             console.log('[websocket] Subscribed to driver', driverId);
             resolve();
           } else {
-            this.subscribedDriverId = null; // Reset on failure
+            this.subscribedDriverId = null;
             reject(new Error('Failed to subscribe'));
           }
         }
@@ -176,8 +351,16 @@ class WebSocketService {
     });
   }
 
-  // Unsubscribe from current driver
+  // Unubscribe to driver location
   async unsubscribeFromDriver(): Promise<void> {
+    const now = Date.now();
+
+    if (now - this.lastUnsubscribeTime < DEBOUNCE_SUB_DELAY_MS) {
+      return;
+    }
+
+    this.lastUnsubscribeTime = now;
+
     if (!this.socket || !this.subscribedDriverId) return;
 
     const driverId = this.subscribedDriverId;
@@ -199,16 +382,6 @@ class WebSocketService {
     });
   }
 
-  // Listen for driver location updates and notify listeners
-  private async handleDriverLocationUpdates() {
-    this.socket?.on('driver:locationUpdate', (payload: LatLng) => {
-      this.lastDriverLocation = payload;
-      for (const listener of this.driverLocationListeners) {
-        listener(payload);
-      }
-    });
-  }
-
   // Add a listener for driver location
   addDriverLocationListener(listener: DriverLocationListener) {
     this.driverLocationListeners.add(listener);
@@ -224,19 +397,40 @@ class WebSocketService {
     return this.lastDriverLocation;
   }
 
-  // Disconnect from server
-  async disconnect() {
-    console.log(' ❌ Disconnecting websocket');
-    if (this.socket) {
-      if (this.subscribedDriverId) {
-        await this.unsubscribeFromDriver();
-      }
+  // Remove all socket listeners
+  private cleanupEventListeners() {
+    if (!this.socket) return;
+    this.socket.off('message');
+    this.socket.off('reconnect');
+    this.socket.off('reconnect_failed');
+    this.socket.off('disconnect');
+    this.socket.off('connect_error');
+    this.socket.off('register');
+    this.hasSetupListeners = false;
+  }
+
+  // Reset internal state
+  private cleanupSocketState() {
+    this.socket = null;
+    this.currentLocation = null;
+    this.isConnecting = false;
+    this.lastRegisterAt = 0;
+  }
+
+  // Disconnect from server and reset internal state
+  async disconnect(fullReset = false) {
+    console.log('❌ Disconnecting Websocket');
+
+    this.cleanupEventListeners();
+
+    if (this.socket?.connected) {
       this.socket.disconnect();
-      this.socket = null;
+    }
+
+    this.cleanupSocketState();
+
+    if (fullReset) {
       this.riderId = null;
-      this.currentLocation = null;
-      this.lastDriverLocation = null;
-      this.driverLocationListeners.clear();
     }
   }
 }

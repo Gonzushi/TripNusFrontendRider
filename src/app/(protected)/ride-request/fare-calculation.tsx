@@ -4,7 +4,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -29,6 +28,7 @@ import {
 } from '@/features/fare-calculation/types';
 import { formatPrice } from '@/features/fare-calculation/utils';
 import { AuthContext } from '@/lib/auth';
+import { webSocketService } from '@/lib/background/websocket-service';
 
 // Constants
 const DEBUG_MODE = false;
@@ -140,14 +140,10 @@ export default function FareCalculation() {
 
       const data = await response.json();
 
+      await webSocketService.connect(authState.authData!.riderId);
+
       if (response.ok) {
-        // Navigate to searching driver screen
-        router.replace({
-          pathname: '/active-ride/searching',
-          params: {
-            data: JSON.stringify(data.data),
-          },
-        });
+        router.replace('/active-ride/ride-details');
       } else {
         Alert.alert(
           'Error',
@@ -185,7 +181,7 @@ export default function FareCalculation() {
       ) : (
         <>
           {/* Map Section */}
-          <View className="h-[58%]">
+          <View className="flex-1">
             <AddressCard
               pickup={pickup}
               dropoff={dropoff}
@@ -234,57 +230,55 @@ export default function FareCalculation() {
           </View>
 
           {/* Details Section */}
-          <View className="-mt-1 flex-1 rounded-t-xl bg-white pt-2 shadow-xl">
-            <ScrollView className="flex-1">
-              {/* Vehicle Selection */}
-              <View className="px-4 py-2">
-                <Text className="mb-2 text-base font-medium text-gray-900">
-                  Pilih Jenis Kendaraan
-                </Text>
-                <View className="space-y-2">
-                  {VEHICLES.map((vehicle) => (
-                    <VehicleOption
-                      key={vehicle.id}
-                      vehicle={vehicle}
-                      isSelected={selectedVehicle.id === vehicle.id}
-                      fares={routeDetails.fares}
-                      onSelect={() => setSelectedVehicle(vehicle)}
-                    />
-                  ))}
-                </View>
+          <View className="-mt-1 rounded-t-xl bg-white pt-2 shadow-xl">
+            {/* Vehicle Selection */}
+            <View className="px-4 py-2">
+              <Text className="mb-2 text-base font-medium text-gray-900">
+                Pilih Jenis Kendaraan
+              </Text>
+              <View className="space-y-2">
+                {VEHICLES.map((vehicle) => (
+                  <VehicleOption
+                    key={vehicle.id}
+                    vehicle={vehicle}
+                    isSelected={selectedVehicle.id === vehicle.id}
+                    fares={routeDetails.fares}
+                    onSelect={() => setSelectedVehicle(vehicle)}
+                  />
+                ))}
               </View>
+            </View>
 
-              {/* Payment Method */}
-              <View className="border-t border-gray-100 px-4 py-2">
-                <Text className="mb-2 text-base font-medium text-gray-900">
-                  Metode Pembayaran
-                </Text>
-                <View className="rounded-xl border border-gray-200 bg-white px-3 py-2.5">
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center">
-                      <View className="rounded-lg bg-blue-50 p-1.5">
-                        <MaterialCommunityIcons
-                          name="qrcode-scan"
-                          size={20}
-                          color="#3B82F6"
-                        />
-                      </View>
-                      <View className="ml-3">
-                        <Text className="font-medium text-gray-900">QRIS</Text>
-                        <Text className="text-xs text-gray-500">
-                          Pindai QR untuk membayar di tujuan
-                        </Text>
-                      </View>
+            {/* Payment Method */}
+            <View className="border-t border-gray-100 px-4 py-2 pb-4">
+              <Text className="mb-2 text-base font-medium text-gray-900">
+                Metode Pembayaran
+              </Text>
+              <View className="rounded-xl border border-gray-200 bg-white px-3 py-2.5">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center">
+                    <View className="rounded-lg bg-blue-50 p-1.5">
+                      <MaterialCommunityIcons
+                        name="qrcode-scan"
+                        size={20}
+                        color="#3B82F6"
+                      />
                     </View>
-                    <MaterialCommunityIcons
-                      name="check-circle"
-                      size={20}
-                      color="#3B82F6"
-                    />
+                    <View className="ml-3">
+                      <Text className="font-medium text-gray-900">QRIS</Text>
+                      <Text className="text-xs text-gray-500">
+                        Pindai QR untuk membayar di tujuan
+                      </Text>
+                    </View>
                   </View>
+                  <MaterialCommunityIcons
+                    name="check-circle"
+                    size={20}
+                    color="#3B82F6"
+                  />
                 </View>
               </View>
-            </ScrollView>
+            </View>
 
             {/* Bottom Bar */}
             <View

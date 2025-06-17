@@ -18,6 +18,7 @@ export type FareBreakdown = {
 };
 
 export type RideStatus =
+  | 'searching'
   | 'requesting_driver'
   | 'driver_accepted'
   | 'driver_arrived'
@@ -81,7 +82,7 @@ export type RideData = {
   actual_dropoff_coords: Point | null;
   match_attempt?: MatchAttempt;
   status_reason: string | null;
-  drivers: {
+  drivers?: {
     users: {
       phone: string;
     };
@@ -97,6 +98,12 @@ export type RideData = {
     profile_picture_url: string;
     vehicle_plate_number: string;
     completed_rides?: number | null;
+  };
+  driverLocation?: {
+    latitude: number;
+    longitude: number;
+    heading_deg: number;
+    speed_kph: number;
   };
 };
 

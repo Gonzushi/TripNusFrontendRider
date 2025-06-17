@@ -111,7 +111,7 @@ export default function SearchingDriver() {
                       text: 'OK',
                       onPress: () => {
                         router.push({
-                          pathname: '/active-ride/driver-found',
+                          pathname: '/active-ride/ride-details',
                           params: { data: params.data },
                         });
                       },

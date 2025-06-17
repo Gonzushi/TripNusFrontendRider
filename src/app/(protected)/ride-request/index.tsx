@@ -36,6 +36,8 @@ import { SafeView } from '@/lib/safe-view';
 
 const DEBUG_MODE = false;
 
+const SEARCH_MIN_LENGTH = 3;
+
 type ButtonState = {
   text: string;
   isActive: boolean;
@@ -105,7 +107,7 @@ export default function RideRequest() {
   // Debounced search function
   const searchLocationsCallback = useCallback(
     async (searchText: string) => {
-      if (!searchText || searchText.length < 4 || !currentLocation) {
+      if (!searchText || searchText.length < SEARCH_MIN_LENGTH || !currentLocation) {
         return;
       }
 

@@ -40,6 +40,8 @@ export async function cancelRideByRiderBeforePickup(
     }
   );
 
+  console.log('responseRaw', responseRaw);
+
   const responseJson = await responseRaw.json();
   return responseJson;
 }
