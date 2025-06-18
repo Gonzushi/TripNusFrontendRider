@@ -34,7 +34,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AddressCard } from '@/features/fare-calculation/components';
 import { AuthContext } from '@/lib/auth';
-import { DEBOUNCE_SUB_DELAY_MS } from '@/lib/background/constants';
 import {
   type LocationWithHeading,
   webSocketService,
@@ -45,9 +44,12 @@ import { useRideStore } from '@/lib/ride/store';
 import { type RideData, type RideStatus } from '@/lib/ride/types';
 import { SafeView } from '@/lib/safe-view';
 
+import { DebugConsole } from './debug-console';
+
 type Location = { latitude: number; longitude: number };
 
 // Constants
+const DEBUG_MODE = true;
 const MAP_EDGE_PADDING = {
   top: 200,
   right: 50,
@@ -56,6 +58,12 @@ const MAP_EDGE_PADDING = {
 };
 
 // Helper Functions
+const isActiveRideStatus = (status: RideStatus | null | undefined) => {
+  return ['driver_accepted', 'driver_arrived', 'in_progress'].includes(
+    status as RideStatus
+  );
+};
+
 async function openWhatsApp(phoneNumber: string) {
   try {
     const phone = phoneNumber.replace(/\D/g, '');
@@ -312,32 +320,7 @@ export default function RideDetails() {
 
   // Refs
   const mapRef = useRef<MapView | null>(null);
-  const hasInitializedMap = useRef(false);
-  const isFirstMount = useRef(true);
   const driverPositionRef = useRef<AnimatedRegion | null>(null);
-
-  // Animation setup for skeleton loading
-  const opacity = useSharedValue(0.3);
-
-  useEffect(() => {
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(0.7, { duration: 1000 }),
-        withTiming(0.3, { duration: 1000 })
-      ),
-      -1,
-      true
-    );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
-
-  // Update ref when driverPosition changes
-  useEffect(() => {
-    driverPositionRef.current = driverPosition;
-  }, [driverPosition]);
 
   // Fetch Ride Details
   const fetchRideDetails = async () => {
@@ -371,11 +354,12 @@ export default function RideDetails() {
             longitudeDelta: 0.005,
           });
           setDriverPosition(initialPosition);
+          setHeading(0);
         }
+        return response.data;
       } else {
         setRideData(null);
-        Alert.alert('Error', 'Tidak menemukan perjalanan aktif');
-        router.back();
+        setRideStatus(null);
       }
     } catch (error) {
       console.error('Error fetching ride details:', error);
@@ -404,8 +388,8 @@ export default function RideDetails() {
       // Calculate pickup time based on current speed
       const estimatedSpeed = 20; // km/h default speed
       const pickupTime = Math.ceil((distanceToPickupKm / estimatedSpeed) * 60);
-      setPickupTime(pickupTime);
 
+      setPickupTime(pickupTime);
       setHeading(location.heading_deg);
 
       // Update driver position with animation
@@ -427,110 +411,50 @@ export default function RideDetails() {
     [rideData]
   );
 
-  // Helper function to check if status is in active states
-  const isActiveRideStatus = (status: RideStatus | null) => {
-    return ['driver_accepted', 'driver_arrived', 'in_progress'].includes(
-      status as RideStatus
-    );
-  };
-
-  // WebSocket setup and cleanup
-  const setupWebSocket = async () => {
-    const driver = rideData?.drivers;
-    if (!driver?.id) {
-      console.log('No driver available to subscribe to');
-      return;
-    }
-
-    try {
-      await webSocketService.unsubscribeFromDriver();
-      await webSocketService.subscribeToDriver(driver.id);
-      webSocketService.addDriverLocationListener(handleLocationUpdate);
-
-      // Add delay after subscription to prevent immediate unsubscribe
-      await new Promise((resolve) =>
-        setTimeout(resolve, DEBOUNCE_SUB_DELAY_MS)
-      );
-    } catch (err) {
-      console.error('WebSocket setup error:', err);
-    }
-  };
-
-  const cleanupWebSocket = async () => {
-    try {
-      await webSocketService.unsubscribeFromDriver();
-    } catch (err) {
-      console.error('Unsubscribe failed:', err);
-    }
-    webSocketService.removeDriverLocationListener(handleLocationUpdate);
-  };
-
-  // Handle WebSocket connection
+  // Effects
   useEffect(() => {
-    if (!authData?.riderId) return;
+    driverPositionRef.current = driverPosition;
+  }, [driverPosition]);
 
-    const connectWebSocket = async () => {
-      try {
-        await webSocketService.connect(authData.riderId);
-      } catch (err) {
-        console.error('WebSocket connection error:', err);
-      }
-    };
-
-    // Initial connection
-    connectWebSocket();
-
-    // Reconnect on app state change to active
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState === 'active') {
-        connectWebSocket();
-      }
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, [authData?.riderId]);
-
-  // Handle driver subscription based on ride status
-  useEffect(() => {
-    // Skip the effect on mount
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      return;
-    }
-
-    const driver = rideData?.drivers;
-    if (driver?.id && isActiveRideStatus(rideStatus)) {
-      setupWebSocket();
-    }
-
-    return () => {
-      cleanupWebSocket();
-    };
-  }, [rideData?.drivers?.id, rideStatus]);
-
-  // Handle focus/blur
   useFocusEffect(
     useCallback(() => {
-      const driver = rideData?.drivers;
-      if (driver?.id && isActiveRideStatus(rideStatus)) {
-        setupWebSocket();
-      }
+      let isActive = true;
+
+      const run = async () => {
+        console.log('🖥️  Fetching ride details');
+        await webSocketService.connect(authData!.riderId);
+        const newRideData = await fetchRideDetails();
+
+        if (
+          isActive &&
+          isActiveRideStatus(newRideData?.status) &&
+          newRideData?.drivers?.id
+        ) {
+          await webSocketService.unsubscribeFromDriver();
+          await webSocketService.subscribeToDriver(newRideData?.drivers?.id);
+          webSocketService.addDriverLocationListener(handleLocationUpdate);
+        }
+      };
+
+      run();
+
+      const subscription = AppState.addEventListener('change', (nextState) => {
+        if (nextState === 'active') run();
+      });
 
       return () => {
-        cleanupWebSocket();
+        isActive = false;
+        webSocketService.unsubscribeFromDriver().catch(console.error);
+        webSocketService.removeDriverLocationListener(handleLocationUpdate);
+        subscription.remove();
       };
-    }, [])
+    }, [rideStatus])
   );
 
   // Map control handlers
   const handleFollowDriver = useCallback(() => {
     if (!rideData) return;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const currentDriverPosition = (driverPosition as any).__getValue();
-    if (!currentDriverPosition || !mapRef.current) return;
+    if (!mapRef.current) return;
 
     const pickupCoords = {
       latitude: rideData.planned_pickup_coords.coordinates[1],
@@ -541,10 +465,17 @@ export default function RideDetails() {
       longitude: rideData.planned_dropoff_coords.coordinates[0],
     };
 
+    let currentDriverPosition = pickupCoords;
+
+    if (driverPositionRef.current) {
+      currentDriverPosition =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (driverPositionRef.current as any).__getValue();
+    }
+
     let coordsToFit = [];
     switch (rideStatus) {
       case 'driver_accepted':
-        coordsToFit = [pickupCoords, currentDriverPosition];
       case 'driver_arrived':
         coordsToFit = [pickupCoords, currentDriverPosition];
         break;
@@ -559,9 +490,39 @@ export default function RideDetails() {
       edgePadding: MAP_EDGE_PADDING,
       animated: true,
     });
-  }, [rideData, rideStatus]);
+  }, [rideStatus]);
 
-  const handleViewPickup = useCallback(() => {
+  const handleShowAll = useCallback(() => {
+    if (!rideData) return;
+    if (!mapRef.current) return;
+
+    const pickupCoords = {
+      latitude: rideData.planned_pickup_coords.coordinates[1],
+      longitude: rideData.planned_pickup_coords.coordinates[0],
+    };
+    const dropoffCoords = {
+      latitude: rideData.planned_dropoff_coords.coordinates[1],
+      longitude: rideData.planned_dropoff_coords.coordinates[0],
+    };
+
+    let currentDriverPosition = pickupCoords;
+
+    if (driverPositionRef.current) {
+      currentDriverPosition =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (driverPositionRef.current as any).__getValue();
+    }
+
+    mapRef.current.fitToCoordinates(
+      [pickupCoords, dropoffCoords, currentDriverPosition],
+      {
+        edgePadding: MAP_EDGE_PADDING,
+        animated: true,
+      }
+    );
+  }, [rideData]);
+
+  const handleViewPickup = () => {
     if (!rideData || !mapRef.current) return;
 
     mapRef.current.animateToRegion(
@@ -573,9 +534,9 @@ export default function RideDetails() {
       },
       1000
     );
-  }, [rideData]);
+  };
 
-  const handleViewDropoff = useCallback(() => {
+  const handleViewDropoff = () => {
     if (!rideData || !mapRef.current) return;
 
     mapRef.current.animateToRegion(
@@ -587,145 +548,52 @@ export default function RideDetails() {
       },
       1000
     );
-  }, [rideData]);
+  };
 
-  const handleShowAll = useCallback(() => {
-    if (!rideData) return;
-
-    const currentDriverPosition =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (driverPosition as any).__getValue();
-    if (!currentDriverPosition || !mapRef.current) return;
-
-    const pickupCoords = {
-      latitude: rideData.planned_pickup_coords.coordinates[1],
-      longitude: rideData.planned_pickup_coords.coordinates[0],
-    };
-    const dropoffCoords = {
-      latitude: rideData.planned_dropoff_coords.coordinates[1],
-      longitude: rideData.planned_dropoff_coords.coordinates[0],
-    };
-
-    mapRef.current.fitToCoordinates(
-      [pickupCoords, dropoffCoords, currentDriverPosition],
-      {
-        edgePadding: MAP_EDGE_PADDING,
-        animated: true,
-      }
-    );
-  }, [rideData]);
-
-  // Fetch data when mounted and on focus
-  useFocusEffect(
-    useCallback(() => {
-      fetchRideDetails();
-    }, [])
-  );
-
-  // Effects
+  // Effect to handle ride status changes
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState === 'active') {
-        const driver = rideData?.drivers;
-        if (driver?.id) {
-          setupWebSocket();
-        }
-      }
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, [rideData?.drivers?.id]);
-
-  useFocusEffect(
-    useCallback(() => {
-      const driver = rideData?.drivers;
-      if (driver?.id) {
-        setupWebSocket();
-      }
-      return () => {
-        cleanupWebSocket();
-      };
-    }, [rideData?.drivers?.id])
-  );
-
-  useEffect(() => {
-    if (!mapRef.current || !rideData || hasInitializedMap.current) return;
-
-    // Initialize map with driver position if available, or use pickup location as fallback
-    const initialDriverPosition = rideData.driverLocation ?? {
-      latitude: rideData.planned_pickup_coords.coordinates[1],
-      longitude: rideData.planned_pickup_coords.coordinates[0],
-      heading_deg: 0,
-    };
-
-    // Initialize driver position for map controls
-    const initialPosition = new AnimatedRegion({
-      latitude: initialDriverPosition.latitude,
-      longitude: initialDriverPosition.longitude,
-      latitudeDelta: 0.005,
-      longitudeDelta: 0.005,
-    });
-    setDriverPosition(initialPosition);
-
-    // Calculate initial pickup time with default speed
-    const distanceToPickupKm = getDistanceInKm(
-      {
-        latitude: initialDriverPosition.latitude,
-        longitude: initialDriverPosition.longitude,
-      },
-      {
-        latitude: rideData.planned_pickup_coords.coordinates[1],
-        longitude: rideData.planned_pickup_coords.coordinates[0],
-      }
-    );
-
-    const estimatedSpeed = 20; // km/h default speed
-    const pickupTime = Math.ceil((distanceToPickupKm / estimatedSpeed) * 60);
-    setPickupTime(pickupTime);
-    setHeading(initialDriverPosition.heading_deg ?? 0);
-
-    // Initialize map view based on ride status
-    const pickupCoords = {
-      latitude: rideData.planned_pickup_coords.coordinates[1],
-      longitude: rideData.planned_pickup_coords.coordinates[0],
-    };
-    const dropoffCoords = {
-      latitude: rideData.planned_dropoff_coords.coordinates[1],
-      longitude: rideData.planned_dropoff_coords.coordinates[0],
-    };
-    const driverCoords = {
-      latitude: initialDriverPosition.latitude,
-      longitude: initialDriverPosition.longitude,
-    };
-
-    let coordsToFit = [];
+    if (!rideStatus || !rideData) return;
 
     switch (rideStatus) {
       case 'searching':
       case 'requesting_driver':
-        coordsToFit = [pickupCoords, dropoffCoords];
+        handleShowAll();
         break;
       case 'driver_accepted':
       case 'driver_arrived':
-        coordsToFit = [pickupCoords, driverCoords];
-        break;
       case 'in_progress':
-        coordsToFit = [dropoffCoords, driverCoords];
+        handleFollowDriver();
         break;
       default:
-        coordsToFit = [pickupCoords, dropoffCoords, driverCoords];
+        handleShowAll();
+        break;
     }
+  }, [rideStatus, rideData, handleShowAll, handleFollowDriver]);
 
-    mapRef.current.fitToCoordinates(coordsToFit, {
-      edgePadding: MAP_EDGE_PADDING,
-      animated: true,
-    });
+  // Animation setup for skeleton loading
+  const opacity = useSharedValue(0.3);
 
-    hasInitializedMap.current = true;
-  }, [rideData, rideStatus]);
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0.7, { duration: 1000 }),
+        withTiming(0.3, { duration: 1000 })
+      ),
+      -1,
+      true
+    );
+  }, []);
 
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  // Handle
+  const handleCancelRide = () => {
+    console.log('❌ Cancel ride');
+  };
+
+  // Render Function
   const renderStatusBar = () => {
     if (!rideData) return null;
 
@@ -1040,7 +908,7 @@ export default function RideDetails() {
         {isActiveRideStatus(rideStatus) && (
           <TouchableOpacity
             className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-md active:bg-gray-100"
-            onPress={handleShowAll}
+            onPress={() => handleShowAll()}
           >
             <Ionicons name="scan" size={24} color="#3B82F6" />
           </TouchableOpacity>
@@ -1050,7 +918,7 @@ export default function RideDetails() {
         {isActiveRideStatus(rideStatus) && (
           <TouchableOpacity
             className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-md active:bg-gray-100"
-            onPress={handleFollowDriver}
+            onPress={() => handleFollowDriver()}
           >
             <Ionicons name="locate" size={24} color="#3B82F6" />
           </TouchableOpacity>
@@ -1059,7 +927,6 @@ export default function RideDetails() {
     );
   };
 
-  // Update the driver marker render
   const renderDriverMarker = () => {
     if (
       !rideData ||
@@ -1089,30 +956,13 @@ export default function RideDetails() {
     );
   };
 
-  if (isLoading) {
+  // Loading State
+  if (isLoading || !rideData) {
     return <SkeletonLoader />;
   }
 
-  if (!rideData) {
-    return (
-      <SafeView
-        isShowingTabBar={false}
-        isShowingPaddingTop
-        statusBarStyle="light"
-        statusBackgroundColor="bg-blue-600"
-      >
-        <View className="flex-1 items-center justify-center bg-white">
-          <Text className="text-lg text-gray-900">No active ride found</Text>
-        </View>
-      </SafeView>
-    );
-  }
 
-  // Cancel Ride
-  const handleCancelRide = () => {
-    console.log('❌ Cancel ride');
-  };
-
+  // Coordinates
   const pickupCoords = rideData.planned_pickup_coords.coordinates;
   const dropoffCoords = rideData.planned_dropoff_coords.coordinates;
 
@@ -1124,6 +974,8 @@ export default function RideDetails() {
       statusBackgroundColor="bg-blue-600"
     >
       <View className="flex-1 bg-white">
+        {DEBUG_MODE && <DebugConsole />}
+
         {/* Address Card */}
         <AddressCard
           pickup={{

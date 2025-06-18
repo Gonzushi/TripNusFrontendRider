@@ -145,7 +145,7 @@ class WebSocketService {
     try {
       if (this.socket?.connected && this.riderId === riderId) {
         console.log(
-          `✅ Websocket already connected with same rider info, connection: ${this.socket.connected}`
+          `✅ Websocket already connected with same rider info, connection: ${this.socket.connected} - ${this.socket.id}`
         );
         await this.loadOrFetchLocation();
         await this.sendLocationUpdate();
@@ -228,6 +228,9 @@ class WebSocketService {
       try {
         await this.loadOrFetchLocation();
         await this.registerRider();
+        if (this.subscribedDriverId) {
+          await this.subscribeToDriver(this.subscribedDriverId);
+        }
       } catch (error) {
         console.error('❌ Failed to re-register after reconnect:', error);
       }
@@ -328,10 +331,10 @@ class WebSocketService {
       return;
     }
 
-    this.lastSubscribeTime = now;
-
     if (!this.socket) return;
-
+    
+    this.lastSubscribeTime = now;
+    
     this.subscribedDriverId = driverId;
 
     return new Promise((resolve, reject) => {
@@ -359,9 +362,9 @@ class WebSocketService {
       return;
     }
 
-    this.lastUnsubscribeTime = now;
-
     if (!this.socket || !this.subscribedDriverId) return;
+
+    this.lastUnsubscribeTime = now;
 
     const driverId = this.subscribedDriverId;
 
