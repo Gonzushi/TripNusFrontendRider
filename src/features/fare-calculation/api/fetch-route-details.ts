@@ -87,6 +87,10 @@ export default async function fetchRouteDetails({
       accessToken,
       distanceM,
       durationSec,
+      pickup: {
+        longitude: pickup.longitude,
+        latitude: pickup.latitude,
+      },
     });
 
     const routeData: RouteDetails = {

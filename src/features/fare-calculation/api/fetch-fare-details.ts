@@ -1,9 +1,14 @@
-import { type FareResponse } from '@/types/fare';
+import { API_URL } from '../constants';
+import { type FareResponse } from '../types';
 
 type FetchFareDetailsProps = {
   accessToken: string;
   distanceM: number;
   durationSec: number;
+  pickup: {
+    longitude: number;
+    latitude: number;
+  };
 };
 
 export default async function fetchFareDetails({
@@ -12,7 +17,7 @@ export default async function fetchFareDetails({
   durationSec,
 }: FetchFareDetailsProps): Promise<FareResponse | null> {
   try {
-    const response = await fetch('https://rest.trip-nus.com/fare/calculate', {
+    const response = await fetch(`${API_URL}/fare/calculate`, {
       method: 'POST',
       headers: {
         accept: 'application/json',

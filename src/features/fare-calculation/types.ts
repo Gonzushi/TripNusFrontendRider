@@ -44,6 +44,18 @@ export type FareResponse = {
   car: VehicleFare;
 };
 
+export type NearbyDriver = {
+  driver_id: string;
+  latitude: number;
+  longitude: number;
+  distance_km: number;
+};
+
+export type NearbyDrivers = {
+  motorcycle: NearbyDriver[];
+  car: NearbyDriver[];
+};
+
 export type RouteDetails = {
   distance: number;
   duration: number;

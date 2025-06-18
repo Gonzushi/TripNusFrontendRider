@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
@@ -12,6 +12,7 @@ import MapView, { Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { fetchRouteDetails } from '@/features/fare-calculation/api';
+import fetchNearbyDrivers from '@/features/fare-calculation/api/fetch-nearby-drivers';
 import {
   AddressCard,
   DebugOverlay,
@@ -20,6 +21,7 @@ import {
   VehicleOption,
 } from '@/features/fare-calculation/components';
 import { VEHICLES } from '@/features/fare-calculation/constants';
+import type { NearbyDrivers } from '@/features/fare-calculation/types';
 import {
   type FareResponse,
   type Location,
@@ -43,6 +45,9 @@ export default function FareCalculation() {
   const insets = useSafeAreaInsets();
 
   // States
+  const [nearbyDrivers, setNearbyDrivers] = useState<NearbyDrivers | null>(
+    null
+  );
   const [isPolylineDrawn, setIsPolylineDrawn] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle>(VEHICLES[0]);
   const [routeDetails, setRouteDetails] = useState<RouteDetails>({
@@ -160,17 +165,46 @@ export default function FareCalculation() {
     }
   };
 
+  function getClosestDriverEtaFromResponse(
+    drivers: Array<{ distance_km: number }>
+  ): number | null {
+    if (!drivers.length) return null;
+
+    const closestDistanceKm = Math.min(...drivers.map((d) => d.distance_km));
+    const speedKmH = 20;
+    const etaMinutes = (closestDistanceKm / speedKmH) * 60;
+
+    return Math.round(etaMinutes);
+  }
+
   // Effects
   useEffect(() => {
-    fetchRouteDetails({
-      accessToken,
-      pickup,
-      dropoff,
-      setRouteDetails,
-      setIsPolylineDrawn,
-      fitToRoute,
-    });
+    const loadRouteAndDrivers = async () => {
+      const route = await fetchRouteDetails({
+        accessToken,
+        pickup,
+        dropoff,
+        setRouteDetails,
+        setIsPolylineDrawn,
+        fitToRoute,
+      });
+
+      if (!route || route.error) return;
+
+      const drivers = await fetchNearbyDrivers({
+        accessToken,
+        pickup,
+      });
+
+      if (drivers) {
+        setNearbyDrivers(drivers);
+      }
+    };
+
+    loadRouteAndDrivers();
   }, []);
+
+  const drivers = nearbyDrivers?.[selectedVehicle.id];
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -213,6 +247,18 @@ export default function FareCalculation() {
 
                   <LocationMarker type="pickup" coordinate={pickup} />
                   <LocationMarker type="dropoff" coordinate={dropoff} />
+
+                  {selectedVehicle &&
+                    nearbyDrivers?.[selectedVehicle.id]?.map((driver) => (
+                      <LocationMarker
+                        key={driver.driver_id}
+                        type={selectedVehicle.id as 'motorcycle' | 'car'}
+                        coordinate={{
+                          latitude: driver.latitude,
+                          longitude: driver.longitude,
+                        }}
+                      />
+                    ))}
                 </MapView>
               </View>
             ) : (
@@ -227,6 +273,36 @@ export default function FareCalculation() {
             {DEBUG_MODE && (
               <DebugOverlay mapRef={mapRef} routeDetails={routeDetails} />
             )}
+
+            {/* Map Controls */}
+            <View className="absolute bottom-4 right-4 flex-row gap-1">
+              {/* Conditionally Render Locate Button */}
+              {drivers && drivers.length > 0 && (
+                <TouchableOpacity
+                  className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-md active:bg-gray-100"
+                  onPress={() => {
+                    const firstThree = drivers.slice(0, 3).map((d) => ({
+                      latitude: d.latitude,
+                      longitude: d.longitude,
+                    }));
+                    const coordsToFit = [pickup, ...firstThree];
+                    fitToRoute(coordsToFit);
+                  }}
+                >
+                  <Ionicons name="locate" size={24} color="#3B82F6" />
+                </TouchableOpacity>
+              )}
+
+              {/* Always show Scan Button */}
+              <TouchableOpacity
+                className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-md active:bg-gray-100"
+                onPress={() => {
+                  fitToRoute([pickup, dropoff]);
+                }}
+              >
+                <Ionicons name="scan" size={24} color="#3B82F6" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Details Section */}
@@ -237,15 +313,26 @@ export default function FareCalculation() {
                 Pilih Jenis Kendaraan
               </Text>
               <View className="space-y-2">
-                {VEHICLES.map((vehicle) => (
-                  <VehicleOption
-                    key={vehicle.id}
-                    vehicle={vehicle}
-                    isSelected={selectedVehicle.id === vehicle.id}
-                    fares={routeDetails.fares}
-                    onSelect={() => setSelectedVehicle(vehicle)}
-                  />
-                ))}
+                {VEHICLES.map((vehicle) => {
+                  const driversForVehicle = nearbyDrivers?.[vehicle.id] ?? [];
+                  const etaMinutes =
+                    getClosestDriverEtaFromResponse(driversForVehicle);
+
+                  return (
+                    <VehicleOption
+                      key={vehicle.id}
+                      vehicle={vehicle}
+                      isSelected={selectedVehicle.id === vehicle.id}
+                      fares={routeDetails.fares}
+                      onSelect={() => {
+                        if (driversForVehicle.length > 0)
+                          setSelectedVehicle(vehicle);
+                      }}
+                      disabled={driversForVehicle.length === 0}
+                      etaMinutes={etaMinutes}
+                    />
+                  );
+                })}
               </View>
             </View>
 
@@ -301,7 +388,11 @@ export default function FareCalculation() {
                 </View>
                 <TouchableOpacity
                   onPress={handleConfirmRide}
-                  disabled={!isPolylineDrawn}
+                  disabled={
+                    !isPolylineDrawn ||
+                    !nearbyDrivers?.[selectedVehicle.id] ||
+                    nearbyDrivers[selectedVehicle.id].length === 0
+                  }
                   className={`rounded-xl px-6 py-3 ${
                     isPolylineDrawn
                       ? 'bg-blue-600 active:bg-blue-700'
