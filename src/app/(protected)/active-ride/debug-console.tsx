@@ -97,14 +97,13 @@ export const DebugConsole = () => {
 
   return (
     <View
-      className="absolute left-0 right-0 z-50 h-[50vh]"
+      className="absolute left-0 right-0 top-40 z-50 h-[50vh]"
       pointerEvents="box-none"
       style={{ paddingTop: insets.top }}
     >
       <View
         className="absolute right-0 h-full bg-black/70 px-2 py-1"
         pointerEvents="auto"
-        style={{ paddingTop: insets.top }}
       >
         <Pressable className="flex-1">
           <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator>

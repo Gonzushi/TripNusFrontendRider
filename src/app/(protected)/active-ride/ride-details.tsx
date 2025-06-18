@@ -49,7 +49,7 @@ import { DebugConsole } from './debug-console';
 type Location = { latitude: number; longitude: number };
 
 // Constants
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 const MAP_EDGE_PADDING = {
   top: 200,
   right: 50,
@@ -142,7 +142,7 @@ const SkeletonLoader = () => {
     <SafeView
       isShowingTabBar={false}
       isShowingPaddingTop={false}
-      statusBarStyle="light"
+      statusBarStyle="dark"
       statusBackgroundColor="bg-blue-600"
     >
       <View className="flex-1 bg-white">
@@ -321,6 +321,7 @@ export default function RideDetails() {
   // Refs
   const mapRef = useRef<MapView | null>(null);
   const driverPositionRef = useRef<AnimatedRegion | null>(null);
+  const lastAppState = useRef(AppState.currentState);
 
   // Fetch Ride Details
   const fetchRideDetails = async () => {
@@ -421,7 +422,6 @@ export default function RideDetails() {
       let isActive = true;
 
       const run = async () => {
-        console.log('🖥️  Fetching ride details');
         await webSocketService.connect(authData!.riderId);
         const newRideData = await fetchRideDetails();
 
@@ -439,13 +439,18 @@ export default function RideDetails() {
       run();
 
       const subscription = AppState.addEventListener('change', (nextState) => {
-        if (nextState === 'active') run();
+        // Only refetch if coming from background, not from inactive (phone dialog)
+        if (nextState === 'active' && lastAppState.current === 'background') {
+          setIsLoading(true);
+          run();
+        }
+        lastAppState.current = nextState;
       });
 
       return () => {
         isActive = false;
         webSocketService.unsubscribeFromDriver().catch(console.error);
-        webSocketService.removeDriverLocationListener(handleLocationUpdate);
+        webSocketService.removeDriverLocationListener();
         subscription.remove();
       };
     }, [rideStatus])
@@ -961,7 +966,6 @@ export default function RideDetails() {
     return <SkeletonLoader />;
   }
 
-
   // Coordinates
   const pickupCoords = rideData.planned_pickup_coords.coordinates;
   const dropoffCoords = rideData.planned_dropoff_coords.coordinates;
@@ -970,7 +974,7 @@ export default function RideDetails() {
     <SafeView
       isShowingTabBar={false}
       isShowingPaddingTop={false}
-      statusBarStyle="light"
+      statusBarStyle="dark"
       statusBackgroundColor="bg-blue-600"
     >
       <View className="flex-1 bg-white">

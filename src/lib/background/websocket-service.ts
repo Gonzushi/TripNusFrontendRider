@@ -31,7 +31,7 @@ class WebSocketService {
   private currentLocation: Location.LocationObject | null = null;
   private subscribedDriverId: string | null = null;
   private lastDriverLocation: LocationWithHeading | null = null;
-  private driverLocationListeners: Set<DriverLocationListener> = new Set();
+  private driverLocationListener: DriverLocationListener | null = null;
 
   private lastSubscribeTime = 0;
   private lastUnsubscribeTime = 0;
@@ -202,6 +202,7 @@ class WebSocketService {
           reject(err);
         });
 
+        this.hasSetupListeners = false;
         await this.setupEventListeners();
         if (DEBUG_MODE) this.watchAllSocketEvents(this.socket!);
       });
@@ -252,9 +253,7 @@ class WebSocketService {
 
     this.socket?.on('driver:locationUpdate', (payload: LocationWithHeading) => {
       this.lastDriverLocation = payload;
-      for (const listener of this.driverLocationListeners) {
-        listener(payload);
-      }
+      this.driverLocationListener?.(payload);
     });
   }
 
@@ -332,9 +331,9 @@ class WebSocketService {
     }
 
     if (!this.socket) return;
-    
+
     this.lastSubscribeTime = now;
-    
+
     this.subscribedDriverId = driverId;
 
     return new Promise((resolve, reject) => {
@@ -387,12 +386,12 @@ class WebSocketService {
 
   // Add a listener for driver location
   addDriverLocationListener(listener: DriverLocationListener) {
-    this.driverLocationListeners.add(listener);
+    this.driverLocationListener = listener;
   }
 
   // Remove a previously added listener
-  removeDriverLocationListener(listener: DriverLocationListener) {
-    this.driverLocationListeners.delete(listener);
+  removeDriverLocationListener() {
+    this.driverLocationListener = null;
   }
 
   // Get last known driver location
