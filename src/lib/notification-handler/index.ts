@@ -43,6 +43,26 @@ const NotificationHandler = async (data: NotificationData, router: Router) => {
       await fetchAndHandleRideData();
       break;
 
+    case 'RIDE_IN_PROGRESS':
+      await fetchAndHandleRideData();
+      break;
+
+    case 'RIDE_CANCELLED_BY_DRIVER_AND_NO_DRIVER_AVAILABLE':
+      Alert.alert(
+        'Perjalanan Dibatalkan',
+        'Maaf, driver yang ditugaskan tidak dapat melanjutkan perjalanan dan saat ini tidak ada driver lain yang tersedia di area Anda. Silakan coba lagi dalam beberapa saat.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              useRideStore.getState().setRideStatus(null);
+              router.back();
+            },
+          },
+        ]
+      );
+      break;
+
     case 'RIDE_CANCELLED_BY_DRIVER':
       Alert.alert(
         'Perjalanan dibatalkan',

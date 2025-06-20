@@ -226,6 +226,7 @@ export default function FareCalculation() {
               <View className="flex-1">
                 <MapView
                   ref={mapRef}
+                  showsUserLocation
                   provider={PROVIDER_GOOGLE}
                   style={{ flex: 1 }}
                   initialRegion={getInitialRegion()}
